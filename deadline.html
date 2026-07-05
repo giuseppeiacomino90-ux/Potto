@@ -195,6 +195,7 @@
   /* === HEADER === */
   header {
     padding: 16px 20px 12px;
+    padding-right: 150px; /* spazio per la screen-pill in alto a destra */
     border-bottom: 2px dashed var(--gb-darkest);
     display: flex;
     flex-wrap: wrap;
@@ -263,6 +264,18 @@
     line-height: 1.2;
   }
   .stat-row + .stat-row { margin-top: 2px; }
+  /* === RESOURCE LABEL con SVG inline === */
+  .res-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .res-ico {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
   .stat-icon {
     display: inline-block;
     width: 14px;
@@ -300,18 +313,25 @@
     border-bottom: 2px solid var(--gb-dark);
   }
   nav.tabs button {
-    flex: 1;
-    min-width: 110px;
-    padding: 12px 6px;
+    flex: 1 1 auto;
+    min-width: 0;            /* fix overflow sui label lunghi tipo COSTRUZIONI */
+    padding: 12px 8px;
     background: transparent;
     border: none;
     border-right: 1px solid var(--gb-darkest);
     color: var(--gb-dark);
     font-family: 'Black Ops One', 'Special Elite', monospace;
-    font-size: 13px;
-    letter-spacing: 2px;
+    font-size: 12px;
+    letter-spacing: 1px;     /* prima era 2px, sbordava */
     cursor: pointer;
     transition: all 0.15s;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
   }
   nav.tabs button:hover {
     background: var(--bg-mid);
@@ -322,6 +342,28 @@
     color: var(--gb-glow);
     border-bottom: 3px solid var(--gb-glow);
     margin-bottom: -2px;
+  }
+  /* Su desktop: icona SVG + label sulla stessa riga */
+  nav.tabs button .tab-ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  nav.tabs button .tab-ico svg {
+    width: 100%;
+    height: 100%;
+    color: currentColor;
+    opacity: 0.85;
+  }
+  nav.tabs button.active .tab-ico svg { opacity: 1; }
+  nav.tabs button .tab-lbl {
+    display: inline-block;
+    vertical-align: middle;
   }
 
   /* === MAIN CONTENT === */
@@ -1278,6 +1320,109 @@
     font-style: normal;
     letter-spacing: 0;
   }
+  .cal-export-btn {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    background: var(--bg-mid);
+    border: 1px solid var(--gb-mid);
+    color: var(--gb-mid);
+    font-family: 'Black Ops One', 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+  .cal-export-btn:hover {
+    background: var(--gb-glow);
+    color: var(--bg-deep);
+    border-color: var(--gb-glow);
+  }
+
+  /* === COUNTER MISSION UI === */
+  .counter-plus-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--gb-glow);
+    color: var(--bg-deep);
+    border: 2px solid var(--gb-light);
+    font-family: 'Black Ops One', 'Special Elite', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 80ms, background 120ms;
+    padding: 0;
+    line-height: 1;
+  }
+  .counter-plus-btn:active {
+    transform: scale(0.92);
+  }
+  .counter-plus-btn:hover {
+    background: var(--bg-deep);
+    color: var(--gb-glow);
+  }
+  .counter-current {
+    display: inline-block;
+    background: var(--bg-mid);
+    color: var(--gb-glow);
+    border: 1px solid var(--gb-light);
+    padding: 1px 8px;
+    margin-left: 6px;
+    font-family: 'Black Ops One', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .counter-total {
+    font-size: 12px;
+    margin-left: 6px;
+  }
+  .counter-bonus-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border: 1px solid var(--gb-dark);
+    font-family: 'Black Ops One', monospace;
+    font-size: 11px;
+    color: var(--gb-mid);
+  }
+  .counter-bonus-badge.ready {
+    background: var(--gb-mid);
+    color: var(--bg-deep);
+    border-color: var(--gb-light);
+  }
+  .counter-bonus-badge.awarded {
+    background: var(--gb-light);
+    color: var(--bg-deep);
+    border-color: var(--gb-glow);
+  }
+  .counter-bonus-badge.pending {
+    opacity: 0.55;
+  }
+  .counter-progress {
+    position: relative;
+    height: 16px;
+    background: var(--bg-tile);
+    border: 1px solid var(--gb-dark);
+    overflow: hidden;
+  }
+  .counter-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--rust));
+    transition: width 240ms ease-out;
+  }
+  .counter-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Black Ops One', monospace;
+    font-size: 11px;
+    color: var(--gb-glow);
+    text-shadow: 1px 1px 0 var(--bg-deep);
+    white-space: nowrap;
+  }
+  .counter-progress.completed .counter-progress-fill {
+    background: linear-gradient(90deg, var(--gold), var(--gb-glow));
+  }
 
   /* === DEV / CHEAT PANEL === */
   .cheat-modal {
@@ -1443,7 +1588,49 @@
     font-size: 12px;
   }
 
-  /* === FREEZE TOKENS === */
+  /* === HEADER PILLS — dimensioni uniformi per tutti i controlli toolbar ===
+     Sale dei controlli che condividono altezza, padding, font, bordo.
+     I colori/varianti restano nelle classi specifiche. */
+  header .freeze-pill,
+  header .save-status,
+  header .toolbar-btn,
+  header #endDayBtn,
+  header .install-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 12px;
+    font-family: 'Black Ops One', 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    border: 1.5px solid var(--gb-dark);
+    background: var(--bg-deep);
+    color: var(--gb-mid);
+    border-radius: 0;
+    box-sizing: border-box;
+    line-height: 1;
+    margin: 0;
+    white-space: nowrap;
+  }
+  /* Varianti: solo colore, niente dimensioni */
+  header .save-status.saved { color: var(--gb-light); border-color: var(--gb-light); }
+  header .toolbar-btn:hover { color: var(--gb-glow); border-color: var(--gb-glow); }
+  header .toolbar-btn.muted-state { opacity: 0.55; }
+  header .freeze-pill { color: var(--gb-mid); border-color: var(--gb-mid); }
+  /* End day = azione primaria, leggermente più presente */
+  header #endDayBtn {
+    background: var(--bg-mid);
+    color: var(--gb-light);
+    border-color: var(--gb-light);
+    font-weight: 700;
+  }
+  header #endDayBtn:hover {
+    background: var(--gb-light);
+    color: var(--bg-deep);
+  }
+
+  /* === FREEZE TOKENS === (fallback fuori header) */
   .freeze-pill {
     display: inline-block;
     padding: 4px 8px;
@@ -1471,6 +1658,31 @@
     transition: background 120ms, color 120ms;
     font-weight: 700;
     margin-right: 6px;
+  }
+  /* Variante "corner": piazzata in alto a destra del .crt, sempre visibile,
+     usata come termometro principale del gioco (lo screen time è il vero punteggio). */
+  .screen-pill.screen-pill-corner {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 50;
+    padding: 8px 12px;
+    font-size: 14px;
+    gap: 8px;
+    border-width: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    margin-right: 0;
+  }
+  .screen-pill.screen-pill-corner .screen-pill-ico {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  /* Su iOS standalone, sotto la Dynamic Island */
+  @supports (top: env(safe-area-inset-top)) {
+    .screen-pill.screen-pill-corner {
+      top: max(14px, calc(env(safe-area-inset-top) + 6px));
+    }
   }
   .screen-pill:hover {
     background: var(--rust);
@@ -1549,20 +1761,57 @@
       );
     }
 
-    /* HEADER — più compatto, titolo più piccolo, controlli wrappabili */
+    /* HEADER — più compatto + rispetta safe-area iOS (Dynamic Island, notch) */
     header {
       padding: 10px 12px 8px;
-      gap: 8px;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-right: 110px;  /* spazio per la screen-pill in corner anche su mobile */
+      gap: 6px;
+      flex-wrap: wrap;
     }
-    h1.title { font-size: 26px; letter-spacing: 1px; }
-    h1.title .skull { font-size: 20px; margin-right: 6px; }
-    .subtitle { font-size: 13px; letter-spacing: 1px; }
-    .save-status, .freeze-pill, .toolbar-btn {
-      font-size: 9px;
-      padding: 4px 6px;
+    /* Screen pill in corner: compatta ma sempre toccabile su mobile */
+    .screen-pill.screen-pill-corner {
+      top: 10px;
+      right: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      gap: 6px;
+      border-width: 1.5px;
+    }
+    .screen-pill.screen-pill-corner .screen-pill-ico {
+      width: 14px;
+      height: 14px;
+    }
+    @supports (top: env(safe-area-inset-top)) {
+      .screen-pill.screen-pill-corner {
+        top: max(10px, calc(env(safe-area-inset-top) + 2px));
+      }
+    }
+    /* Header ha 2 righe: [titolo | dayCounter+endDay] sopra, [pills toolbar] sotto */
+    header > div:first-child { flex: 1 1 auto; min-width: 0; }
+    header > .row { flex-wrap: wrap; gap: 4px; row-gap: 6px; }
+    h1.title { font-size: 22px; letter-spacing: 1px; margin-bottom: 0; }
+    h1.title .skull { font-size: 18px; margin-right: 6px; }
+    /* Sotto i 500px nascondo il subtitle, occupa solo posto */
+    .subtitle { font-size: 11px; letter-spacing: 1px; }
+    @media (max-width: 500px) {
+      header .subtitle { display: none; }
+    }
+    /* Mobile: tutti i pill header alla stessa altezza touch-friendly */
+    header .save-status,
+    header .freeze-pill,
+    header .toolbar-btn,
+    header #endDayBtn,
+    header .install-pill {
+      height: 38px;
+      padding: 0 10px;
+      font-size: 10px;
       letter-spacing: 1px;
     }
-    #endDayBtn { font-size: 10px; padding: 6px 8px; }
+    /* Pillole header: tutti larghi uguali, niente overflow */
+    header .row > * { flex: 0 0 auto; }
+    /* Theme menu: posizionato bene sotto il pulsante anche su mobile */
+    .theme-menu { right: 0; left: auto; }
 
     /* STATS BAR — colonna unica, font più piccoli */
     .stats-bar {
@@ -1574,23 +1823,33 @@
     .stat-row { font-size: 17px; }
     .stat-block h3 { font-size: 11px; letter-spacing: 1px; }
 
-    /* TABS — scorrimento orizzontale invece di wrap multi-riga */
+    /* TABS — scorrimento orizzontale + icone visibili sempre */
     nav.tabs {
       flex-wrap: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      gap: 4px;
+      padding: 6px 4px;
     }
     nav.tabs::-webkit-scrollbar { display: none; }
     nav.tabs button {
       flex: 0 0 auto;
-      min-width: auto;
-      padding: 10px 12px;
-      font-size: 11px;
-      letter-spacing: 1px;
+      min-width: 56px;
+      padding: 8px 10px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
       white-space: nowrap;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      line-height: 1.1;
     }
+    nav.tabs .tab-ico { width: 22px; height: 22px; display: block; margin: 0 auto; }
+    nav.tabs .tab-ico svg { width: 100%; height: 100%; opacity: 0.9; }
+    nav.tabs .tab-lbl { font-size: 9px; letter-spacing: 0.5px; display: block; margin: 0; }
 
     /* MAIN content — meno padding */
     main { padding: 12px; }
@@ -1598,32 +1857,55 @@
     h3.sub-title { font-size: 11px; letter-spacing: 1px; }
     p, label, span, li, td, th { font-size: 17px; }
 
-    /* MISSIONI — form a colonna, item più stretti */
+    /* MISSIONI — form a colonna, item con tutto leggibile e simmetrico */
     .add-mission-form { grid-template-columns: 1fr; padding: 10px; }
     .mission-item {
-      grid-template-columns: 32px 1fr auto;
-      gap: 8px;
-      padding: 10px;
+      grid-template-columns: 44px 1fr 36px;  /* checkbox 44 (touch) · nome · X delete 36 */
+      gap: 10px;
+      padding: 12px 10px;
+      align-items: center;
     }
+    /* La difficulty-badge va INLINE col meta, non su una riga propria */
     .mission-item .difficulty-badge {
-      grid-column: 2;
-      grid-row: 2;
-      justify-self: start;
-      margin-top: 4px;
+      grid-column: auto;
+      grid-row: auto;
+      justify-self: auto;
+      margin-top: 0;
+      margin-left: 6px;
+      font-size: 10px;
+      padding: 3px 8px;
+      vertical-align: middle;
     }
     .mission-item button.danger-btn {
       grid-column: 3;
-      grid-row: 1 / span 2;
+      grid-row: 1;
       align-self: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      font-size: 14px;
     }
-    .mission-check { width: 32px; height: 32px; }
-    .mission-name { font-size: 17px; }
-    .mission-meta { font-size: 12px; }
+    .mission-check {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .mission-name {
+      font-size: 16px;
+      line-height: 1.35;
+      padding-top: 2px;       /* fix clipping dell'ascender */
+      word-break: break-word;
+    }
+    .mission-meta {
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 3px;
+    }
     .mission-filter-bar {
       gap: 8px 12px;
       padding: 8px;
     }
-    .filter-btn { font-size: 9px; padding: 5px 7px; }
+    .filter-btn { font-size: 9px; padding: 7px 9px; min-height: 36px; }
     .filter-label { font-size: 10px; }
 
     /* FOCUS — single column, timer più piccolo */
@@ -1762,6 +2044,187 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* ============================================================
+     === FABLE 5 POLISH LAYER ===
+     Rifinitura moderna: raggi, ombre, micro-animazioni, coerenza
+     su tutti i temi (usa solo variabili di palette).
+     ============================================================ */
+
+  /* container principale: cornice più morbida */
+  .crt {
+    border-radius: 14px;
+    box-shadow:
+      0 0 0 1px var(--bg-deep) inset,
+      0 12px 40px var(--shadow),
+      0 2px 8px var(--shadow);
+  }
+  .crt::before { border-radius: 12px; }
+
+  /* canvas villaggio: vetrina del gioco */
+  #villageCanvas {
+    aspect-ratio: 5 / 3;
+    border-radius: 12px;
+    border: 1px solid var(--gb-dark);
+    box-shadow:
+      0 0 0 4px var(--bg-deep),
+      0 0 0 5px var(--gb-darkest),
+      0 14px 36px var(--shadow);
+  }
+
+  /* card: profondità e hover */
+  .info-card, .building-card, .survivor-card, .ach-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px var(--shadow);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  }
+  .building-card:hover, .survivor-card:hover, .ach-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px var(--shadow);
+    border-color: var(--gb-mid);
+  }
+
+  /* bottoni: raggio, pressione tattile */
+  button.btn, input[type="submit"] {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+  button.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px var(--shadow);
+  }
+  button.btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+
+  /* pill: completamente arrotondate */
+  .freeze-pill, .screen-pill, .badge, .cat-badge,
+  .difficulty-badge, .install-pill, .date-badge, .align-badge {
+    border-radius: 999px;
+  }
+
+  /* tab: transizione attiva più fluida */
+  nav.tabs button { position: relative; }
+  nav.tabs button.active {
+    border-bottom-width: 3px;
+  }
+  nav.tabs button::after {
+    content: '';
+    position: absolute;
+    left: 50%; bottom: 0;
+    width: 0; height: 3px;
+    background: var(--gb-glow);
+    transition: width 0.22s ease, left 0.22s ease;
+  }
+  nav.tabs button:hover::after { width: 60%; left: 20%; }
+  nav.tabs button.active::after { width: 100%; left: 0; }
+
+  /* input: raggio + focus ring coerente */
+  input, textarea, select {
+    border-radius: 8px;
+  }
+  :is(input, textarea, select, button):focus-visible {
+    outline: 2px solid var(--gb-glow);
+    outline-offset: 2px;
+  }
+
+  /* modali: vetro smerigliato */
+  .event-modal, .cheat-modal {
+    border-radius: 14px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .overlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* barre progresso: raggio + shine */
+  .hp-bar-wrap, .skill-bar-wrap, .counter-progress {
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .hp-bar, .xp-bar, .counter-progress-fill { border-radius: 999px; }
+
+  /* scrollbar sottile a tema */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--gb-dark);
+    border-radius: 999px;
+    border: 2px solid var(--bg-dark);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gb-mid); }
+
+  /* titoli sezione: sottolineatura accent */
+  h2.section-title {
+    border-bottom: none;
+    position: relative;
+    padding-bottom: 10px;
+  }
+  h2.section-title::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 64px; height: 3px;
+    background: linear-gradient(90deg, var(--gb-glow), transparent);
+    border-radius: 2px;
+  }
+
+  /* entrata dolce dei pannelli */
+  @keyframes fablePaneIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .tab-pane.active { animation: fablePaneIn 0.22s ease; }
+
+  /* === recap fine giornata === */
+  .recap-sub { font-size: 15px; color: var(--gb-dark); margin-bottom: 4px; }
+  .recap-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin: 12px 0 14px;
+  }
+  .recap-chip {
+    background: var(--bg-tile);
+    border: 1px solid var(--gb-dark);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  .recap-streak {
+    text-align: center;
+    font-family: 'Black Ops One', 'Special Elite', monospace;
+    font-size: 20px;
+    letter-spacing: 2px;
+    margin: 12px 0;
+    color: var(--gb-glow);
+  }
+  .recap-streak.off {
+    color: var(--gb-dark);
+    font-size: 15px;
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0;
+  }
+  .recap-attack {
+    border-radius: 10px;
+    border: 1px solid;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 15px;
+    text-align: center;
+  }
+  .recap-attack.ok  { border-color: #4a7a3a; color: #7ab060; background: rgba(80, 160, 60, 0.08); }
+  .recap-attack.bad { border-color: var(--blood); color: var(--rust); background: rgba(160, 30, 20, 0.10); }
+  .recap-line { font-size: 14px; margin: 6px 0; }
+  .recap-line.warn { color: var(--rust); }
+  .recap-line.dim { color: var(--gb-dark); }
+
+  /* flash della card edificio quando arrivi dal villaggio */
+  @keyframes fableFlash {
+    50% { border-color: var(--gb-glow); box-shadow: 0 0 0 3px var(--gb-glow), 0 8px 22px var(--shadow); }
+  }
+  .building-card.flash-highlight { animation: fableFlash 0.6s ease 3; }
 </style>
 </head>
 <body>
@@ -1772,11 +2235,18 @@
   <header>
     <div>
       <h1 class="title"><span class="skull">☠</span>DEADLINE</h1>
-      <div class="subtitle">— DEADLINE: Habits to Remain Human v3.22 —</div>
+      <div class="subtitle">— DEADLINE: Habits to Remain Human v3.35 —</div>
     </div>
+    <button id="screenPill" class="screen-pill screen-pill-corner" title="Soglia screen time · Clicca per cambiarla">
+      <svg viewBox="0 0 24 24" class="screen-pill-ico" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/>
+        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>
+      </svg>
+      <span id="screenPillVal">240m</span>
+      <span id="screenPillStatus" class="screen-pill-status">?</span>
+    </button>
     <div class="row">
       <div id="dayCounter" class="subtitle">Giorno 1</div>
-      <button id="screenPill" class="screen-pill" title="Soglia screen time · Clicca per cambiarla">📵 <span id="screenPillVal">240m</span> <span id="screenPillStatus" class="screen-pill-status">?</span></button>
       <button id="installAppBtnHeader" class="install-pill" title="Installa DEADLINE come app" style="display:none">📲 INSTALLA</button>
       <div id="freezeDisplay" class="freeze-pill" title="Streak freeze: assorbe un giorno saltato">❄ 2</div>
       <div id="saveStatus" class="save-status">SALVATO</div>
@@ -1810,28 +2280,61 @@
     </div>
     <div class="stat-block">
       <h3>RISORSE</h3>
-      <div class="stat-row"><span>🪵 LEGNO</span><span id="resLegno">0</span></div>
-      <div class="stat-row"><span>⚙ FERRO</span><span id="resFerro">0</span></div>
-      <div class="stat-row"><span>📜 RICERCA</span><span id="resRicerca">0</span></div>
-      <div class="stat-row"><span class="gold">$ MONETE</span><span id="resMonete" class="gold">0</span></div>
-      <div class="stat-row mt8"><span class="danger">☣ MINACCIA</span><span><span id="threatPct">0</span>%</span></div>
+      <div class="stat-row"><span class="res-label"><svg class="res-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="6" cy="12" rx="3" ry="6"/><path d="M6 6 L20 6 C21.5 6 22 8 22 12 C22 16 21.5 18 20 18 L6 18"/><ellipse cx="6" cy="12" rx="1.5" ry="3"/></svg> LEGNO</span><span id="resLegno">0</span></div>
+      <div class="stat-row"><span class="res-label"><svg class="res-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="5" rx="0.5"/><line x1="12" y1="10" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg> FERRO</span><span id="resFerro">0</span></div>
+      <div class="stat-row"><span class="res-label"><svg class="res-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5 C5 3.5 6 3 7 3 C8 3 9 3.5 9 5 V19 C9 20.5 8 21 7 21 H17 C18 21 19 20.5 19 19 V5 C19 3.5 18 3 17 3 H7"/><line x1="11" y1="8" x2="16" y2="8"/><line x1="11" y1="12" x2="16" y2="12"/><line x1="11" y1="16" x2="14" y2="16"/></svg> RICERCA</span><span id="resRicerca">0</span></div>
+      <div class="stat-row"><span class="gold res-label"><svg class="res-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5.5"/><circle cx="15" cy="15" r="5.5"/><path d="M9 7 V11 M7.5 8 H10 C10.8 8 11 9 10 9 H8 C7 9 7.5 10 8.5 10 H10.5" stroke-width="1.5"/></svg> MONETE</span><span id="resMonete" class="gold">0</span></div>
+      <div class="stat-row mt8"><span class="danger res-label"><svg class="res-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5 C6 3 8 2 12 2 C16 2 18 3 18 5 V13 H15 V17 H9 V13 H6 Z"/><circle cx="9.5" cy="9" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="9" r="1.5" fill="currentColor" stroke="none"/><path d="M10 13 V15 M14 13 V15 M12 13 V15"/></svg> MINACCIA</span><span><span id="threatPct">0</span>%</span></div>
       <div class="threat-meter"><div id="threatBar" class="threat-fill" style="width:0%"></div></div>
     </div>
   </section>
 
   <!-- TABS -->
   <nav class="tabs" id="tabs">
-    <button data-tab="village" class="active">VILLAGGIO</button>
-    <button data-tab="missions">MISSIONI</button>
-    <button data-tab="focus">FOCUS</button>
-    <button data-tab="resist">RESISTI</button>
-    <button data-tab="tracking">📵 SCHERMO</button>
-    <button data-tab="build">COSTRUZIONI</button>
-    <button data-tab="profile">PROFILO</button>
-    <button data-tab="survivors">CIURMA</button>
-    <button data-tab="diary">DIARIO</button>
-    <button data-tab="storia">STORIA</button>
-    <button data-tab="log">LOG</button>
+    <button data-tab="village" class="active">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M3 11 L12 3 L21 11 M5 10 V20 H19 V10 M10 20 V14 H14 V20"/></svg></span>
+      <span class="tab-lbl">VILLAGGIO</span>
+    </button>
+    <button data-tab="missions">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 6 L8 10 L12 6 M4 14 L8 18 L12 14 M16 7 H20 M16 15 H20"/></svg></span>
+      <span class="tab-lbl">MISSIONI</span>
+    </button>
+    <button data-tab="focus">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><circle cx="12" cy="13" r="8"/><path d="M12 13 V8 M12 13 L16 16 M10 2 H14 M9 4 L15 4"/></svg></span>
+      <span class="tab-lbl">FOCUS</span>
+    </button>
+    <button data-tab="resist">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M12 3 L20 6 V12 C20 17 16 20 12 21 C8 20 4 17 4 12 V6 Z M9 12 L11 14 L15 10"/></svg></span>
+      <span class="tab-lbl">RESISTI</span>
+    </button>
+    <button data-tab="tracking">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12 C5 6 8 4 12 4 C16 4 19 6 22 12 C19 18 16 20 12 20 C8 20 5 18 2 12 Z"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg></span>
+      <span class="tab-lbl">SCHERMO</span>
+    </button>
+    <button data-tab="build">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 4 L20 10 L17 13 L11 7 Z M11 7 L4 14 L7 17 L14 10"/></svg></span>
+      <span class="tab-lbl">COSTRUZIONI</span>
+    </button>
+    <button data-tab="profile">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16 8 14 12 14 C16 14 20 16 20 21"/></svg></span>
+      <span class="tab-lbl">PROFILO</span>
+    </button>
+    <button data-tab="survivors">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19 C3 15 6 13 9 13 C12 13 15 15 15 19 M14 19 C14 17 16 16 17 16 C18 16 21 17 21 19"/></svg></span>
+      <span class="tab-lbl">CIURMA</span>
+    </button>
+    <button data-tab="diary">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 4 H17 V20 H5 Z M5 7 H17 M8 11 H14 M8 14 H14 M8 17 H12"/></svg></span>
+      <span class="tab-lbl">DIARIO</span>
+    </button>
+    <button data-tab="storia">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4 H14 L20 10 V20 H4 Z M14 4 V10 H20 M7 13 H17 M7 16 H17 M7 19 H13"/></svg></span>
+      <span class="tab-lbl">STORIA</span>
+    </button>
+    <button data-tab="log">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M5 4 H19 V20 H5 Z M8 8 H16 M8 12 H16 M8 16 H13"/></svg></span>
+      <span class="tab-lbl">LOG</span>
+    </button>
   </nav>
 
   <main>
@@ -1852,7 +2355,7 @@
           </div>
           <div class="info-card">
             <h3 class="sub-title">PROSSIMO GIORNO</h3>
-            <p id="hintBox" class="muted">Completa missioni e accumula focus time per costruire il tuo villaggio. Attento allo screen time: oltre 120 minuti i morti vengono attratti.</p>
+            <p id="hintBox" class="muted">Completa missioni e accumula focus time per costruire il tuo villaggio. Attento allo screen time: oltre 120 minuti i morti vengono attratti. Tocca un edificio sulla mappa per aprire la sua scheda.</p>
           </div>
           <div class="info-card">
             <h3 class="sub-title">RECLUTA</h3>
@@ -1869,12 +2372,12 @@
       <form class="add-mission-form" id="addMissionForm">
         <input type="text" id="newMissionName" placeholder="Es. Allenamento, lettura, lavorare al progetto..." required>
         <select id="newMissionCategory">
-          <option value="Forza">💪 Forza</option>
-          <option value="Intelletto" selected>🧠 Intelletto</option>
-          <option value="Creativita">🎨 Creatività</option>
-          <option value="Salute">❤ Salute</option>
-          <option value="Sociale">🫂 Sociale</option>
-          <option value="Spirito">🧘 Spirito</option>
+          <option value="Forza">Forza</option>
+          <option value="Intelletto" selected>Intelletto</option>
+          <option value="Creativita">Creatività</option>
+          <option value="Salute">Salute</option>
+          <option value="Sociale">Sociale</option>
+          <option value="Spirito">Spirito</option>
         </select>
         <select id="newMissionDiff">
           <option value="Molto facile">Molto facile (×1)</option>
@@ -1890,7 +2393,22 @@
           <option value="weekly">Settimanale</option>
         </select>
         <input type="date" id="newMissionDate" title="Quando va fatta (per 'una volta'). Vuoto = sempre disponibile.">
+        <label class="counter-toggle" style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="newMissionIsCounter" style="width:auto;margin:0">
+          <span>Contatore (flessioni, carte Anki, pomodori…)</span>
+        </label>
         <button class="btn" type="submit">+ AGGIUNGI</button>
+        <div id="counterFields" style="display:none; grid-column:1/-1; padding:10px; background:var(--bg-mid); border:1px dashed var(--gb-dark); font-size:13px">
+          <p class="muted" style="font-size:12px; margin-bottom:8px">Il contatore aumenta col tasto <strong>+N</strong>. Si resetta in base alla cadenza. Imposta fino a 3 bonus a soglia (es: 10/50/100 flessioni → XP crescente).</p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center">
+            <label>Incremento per tap: <input type="number" id="newMissionStep" value="1" min="1" max="999" style="width:70px"></label>
+          </div>
+          <div style="margin-top:8px; display:grid; grid-template-columns: auto 70px auto 60px auto 60px; gap:6px; align-items:center; font-size:12px">
+            <span>Bonus 1: dopo</span><input type="number" id="bAt1" placeholder="10" min="1" style="width:60px"><span>→ +</span><input type="number" id="bXp1" placeholder="5" min="0" style="width:50px"><span>XP, +</span><input type="number" id="bCo1" placeholder="5" min="0" style="width:50px">
+            <span>Bonus 2: dopo</span><input type="number" id="bAt2" placeholder="50" min="1" style="width:60px"><span>→ +</span><input type="number" id="bXp2" placeholder="30" min="0" style="width:50px"><span>XP, +</span><input type="number" id="bCo2" placeholder="25" min="0" style="width:50px">
+            <span>Bonus 3: dopo</span><input type="number" id="bAt3" placeholder="100" min="1" style="width:60px"><span>→ +</span><input type="number" id="bXp3" placeholder="80" min="0" style="width:50px"><span>XP, +</span><input type="number" id="bCo3" placeholder="60" min="0" style="width:50px">
+          </div>
+        </div>
       </form>
       <div class="mission-filter-bar" id="missionFilterBar">
         <div class="filter-group" data-filter-group="when">
@@ -2002,7 +2520,7 @@
       <form class="resist-form" id="addResistForm">
         <input type="text" id="newResistName" placeholder="Es. Non fumare, non usare il cellulare, niente snack..." required>
         <select id="newResistKind">
-          <option value="Schermo" selected>📵 Schermo</option>
+          <option value="Schermo" selected>⌧ Schermo</option>
           <option value="Fumo">🚬 Fumo</option>
           <option value="Impulso">⚠ Impulso</option>
           <option value="Altro">☢ Altro</option>
@@ -2029,7 +2547,7 @@
         <form class="resist-form" id="manualResistForm">
           <input type="text" id="manualResistName" placeholder="Es. No cellulare, no fumo, no snack..." required>
           <select id="manualResistKind">
-            <option value="Schermo" selected>📵 Schermo</option>
+            <option value="Schermo" selected>⌧ Schermo</option>
             <option value="Fumo">🚬 Fumo</option>
             <option value="Impulso">⚠ Impulso</option>
             <option value="Altro">☢ Altro</option>
@@ -2141,13 +2659,14 @@
           <div class="note-toolbar">
             <select id="noteCategory" title="Tipo di nota" style="font-size:13px;padding:4px 6px">
               <option value="">— Tipo —</option>
-              <option value="Studio">📚 Studio</option>
-              <option value="Lavoro">⚙ Lavoro</option>
-              <option value="Creativita">🎨 Creatività</option>
+              <option value="Studio">Studio</option>
+              <option value="Lavoro">Lavoro</option>
+              <option value="Creativita">Creatività</option>
             </select>
             <button id="noteSaveBtn" class="btn">SALVA NOTA</button>
             <button id="noteNewBtn" class="btn small">+ NUOVA</button>
             <button id="noteFocusBtn" class="btn small">CONCENTRATI</button>
+            <button id="noteShareBtn" class="btn small" title="Condividi questa nota">↗ CONDIVIDI</button>
             <button id="noteDeleteBtn" class="btn small danger-btn" style="display:none">CESTINA</button>
             <span id="noteCounter" class="note-counter">0 parole · 0 caratteri</span>
           </div>
@@ -2227,6 +2746,14 @@
         <button id="resetBtn" class="btn small danger-btn">RESET TOTALE</button>
       </div>
       <p class="muted mt8" style="font-size:12px">L'app si installa come applicazione sul tuo dispositivo: schermata Home, splash, offline. Su iOS Safari: tocca condividi → "Aggiungi a Home". Su Android: menù del browser → "Installa app".</p>
+
+      <h3 class="sub-title mt16">CALENDARIO &amp; NOTIFICHE</h3>
+      <p class="muted mb8" style="font-size:13px">Esporta le missioni programmate verso Google Calendar / Apple Calendar / Outlook / qualunque app calendar. Una volta importate, le notifiche te le manda il calendario nativo del telefono — sempre, anche se DEADLINE è chiusa.</p>
+      <div class="row" style="gap:8px; flex-wrap:wrap">
+        <button id="exportCalBtn" class="btn small">↗ ESPORTA CALENDARIO (.ics)</button>
+        <button id="notifEnableBtn" class="btn small">🔔 ATTIVA NOTIFICHE</button>
+      </div>
+      <p class="muted mt8" style="font-size:12px">Le notifiche in-app ti avvisano quando apri DEADLINE e hai missioni schedulate per oggi. Per reminder "veri" alle 8 del mattino senza aprire l'app, usa l'export calendario sopra: il tuo telefono ci pensa nativamente.</p>
     </div>
   </main>
 </div>
@@ -2279,9 +2806,9 @@
     <h2>TIPO DI NOTA</h2>
     <p class="muted">Che tipo di scrittura era? Influisce sulla resa in risorse.</p>
     <div class="row" style="justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn" data-focus-cat="Studio">📚 STUDIO</button>
-      <button class="btn" data-focus-cat="Lavoro">⚙ LAVORO</button>
-      <button class="btn" data-focus-cat="Creativita">🎨 CREATIVITÀ</button>
+      <button class="btn" data-focus-cat="Studio">STUDIO</button>
+      <button class="btn" data-focus-cat="Lavoro">LAVORO</button>
+      <button class="btn" data-focus-cat="Creativita">CREATIVITÀ</button>
     </div>
   </div>
 </div>
@@ -2363,6 +2890,37 @@
   </div>
 </div>
 
+<!-- SHARE MODAL — esporta la nota corrente verso Keep/Notes/clipboard/file -->
+<div class="modal-bg" id="shareBg">
+  <div class="modal" style="max-width:420px; text-align:left">
+    <h2 style="margin-bottom:6px">CONDIVIDI NOTA</h2>
+    <p class="muted" style="font-size:13px; margin-bottom:14px; line-height:1.4">
+      Dove vuoi che vada questa pagina del tuo diario?
+    </p>
+    <div style="display:flex; flex-direction:column; gap:8px">
+      <button id="shareNative" class="btn" style="text-align:left; padding:14px">
+        <strong>↗ Condividi tramite app</strong>
+        <div class="muted" style="font-size:12px; margin-top:2px">Apre il menu del sistema: Keep, Notes, Drive, Mail, WhatsApp, qualunque app installata.</div>
+      </button>
+      <button id="shareClipboard" class="btn" style="text-align:left; padding:14px">
+        <strong>⎘ Copia il testo</strong>
+        <div class="muted" style="font-size:12px; margin-top:2px">Salva negli appunti. Poi apri dove vuoi e incolla.</div>
+      </button>
+      <button id="shareDownload" class="btn" style="text-align:left; padding:14px">
+        <strong>↓ Scarica come .md</strong>
+        <div class="muted" style="font-size:12px; margin-top:2px">File Markdown leggibile da Obsidian, Notion (via import), o qualunque editor di testo.</div>
+      </button>
+      <button id="shareEmail" class="btn" style="text-align:left; padding:14px">
+        <strong>✉ Mandala via email</strong>
+        <div class="muted" style="font-size:12px; margin-top:2px">Apre il client di posta predefinito con la nota già scritta.</div>
+      </button>
+    </div>
+    <div style="margin-top:14px; text-align:right">
+      <button id="shareClose" class="btn small">CHIUDI</button>
+    </div>
+  </div>
+</div>
+
 <!-- TUTORIAL NOMI — chiede al giocatore di mappare i personaggi speciali a persone vere -->
 <div class="modal-bg" id="tutorBg">
   <div class="modal" style="max-width:480px; text-align:left">
@@ -2404,32 +2962,67 @@
 // ===================================================================
 (function setupPWA() {
   try {
-    // === Icon generator ===
-    // Disegna l'icona direttamente su canvas → toDataURL('image/png').
-    // `maskable: true` aggiunge la safe-zone interna del 10% (Android maskable spec).
+    // === Icon generator === icona più curata (v3.24):
+    // sfondo a gradiente caldo, cornice ruggine doppia, testo serif con kerning,
+    // sotto-decorazione skull tipografico minimal.
     function renderIcon(size, maskable) {
       const c = document.createElement('canvas');
       c.width = size; c.height = size;
       const ctx = c.getContext('2d');
-      // sfondo pieno (importante per maskable: NO transparency)
-      ctx.fillStyle = '#1a1410';
+      // === SFONDO === gradiente radiale caldo (più ricco del piatto nero)
+      const grad = ctx.createRadialGradient(size*0.5, size*0.45, size*0.05, size*0.5, size*0.55, size*0.7);
+      grad.addColorStop(0,    '#3a1f12');
+      grad.addColorStop(0.45, '#221008');
+      grad.addColorStop(1,    '#0f0703');
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, size, size);
-      // safe-zone per maskable: contenuto al 80% centrato
-      const pad = maskable ? size * 0.12 : size * 0.10;
+      // safe-zone per maskable: contenuto al 76% centrato
+      const pad = maskable ? size * 0.16 : size * 0.10;
       const inner = size - pad * 2;
-      // cornice ruggine
+      // === CORNICE doppia (esterna spessa, interna sottile) ===
       ctx.strokeStyle = '#9b4b28';
-      ctx.lineWidth = Math.max(2, size * 0.024);
+      ctx.lineWidth = Math.max(3, size * 0.028);
       ctx.strokeRect(pad, pad, inner, inner);
-      // testo DEAD / LINE
-      ctx.fillStyle = '#9b4b28';
-      ctx.font = '900 ' + Math.floor(size * 0.235) + 'px serif';
+      ctx.strokeStyle = '#c7a47b';
+      ctx.lineWidth = Math.max(1, size * 0.008);
+      const pad2 = pad + size * 0.035;
+      ctx.strokeRect(pad2, pad2, size - pad2*2, size - pad2*2);
+      // === TESTO DEAD / LINE ===
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const cx = size / 2;
-      ctx.fillText('DEAD', cx, size * 0.42);
+      // ombra del testo (drop)
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.font = '900 ' + Math.floor(size * 0.225) + 'px Georgia, "Times New Roman", serif';
+      ctx.fillText('DEAD', cx + size*0.012, size * 0.435);
+      ctx.fillText('LINE', cx + size*0.012, size * 0.66);
+      // testo principale
+      ctx.fillStyle = '#d96d35';
+      ctx.fillText('DEAD', cx, size * 0.43);
+      ctx.fillStyle = '#e8c89a';
+      ctx.fillText('LINE', cx, size * 0.655);
+      // === DECORAZIONE: piccolo skull-dot in basso al centro ===
+      ctx.fillStyle = '#9b4b28';
+      const sx = cx, sy = size * 0.82;
+      const sr = size * 0.02;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fill();
+      // tre punti decorativi laterali
+      ctx.fillStyle = '#7a3a20';
+      ctx.beginPath(); ctx.arc(sx - size*0.08, sy, sr*0.6, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx + size*0.08, sy, sr*0.6, 0, Math.PI*2); ctx.fill();
+      // === ANGOLI: piccolo accent per ricordare la cornice di un quadro ===
       ctx.fillStyle = '#c7a47b';
-      ctx.fillText('LINE', cx, size * 0.66);
+      const corner = size * 0.018;
+      // top-left
+      ctx.fillRect(pad - corner, pad - corner, corner*2, corner*2);
+      // top-right
+      ctx.fillRect(size - pad - corner, pad - corner, corner*2, corner*2);
+      // bottom-left
+      ctx.fillRect(pad - corner, size - pad - corner, corner*2, corner*2);
+      // bottom-right
+      ctx.fillRect(size - pad - corner, size - pad - corner, corner*2, corner*2);
       return c.toDataURL('image/png');
     }
     const icon192 = renderIcon(192, false);
@@ -2475,7 +3068,11 @@
 
     // 2) Service Worker via Blob URL — cache-first per il file HTML stesso
     //    (gioco single-file: basta cachare la URL corrente per andare offline).
-    if ('serviceWorker' in navigator) {
+    // SW solo su http(s): su file:// la registrazione non è permessa e
+    // sporcherebbe la console. L'app resta installabile via manifest/meta.
+    const _canSW = 'serviceWorker' in navigator &&
+                   (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+    if (_canSW) {
       const swCode = `
         const CACHE = 'deadline-v1';
         const ASSETS = [location.href.replace(/sw\\.js.*$/, '')];
@@ -5373,6 +5970,183 @@ function toggleMusic() {
 // API non bloccante: chiama haptic('complete'/'attack'/'levelup'/'tap')
 // Su iOS Safari non funziona (Apple non implementa Vibration API).
 // Su Android e PWA installata funziona perfettamente.
+// === CALENDAR EXPORT — formato iCal RFC 5545 ===
+// Genera un VEVENT all-day per ogni missione con scheduledDate.
+// Importabile in: Google Calendar, Apple Calendar, Outlook, Thunderbird, ecc.
+const Calendar = {
+  // Formatta una data YYYY-MM-DD in formato iCal DTSTART (all-day): YYYYMMDD
+  _icsDate(dateStr) {
+    if (!dateStr) return '';
+    return dateStr.replace(/-/g, '');
+  },
+  // Aggiunge un giorno a una data YYYY-MM-DD (per DTEND di all-day)
+  _addDay(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  },
+  // Escapes per ICS: backslash → \\, comma → \,, semicolon → \;, newline → \n
+  _esc(s) {
+    return String(s || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/;/g, '\\;')
+      .replace(/,/g, '\\,')
+      .replace(/\n/g, '\\n');
+  },
+  // Linea-fold a 75 chars (RFC requirement, ma quasi tutti i client tollerano linee lunghe)
+  _vevent(m) {
+    if (!m || !m.scheduledDate) return null;
+    const uid = `dl-${m.id}@deadline.app`;
+    const dt  = this._icsDate(m.scheduledDate);
+    const dte = this._icsDate(this._addDay(m.scheduledDate));
+    const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const summary = `[DEADLINE] ${this._esc(m.name)}`;
+    const xp = (typeof xpFromDifficulty === 'function') ? xpFromDifficulty(m.difficulty) : '';
+    const co = (typeof coinsFromDifficulty === 'function') ? coinsFromDifficulty(m.difficulty) : '';
+    const cat = m.category || 'Intelletto';
+    const descParts = [
+      `Categoria: ${cat}`,
+      `Difficoltà: ${m.difficulty || 'Facile'}`,
+      `Ricompensa: +${xp} XP, +${co}$`,
+      `Cadenza: ${m.cadence === 'daily' ? 'Quotidiana' : m.cadence === 'weekly' ? 'Settimanale' : 'Una volta'}`
+    ];
+    if (m.realWorldRef && m.realWorldRef.instruction) {
+      descParts.push('', m.realWorldRef.instruction);
+      if (m.realWorldRef.url) descParts.push(m.realWorldRef.url);
+    }
+    const description = this._esc(descParts.join('\\n'));
+    return [
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${dt}`,
+      `DTEND;VALUE=DATE:${dte}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${description}`,
+      `CATEGORIES:DEADLINE,${this._esc(cat)}`,
+      `STATUS:${m.completed ? 'COMPLETED' : 'CONFIRMED'}`,
+      // Alert/VALARM: notifica 1 ora prima della data evento (07:00 del giorno stesso)
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:${summary}`,
+      'TRIGGER:-PT1H',
+      'END:VALARM',
+      'END:VEVENT'
+    ].join('\r\n');
+  },
+  // Costruisce il VCALENDAR completo con N eventi
+  buildIcs(missions) {
+    const events = missions.map(m => this._vevent(m)).filter(Boolean);
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//DEADLINE//Habits to Remain Human//IT',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:DEADLINE Missioni',
+      'X-WR-TIMEZONE:Europe/Rome',
+      ...events,
+      'END:VCALENDAR'
+    ].join('\r\n');
+  },
+  // Download del file .ics
+  _download(content, filename) {
+    const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
+  // Esporta una sola missione
+  exportOne(missionId) {
+    const m = (G.missions || []).find(x => x.id === missionId);
+    if (!m) return;
+    if (!m.scheduledDate) {
+      showModal('NESSUNA DATA', 'Questa missione non ha una data programmata. Modificala impostando una scadenza.');
+      return;
+    }
+    const ics = this.buildIcs([m]);
+    const safe = (m.name || 'missione').replace(/[^a-zA-Z0-9_\-]+/g, '_').slice(0, 40);
+    this._download(ics, `deadline_${safe}.ics`);
+  },
+  // Esporta tutte le missioni programmate (non scadute, non completate)
+  exportAllScheduled() {
+    const all = (G.missions || []).filter(m => m.scheduledDate && !m.completed);
+    if (all.length === 0) {
+      showModal('NIENTE DA ESPORTARE', 'Non hai missioni programmate con una data futura. Aggiungi una scadenza dal form "Nuova missione".');
+      return;
+    }
+    const ics = this.buildIcs(all);
+    this._download(ics, `deadline_calendario_${new Date().toISOString().slice(0, 10)}.ics`);
+  }
+};
+
+// === NOTIFICATION HELPER ===
+// Wrap intorno a Notification API con permesso lazy + check missioni oggi.
+const Notifier = {
+  supported: ('Notification' in window),
+  async requestPermission() {
+    if (!this.supported) return 'unsupported';
+    if (Notification.permission === 'granted') return 'granted';
+    if (Notification.permission === 'denied') return 'denied';
+    try {
+      const res = await Notification.requestPermission();
+      return res;
+    } catch (_) { return 'denied'; }
+  },
+  fire(title, body) {
+    if (!this.supported || Notification.permission !== 'granted') return false;
+    try {
+      const n = new Notification(title, {
+        body,
+        tag: 'deadline-' + Date.now(),
+        renotify: false
+      });
+      // Auto-close dopo 8s
+      setTimeout(() => { try { n.close(); } catch(_) {} }, 8000);
+      return true;
+    } catch (_) { return false; }
+  },
+  // Check: missioni schedulate per OGGI non completate + missioni-evento in scadenza
+  checkTodayMissions() {
+    if (!this.supported || Notification.permission !== 'granted') return;
+    const today = todayStr();
+    const todays = (G.missions || []).filter(m => m.scheduledDate === today && !m.completed);
+    // Missioni-evento che scadono oggi o domani
+    const day = G.day || 1;
+    const expiring = (G.missions || []).filter(m =>
+      m.fromEvent && m.expiresOnDay && !m.completed && (m.expiresOnDay - day) >= 0 && (m.expiresOnDay - day) <= 1);
+    if (todays.length === 0 && expiring.length === 0) return;
+    // Limita a 1 notifica al giorno per non spammare
+    const key = 'deadline_notif_' + today;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    const lines = [];
+    if (expiring.length) {
+      lines.push(...expiring.slice(0, 2).map(m => {
+        const left = m.expiresOnDay - day;
+        return `⌛ ${m.name} — scade ${left === 0 ? 'OGGI' : 'domani'}`;
+      }));
+    }
+    lines.push(...todays.slice(0, 3).map(m => '· ' + m.name));
+    const total = todays.length + expiring.length;
+    const more = total > lines.length ? `\n+ altre ${total - lines.length}` : '';
+    this.fire(
+      expiring.length ? `DEADLINE in scadenza!` : `${todays.length} missioni per oggi`,
+      `${lines.join('\n')}${more}\n\nApri DEADLINE per completarle.`
+    );
+  }
+};
+// Check su pageload (con piccolo delay) e quando ritorni alla tab
+window.addEventListener('load', () => {
+  setTimeout(() => { try { Notifier.checkTodayMissions(); } catch(_) {} }, 2000);
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    setTimeout(() => { try { Notifier.checkTodayMissions(); } catch(_) {} }, 800);
+  }
+});
+
 const HAPTIC_PATTERNS = {
   tap:      [10],
   complete: [40, 30, 40],
@@ -5471,7 +6245,7 @@ document.querySelectorAll('#tabs button').forEach(btn => {
 });
 
 // -------------------- MISSIONI --------------------
-function addMission(name, difficulty, cadence, category, scheduledDate) {
+function addMission(name, difficulty, cadence, category, scheduledDate, opts) {
   const m = {
     id: 'm' + Date.now() + Math.floor(Math.random()*1000),
     name, difficulty, cadence,
@@ -5480,12 +6254,90 @@ function addMission(name, difficulty, cadence, category, scheduledDate) {
     createdDate: todayStr(),
     scheduledDate: scheduledDate || null  // null = sempre disponibile
   };
+  // === Counter type === (v3.34)
+  if (opts && opts.type === 'counter') {
+    m.type = 'counter';
+    m.step = Math.max(1, parseInt(opts.step, 10) || 1);
+    m.counter = { current: 0, total: 0, lastResetDate: todayStr(), lastIncrementDate: null };
+    m.bonuses = (opts.bonuses || []).filter(b => b && b.at > 0).map(b => ({
+      at: parseInt(b.at, 10) || 0,
+      xp: parseInt(b.xp, 10) || 0,
+      coins: parseInt(b.coins, 10) || 0,
+      awarded: false
+    })).sort((a, b) => a.at - b.at);
+  }
   G.missions.push(m);
   const dateInfo = scheduledDate ? ` per il ${scheduledDate}` : '';
-  logEvent(`Nuova missione: "${name}" (${difficulty}, ${m.category})${dateInfo}`, 'evt-rest');
+  const typeInfo = m.type === 'counter' ? ' [CONTATORE]' : '';
+  logEvent(`Nuova missione${typeInfo}: "${name}" (${difficulty}, ${m.category})${dateInfo}`, 'evt-rest');
   renderMissions();
   saveState();
 }
+
+// === COUNTER LOGIC ===
+function incrementCounterMission(id) {
+  const m = G.missions.find(x => x.id === id);
+  if (!m || m.type !== 'counter') return;
+  if (!m.counter) m.counter = { current: 0, total: 0, lastResetDate: todayStr(), lastIncrementDate: null };
+  // Reset se la data corrente è oltre la finestra (daily/weekly)
+  resetCounterIfNeeded(m);
+  const step = Math.max(1, m.step || 1);
+  m.counter.current += step;
+  m.counter.total += step;
+  m.counter.lastIncrementDate = todayStr();
+  // XP base per ogni incremento: 0.5 XP per unità, arrotondato a min 1
+  const baseXp = Math.max(1, Math.floor(step * 0.5));
+  try { gainXp(baseXp); } catch (e) { G.player.xp = (G.player.xp || 0) + baseXp; }
+  // Skill XP nella categoria della missione
+  try { gainSkillXp(m.category || 'Intelletto', Math.max(1, Math.floor(step * 0.3))); } catch (_) {}
+  // Check soglie bonus
+  if (Array.isArray(m.bonuses)) {
+    m.bonuses.forEach(b => {
+      if (!b.awarded && m.counter.current >= b.at) {
+        b.awarded = true;
+        try { gainXp(b.xp || 0); } catch (_) { G.player.xp = (G.player.xp || 0) + (b.xp || 0); }
+        G.resources.monete = (G.resources.monete || 0) + (b.coins || 0);
+        sfxLevelUp();
+        logEvent(`Soglia raggiunta su "${m.name}": ${b.at} → +${b.xp} XP, +${b.coins}$`, 'evt-success');
+        showModal('SOGLIA RAGGIUNTA', `"${m.name}" — ${b.at} fatti!\n+${b.xp} XP, +${b.coins} monete.`);
+      }
+    });
+  }
+  sfxComplete();
+  haptic('complete');
+  logEvent(`+${step} su "${m.name}" (oggi ${m.counter.current}, totale ${m.counter.total})`, 'evt-rest');
+  renderMissions();
+  renderAll();
+  saveState();
+}
+
+// Reset del counter se la finestra di cadenza è cambiata
+function resetCounterIfNeeded(m) {
+  if (!m.counter || !m.cadence) return;
+  const today = todayStr();
+  const last  = m.counter.lastResetDate || today;
+  let shouldReset = false;
+  if (m.cadence === 'daily') {
+    if (last !== today) shouldReset = true;
+  } else if (m.cadence === 'weekly') {
+    // settimana ISO: domeniche resettano
+    const lastD = new Date(last + 'T00:00:00');
+    const todayD = new Date(today + 'T00:00:00');
+    const daysDiff = Math.floor((todayD - lastD) / 86400000);
+    if (daysDiff >= 7) shouldReset = true;
+  }
+  if (shouldReset) {
+    m.counter.current = 0;
+    m.counter.lastResetDate = today;
+    if (Array.isArray(m.bonuses)) m.bonuses.forEach(b => b.awarded = false);
+  }
+}
+// Reset al cambio giorno per TUTTI i counter
+function resetAllCountersIfNeeded() {
+  if (!Array.isArray(G.missions)) return;
+  G.missions.forEach(m => { if (m.type === 'counter') resetCounterIfNeeded(m); });
+}
+window.incrementCounterMission = incrementCounterMission;
 
 function completeMission(id) {
   // Refactor v2: delega a Game (Rules + Effects + Store).
@@ -5583,24 +6435,28 @@ function renderMissions() {
         else deadline = `<span class="event-mission-deadline">${dleft}g rimast${dleft === 1 ? 'o' : 'i'}</span>`;
       }
     }
+    // SVG calendario inline — sostituisce l'emoji 📅 (incongruente col tema)
+    const CAL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-2px;margin-right:3px"><rect x="3" y="5" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>';
+    const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-2px;margin-right:3px"><polyline points="4 12 10 18 20 6"/></svg>';
     // Data programmata (se presente)
     let dateBadge = '';
     if (m.scheduledDate) {
       const today = todayStr();
       const diff = daysBetween(today, m.scheduledDate);
       let label;
-      if (diff === 0) label = '📅 oggi';
-      else if (diff === 1) label = '📅 domani';
-      else if (diff > 1) label = `📅 fra ${diff}g`;
-      else if (diff === -1) label = '📅 ieri';
-      else label = `📅 ${Math.abs(diff)}g fa`;
+      if (diff === 0) label = 'oggi';
+      else if (diff === 1) label = 'domani';
+      else if (diff > 1) label = `fra ${diff}g`;
+      else if (diff === -1) label = 'ieri';
+      else label = `${Math.abs(diff)}g fa`;
       const dateColor = diff < 0 ? 'var(--rust)' : (diff === 0 ? 'var(--gb-glow)' : 'var(--gb-mid)');
-      dateBadge = ` <span class="date-badge" style="color:${dateColor}">${label}</span>`;
+      dateBadge = ` <span class="date-badge" style="color:${dateColor}">${CAL_SVG}${label}</span>` +
+        ` <button class="cal-export-btn" data-cal-export="${m.id}" title="Aggiungi al tuo calendario (Google/Apple/Outlook)">↗ cal</button>`;
     }
     // Data completamento (se completata)
     let completedBadge = '';
     if (m.completed && m.completedDate) {
-      completedBadge = ` <span class="date-badge" style="color:var(--gb-mid)">✓ ${m.completedDate}</span>`;
+      completedBadge = ` <span class="date-badge" style="color:var(--gb-mid)">${CHECK_SVG}${m.completedDate}</span>`;
     }
     // Riferimento al mondo reale (link Wikipedia + istruzione concreta)
     let refRow = '';
@@ -5612,16 +6468,60 @@ function renderMissions() {
       const instr = r.instruction ? ` <span class="muted" style="font-style:italic">— ${escapeHtml(r.instruction)}</span>` : '';
       refRow = `<div class="mission-meta" style="margin-top:4px">${linkHtml}${instr}</div>`;
     }
-    li.innerHTML = `
-      <div class="mission-check" data-id="${m.id}">${m.completed ? '✓' : ''}</div>
-      <div>
-        <div class="mission-name">${escapeHtml(m.name)}${evtTag}${deadline}${dateBadge}${completedBadge}</div>
-        <div class="mission-meta"><span class="cat-badge" style="border-color:${catDef.color};color:${catDef.color}">${catDef.icon} ${cat}</span>+${xp} XP · +${co}$ · ${m.cadence === 'daily' ? 'Quotidiana' : m.cadence === 'weekly' ? 'Settim.' : 'Una volta'}</div>
-        ${refRow}
-      </div>
-      <span class="difficulty-badge ${DIFF_CLASS[m.difficulty]}">${m.difficulty}</span>
-      <button class="btn small danger-btn" data-del="${m.id}">×</button>
-    `;
+    // Counter type ha render diverso: niente checkbox, c'è il +N e progress
+    if (m.type === 'counter') {
+      resetCounterIfNeeded(m); // assicura stato fresco prima del render
+      const cur = (m.counter && m.counter.current) || 0;
+      const tot = (m.counter && m.counter.total) || 0;
+      const step = m.step || 1;
+      // Trova il prossimo bonus non ancora awarded
+      let nextBonus = null;
+      if (Array.isArray(m.bonuses)) {
+        nextBonus = m.bonuses.find(b => !b.awarded);
+      }
+      const target = nextBonus ? nextBonus.at : null;
+      const pct = target ? Math.min(100, (cur / target) * 100) : 0;
+      // Badge soglie raggiunte
+      let bonusRow = '';
+      if (Array.isArray(m.bonuses) && m.bonuses.length > 0) {
+        bonusRow = `<div class="mission-meta" style="margin-top:4px; display:flex; gap:6px; flex-wrap:wrap">` +
+          m.bonuses.map(b => {
+            const cl = b.awarded ? 'awarded' : (cur >= b.at ? 'ready' : 'pending');
+            return `<span class="counter-bonus-badge ${cl}" title="A ${b.at}: +${b.xp} XP, +${b.coins}$">${b.at}${b.awarded ? ' ✓' : ''}</span>`;
+          }).join('') +
+          `</div>`;
+      }
+      // Progress bar verso il prossimo bonus
+      let progressBar = '';
+      if (nextBonus) {
+        progressBar = `<div class="counter-progress" style="margin-top:6px"><div class="counter-progress-fill" style="width:${pct.toFixed(0)}%"></div><span class="counter-progress-text">${cur}/${nextBonus.at} → +${nextBonus.xp} XP</span></div>`;
+      } else if (Array.isArray(m.bonuses) && m.bonuses.length > 0) {
+        progressBar = `<div class="counter-progress completed" style="margin-top:6px"><div class="counter-progress-fill" style="width:100%"></div><span class="counter-progress-text">tutte le soglie completate ✓</span></div>`;
+      }
+      li.innerHTML = `
+        <button class="counter-plus-btn" data-counter-inc="${m.id}" title="Aggiungi ${step}">+${step}</button>
+        <div>
+          <div class="mission-name">${escapeHtml(m.name)} <span class="counter-current">${cur}</span><span class="counter-total muted"> · tot ${tot}</span>${evtTag}${dateBadge}</div>
+          <div class="mission-meta"><span class="cat-badge" style="border-color:${catDef.color};color:${catDef.color}">${catDef.icon} ${cat}</span>contatore · ${m.cadence === 'daily' ? 'reset quotidiano' : m.cadence === 'weekly' ? 'reset settim.' : 'cumulativo'}</div>
+          ${bonusRow}
+          ${progressBar}
+          ${refRow}
+        </div>
+        <span class="difficulty-badge ${DIFF_CLASS[m.difficulty]}">${m.difficulty}</span>
+        <button class="btn small danger-btn" data-del="${m.id}">×</button>
+      `;
+    } else {
+      li.innerHTML = `
+        <div class="mission-check" data-id="${m.id}">${m.completed ? '✓' : ''}</div>
+        <div>
+          <div class="mission-name">${escapeHtml(m.name)}${evtTag}${deadline}${dateBadge}${completedBadge}</div>
+          <div class="mission-meta"><span class="cat-badge" style="border-color:${catDef.color};color:${catDef.color}">${catDef.icon} ${cat}</span>+${xp} XP · +${co}$ · ${m.cadence === 'daily' ? 'Quotidiana' : m.cadence === 'weekly' ? 'Settim.' : 'Una volta'}</div>
+          ${refRow}
+        </div>
+        <span class="difficulty-badge ${DIFF_CLASS[m.difficulty]}">${m.difficulty}</span>
+        <button class="btn small danger-btn" data-del="${m.id}">×</button>
+      `;
+    }
     ul.appendChild(li);
   });
   const empty = document.getElementById('emptyMissions');
@@ -5653,6 +6553,20 @@ function renderMissions() {
   ul.querySelectorAll('[data-del]').forEach(b => {
     b.addEventListener('click', () => deleteMission(b.dataset.del));
   });
+  // Calendar export per-mission
+  ul.querySelectorAll('[data-cal-export]').forEach(b => {
+    b.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      Calendar.exportOne(b.dataset.calExport);
+    });
+  });
+  // Counter increment
+  ul.querySelectorAll('[data-counter-inc]').forEach(b => {
+    b.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      incrementCounterMission(b.dataset.counterInc);
+    });
+  });
 }
 
 document.getElementById('addMissionForm').addEventListener('submit', e => {
@@ -5663,11 +6577,40 @@ document.getElementById('addMissionForm').addEventListener('submit', e => {
   const cat = document.getElementById('newMissionCategory').value;
   const dateEl = document.getElementById('newMissionDate');
   const sched = dateEl && dateEl.value ? dateEl.value : null;
+  const isCounter = document.getElementById('newMissionIsCounter')?.checked;
   if (!name) return;
-  addMission(name, diff, cad, cat, sched);
+  let opts = null;
+  if (isCounter) {
+    const step = parseInt(document.getElementById('newMissionStep').value, 10) || 1;
+    const bonuses = [];
+    for (let i = 1; i <= 3; i++) {
+      const at = parseInt(document.getElementById('bAt' + i).value, 10);
+      const xp = parseInt(document.getElementById('bXp' + i).value, 10);
+      const co = parseInt(document.getElementById('bCo' + i).value, 10);
+      if (at > 0) bonuses.push({ at, xp: xp || 0, coins: co || 0 });
+    }
+    opts = { type: 'counter', step, bonuses };
+  }
+  addMission(name, diff, cad, cat, sched, opts);
+  // Reset campi form
   document.getElementById('newMissionName').value = '';
   if (dateEl) dateEl.value = '';
+  const cb = document.getElementById('newMissionIsCounter');
+  if (cb) { cb.checked = false; document.getElementById('counterFields').style.display = 'none'; }
+  ['newMissionStep','bAt1','bXp1','bCo1','bAt2','bXp2','bCo2','bAt3','bXp3','bCo3'].forEach(id => {
+    const el = document.getElementById(id); if (el && id !== 'newMissionStep') el.value = '';
+  });
 });
+
+// Toggle visibility dei counter fields
+(function bindCounterToggle() {
+  const cb = document.getElementById('newMissionIsCounter');
+  const wrap = document.getElementById('counterFields');
+  if (!cb || !wrap) return;
+  cb.addEventListener('change', () => {
+    wrap.style.display = cb.checked ? 'block' : 'none';
+  });
+})();
 
 // Bind filtri missioni — gruppo "when"
 document.querySelectorAll('#missionFilterBar [data-filter-when]').forEach(b => {
@@ -7266,6 +8209,94 @@ document.getElementById('noteDeleteBtn').addEventListener('click', deleteCurrent
 document.getElementById('noteText').addEventListener('input', updateNoteCounter);
 document.getElementById('noteTitle').addEventListener('input', () => {});
 
+// === DIARY SHARE === 4 vie: native share, clipboard, .md download, email.
+// Funziona su qualunque app installata sul dispositivo, niente OAuth.
+function getCurrentNotePayload() {
+  const title = (document.getElementById('noteTitle').value || 'Senza titolo').trim();
+  const body  = htmlToPlain(document.getElementById('noteText').innerHTML || '').trim();
+  const date  = new Date().toLocaleDateString('it-IT');
+  return { title, body, date };
+}
+function shareNoteOpen() {
+  const p = getCurrentNotePayload();
+  if (!p.body && !p.title) {
+    showModal('NIENTE DA CONDIVIDERE', 'La nota è vuota. Scrivi qualcosa prima di condividerla.');
+    return;
+  }
+  document.getElementById('shareBg').classList.add('active');
+}
+function shareNoteClose() {
+  document.getElementById('shareBg').classList.remove('active');
+}
+async function shareNoteNative() {
+  const p = getCurrentNotePayload();
+  const text = `${p.title}\n\n${p.body}\n\n— scritto su DEADLINE, ${p.date}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: p.title, text });
+      shareNoteClose();
+    } catch (e) {
+      // user annulla → silent
+    }
+  } else {
+    // fallback: copy + alert
+    await shareNoteClipboard();
+    showModal('CONDIVISIONE NON SUPPORTATA',
+      'Il tuo browser non supporta la condivisione nativa.\nHo copiato il testo negli appunti: apri Keep / Notes / qualunque app e incolla.');
+  }
+}
+async function shareNoteClipboard() {
+  const p = getCurrentNotePayload();
+  const text = `${p.title}\n\n${p.body}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    shareNoteClose();
+    showModal('COPIATO', 'Testo negli appunti. Apri Keep, Notes, o qualunque editor e incolla con Ctrl/Cmd+V.');
+  } catch (e) {
+    // fallback molto vecchio
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (_) {}
+    document.body.removeChild(ta);
+    shareNoteClose();
+    showModal('COPIATO', 'Testo negli appunti. Apri dove vuoi e incolla.');
+  }
+}
+function shareNoteDownload() {
+  const p = getCurrentNotePayload();
+  const safeTitle = (p.title || 'nota').replace(/[^a-zA-Z0-9_\-]+/g, '_').slice(0, 40);
+  const md = `# ${p.title}\n\n${p.body}\n\n---\n_Esportato da DEADLINE, ${p.date}_\n`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${safeTitle}.md`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  shareNoteClose();
+}
+function shareNoteEmail() {
+  const p = getCurrentNotePayload();
+  const subject = encodeURIComponent(`Diario DEADLINE — ${p.title}`);
+  const body    = encodeURIComponent(`${p.body}\n\n— scritto su DEADLINE, ${p.date}`);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  shareNoteClose();
+}
+// Bind dei pulsanti share
+(function bindShare() {
+  const sb = document.getElementById('noteShareBtn'); if (sb) sb.addEventListener('click', shareNoteOpen);
+  const c = document.getElementById('shareClose'); if (c) c.addEventListener('click', shareNoteClose);
+  const n = document.getElementById('shareNative'); if (n) n.addEventListener('click', shareNoteNative);
+  const cl = document.getElementById('shareClipboard'); if (cl) cl.addEventListener('click', shareNoteClipboard);
+  const dl = document.getElementById('shareDownload'); if (dl) dl.addEventListener('click', shareNoteDownload);
+  const em = document.getElementById('shareEmail'); if (em) em.addEventListener('click', shareNoteEmail);
+  // click-fuori per chiudere
+  const bg = document.getElementById('shareBg');
+  if (bg) bg.addEventListener('click', e => { if (e.target.id === 'shareBg') shareNoteClose(); });
+})();
+
 // Ricerca + filtro categoria diario
 const noteSearchEl = document.getElementById('noteSearch');
 if (noteSearchEl) {
@@ -7668,908 +8699,1806 @@ function renderLog() {
   });
 }
 
-// -------------------- VILLAGE CANVAS --------------------
+// -------------------- VILLAGE CANVAS · FABLE HD RENDERER v2 --------------------
+// Motore pixel-art HD: risoluzione interna 960×576 (2× della v1), terreno
+// procedurale pre-renderizzato, edifici in prospettiva 3/4 con sprite cache,
+// illuminazione dinamica giorno/notte con luci reali, personaggi ridisegnati.
 const VC = document.getElementById('villageCanvas');
+VC.width = 960; VC.height = 576;               // upgrade risoluzione interna
 const VCTX = VC.getContext('2d');
 VCTX.imageSmoothingEnabled = false;
-// Su mobile, niente menù "salva immagine" al long-press sul canvas
 VC.addEventListener('contextmenu', e => e.preventDefault());
-
-function drawVillage() {
-  const w = VC.width, h = VC.height;
-  const t = Date.now() / 1000;
-  const TILE = 8;  // dimensione pseudo-tile per pattern
-
-  // === SFONDO: terra/erba uniforme (vista dall'alto) ===
-  VCTX.fillStyle = '#3e5226';
-  VCTX.fillRect(0, 0, w, h);
-  // Pattern erba: tile 8x8 con tonalità che variano
-  for (let y = 0; y < h; y += TILE) {
-    for (let x = 0; x < w; x += TILE) {
-      const n = (Math.sin(x*0.27 + y*0.34) + Math.cos(x*0.41 - y*0.21) + 2) * 0.25;
-      if (n > 0.78)      VCTX.fillStyle = '#506a2e';
-      else if (n > 0.6)  VCTX.fillStyle = '#48602a';
-      else if (n < 0.25) VCTX.fillStyle = '#2c3e1a';
-      else continue;
-      VCTX.fillRect(x, y, TILE, TILE);
-    }
-  }
-  // Ciuffi d'erba (puntini più chiari)
-  for (let i = 0; i < 80; i++) {
-    const x = (i * 47 + 11) % w;
-    const y = (i * 73 + 17) % h;
-    VCTX.fillStyle = '#7a9445';
-    VCTX.fillRect(x, y, 2, 1);
-  }
-
-  // === STRADE LASTRICATE (croce a quattro vie dal centro) ===
-  drawCobblePath(w, h);
-
-  // === ALBERI decorativi (cerchi visti dall'alto) sparsi negli spazi vuoti ===
-  drawTreeAt(20, 90, 0);
-  drawTreeAt(w - 40, 90, 1);
-  drawTreeAt(20, h - 100, 2);
-  drawTreeAt(w - 40, h - 100, 0);
-  drawTreeAt(w/2 - 28, 88, 1);
-  drawTreeAt(w/2 + 60, h - 100, 2);
-  drawTreeAt(220, 90, 0);
-  drawTreeAt(60, 248, 1);
-  drawTreeAt(w - 70, 248, 0);
-
-  // === PALIZZATA perimetrale (vista dall'alto = bordo spesso) ===
-  if (G.buildings.wall.level > 0) {
-    drawPalisade(w, h, G.buildings.wall.level);
-  }
-
-  // === EDIFICI — griglia 5×3 GTA-style ===
-  // Canvas 480×288. Building bbox 48×48. Margini ~24, gap calibrati.
-  const positions = {
-    // Riga 1 (top)
-    sawmill:      [ 36,  36],
-    zen_garden:   [132,  36],
-    altar_skulls: [300,  36],
-    workshop:     [396,  36],
-    // Riga 2 (mid) — HQ al centro, due edifici ai lati
-    watchtower:   [ 36, 120],
-    hq:           [216, 120],
-    barracks:     [396, 120],
-    // Riga 3 (bottom)
-    lab:          [ 36, 204],
-    mensa_comune: [132, 204],
-    ambulatorio:  [216, 204],
-    arsenale:     [300, 204],
-    market:       [396, 204]
-  };
-  Object.entries(positions).forEach(([k, [x,y]]) => {
-    const lvl = G.buildings[k]?.level || 0;
-    if (lvl > 0) drawBuilding(k, x, y, lvl);
-  });
-
-  // === FUMO dai camini ===
-  if (G.buildings.sawmill?.level > 0)  drawSmoke(positions.sawmill[0] + 8, positions.sawmill[1] + 4, t);
-  if (G.buildings.workshop?.level > 0) drawSmoke(positions.workshop[0] + 8, positions.workshop[1] + 4, t + 0.7);
-  if (G.buildings.lab?.level > 0)      drawSmoke(positions.lab[0] + 8, positions.lab[1] + 4, t + 1.3);
-  if (G.buildings.altar_skulls?.level > 0) drawSmoke(positions.altar_skulls[0] + 24, positions.altar_skulls[1] - 2, t + 0.4);
-
-  // === SOPRAVVISSUTI === sprite 10×18 con label sopra
-  // Player al centro col proprio nome. Coordinate pixel-snap dentro drawSurvivor.
-  const playerLabel = (G.player && G.player.name) ? G.player.name.toUpperCase().slice(0, 10) : 'TU';
-  drawSurvivor(w/2 - 5, h/2 - 4, '#c84020', '#e8c890', playerLabel, '#f0c040');
-  G.survivors.forEach((s, i) => {
-    // Disposizione a raggiera con offset costante, niente swing che muove label
-    const angle = (i / Math.max(G.survivors.length, 1)) * Math.PI * 2 + 0.4;
-    const radius = 62 + (i % 2) * 18;
-    const sx = w/2 + Math.cos(angle) * radius - 5;
-    const sy = h/2 + Math.sin(angle) * radius * 0.7 - 4;
-    // Slight sway, ma quantizzato a 1px per non sfumare
-    const sway = Math.round(Math.sin(t * 0.4 + i) * 1);
-    const lbl = (s.name || '').toUpperCase().slice(0, 10);
-    drawSurvivor(sx + sway, sy, s.color, '#e8c890', lbl, s.color);
-  });
-
-  // === ZOMBIE — vagano vicino al perimetro se la minaccia è alta ===
-  const threat = todayThreatPct();
-  const nZombies = Math.min(Math.floor(threat / 15), 6);
-  for (let i = 0; i < nZombies; i++) {
-    // pattern di posizioni che ruotano lungo i bordi
-    const phase = (t * 0.15 + i * 0.7) % 1;
-    let zx, zy;
-    if (phase < 0.25) { zx = 12 + (phase * 4) * (w - 24); zy = 16; }
-    else if (phase < 0.5) { zx = w - 12; zy = 16 + ((phase - 0.25) * 4) * (h - 32); }
-    else if (phase < 0.75) { zx = w - 12 - ((phase - 0.5) * 4) * (w - 24); zy = h - 16; }
-    else { zx = 12; zy = h - 16 - ((phase - 0.75) * 4) * (h - 32); }
-    drawZombie(zx, zy, t + i);
-  }
-
-  // === DECORAZIONI MORALI ===
-  drawMoraleDecor(w, h);
-
-  // === VIGNETTE leggera ===
-  const vg = VCTX.createRadialGradient(w/2, h/2, Math.min(w,h)*0.45, w/2, h/2, Math.max(w,h)*0.75);
-  vg.addColorStop(0, 'rgba(0,0,0,0)');
-  vg.addColorStop(1, 'rgba(0,0,0,0.35)');
-  VCTX.fillStyle = vg;
-  VCTX.fillRect(0, 0, w, h);
-
-  // === HUD ===
-  drawHudBox(0, 0, 100, 16, 'GIORNO ' + (G.day || 1), '#fff');
-  const dscale = difficultyScale();
-  const dColor = dscale.mult > 1.4 ? '#ff8060' : (dscale.mult > 1.1 ? '#f0c040' : '#90d070');
-  drawHudBox(w - 120, 0, 120, 16, dscale.label.toUpperCase(), dColor);
+// Precarica VT323 (già nel <head>) così il canvas lo usa da subito per l'HUD
+if (document.fonts && document.fonts.load) {
+  document.fonts.load('21px "VT323"').catch(() => {});
 }
 
-// === HELPERS ===
-function drawHudBox(x, y, w, h, text, textColor) {
-  VCTX.fillStyle = 'rgba(0,0,0,0.78)';
-  VCTX.fillRect(x, y, w, h);
-  VCTX.strokeStyle = textColor;
-  VCTX.lineWidth = 1;
-  VCTX.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-  VCTX.fillStyle = textColor;
-  VCTX.font = 'bold 9px monospace';
-  VCTX.fillText(text, x + 5, y + 11);
+// === RUNTIME VILLAGGIO === stato non persistito, vive solo durante la sessione.
+const villageRuntime = {
+  initialized: false,
+  survivors: {},           // id → { x, y, tx, ty, nextMoveAt, dir }
+  playerPos: null,
+  dust: [], crows: [], leaves: [], fireflies: [],
+  clouds: [],
+  lastFrameTime: 0,
+  bounds: { minX: 70, maxX: 890, minY: 110, maxY: 500 }
+};
+
+function _randomTarget(b) {
+  return { tx: b.minX + Math.random() * (b.maxX - b.minX),
+           ty: b.minY + Math.random() * (b.maxY - b.minY) };
 }
 
-function drawCobblePath(w, h) {
-  // Vista dall'alto: croce di strade lastricate dal centro che passa tra gli edifici.
-  // Strada orizzontale a metà altezza + strada verticale al centro che collega le righe.
-  const ctx = VCTX;
-  const cy = h/2;
-  const cx = w/2;
-  // bordo terra battuta sotto le strade (ombra del bordo strada)
-  ctx.fillStyle = '#4a3825';
-  ctx.fillRect(12, cy - 12, w - 24, 24);   // orizzontale
-  ctx.fillRect(cx - 12, 12, 24, h - 24);   // verticale
-
-  // pietre del lastricato (orizzontale)
-  for (let x = 12; x < w - 12; x += 6) {
-    for (let y = cy - 10; y < cy + 10; y += 6) {
-      const n = (Math.sin(x * 0.55 + y * 0.75) + Math.cos(x * 0.32) + 2) * 0.25;
-      if (n > 0.7)      ctx.fillStyle = '#a39477';
-      else if (n > 0.45) ctx.fillStyle = '#857658';
-      else if (n > 0.25) ctx.fillStyle = '#6a5a40';
-      else              ctx.fillStyle = '#52442e';
-      ctx.fillRect(x, y, 5, 5);
-    }
-  }
-  // pietre del lastricato (verticale)
-  for (let x = cx - 10; x < cx + 10; x += 6) {
-    for (let y = 12; y < h - 12; y += 6) {
-      const n = (Math.sin(x * 0.55 + y * 0.75) + Math.cos(y * 0.32) + 2) * 0.25;
-      if (n > 0.7)      ctx.fillStyle = '#a39477';
-      else if (n > 0.45) ctx.fillStyle = '#857658';
-      else if (n > 0.25) ctx.fillStyle = '#6a5a40';
-      else              ctx.fillStyle = '#52442e';
-      ctx.fillRect(x, y, 5, 5);
-    }
-  }
-  // Crepe / linee scure tra le pietre
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  for (let x = 12; x < w - 12; x += 6) ctx.fillRect(x + 5, cy - 11, 1, 22);
-  for (let y = 12; y < h - 12; y += 6) ctx.fillRect(cx - 11, y + 5, 22, 1);
-}
-
-// Albero visto dall'alto: cerchio di chioma con tronco al centro e ombra
-function drawTreeAt(x, y, type=0) {
-  const ctx = VCTX;
-  const palettes = [
-    ['#1a3010', '#2a4818', '#3a6020', '#5a8030'],     // verde sano
-    ['#221a08', '#3a3018', '#5a4828', '#7a6638'],     // secco/giallo
-    ['#15280c', '#244218', '#3c5a24', '#5a7a30']      // verde scuro foresta
-  ];
-  const p = palettes[type % palettes.length];
-  // Ombra (offset SE per stile GTA top-down)
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillRect(x + 2, y + 2, 14, 14);
-  // Cerchio chioma esterno (più scuro)
-  ctx.fillStyle = p[0];
-  ctx.fillRect(x + 2, y, 12, 16);
-  ctx.fillRect(x, y + 2, 16, 12);
-  // Strato medio
-  ctx.fillStyle = p[1];
-  ctx.fillRect(x + 3, y + 1, 10, 14);
-  ctx.fillRect(x + 1, y + 3, 14, 10);
-  // Strato chiaro
-  ctx.fillStyle = p[2];
-  ctx.fillRect(x + 4, y + 3, 8, 10);
-  ctx.fillRect(x + 3, y + 4, 10, 8);
-  // Highlight in alto-sx (luce dall'alto-NW)
-  ctx.fillStyle = p[3];
-  ctx.fillRect(x + 4, y + 4, 4, 3);
-  // Tronco al centro (visto da sopra = piccolo cerchio scuro)
-  ctx.fillStyle = '#2a1a0c';
-  ctx.fillRect(x + 7, y + 7, 2, 2);
-}
-
-function drawSmoke(x, y, t) {
-  const ctx = VCTX;
-  for (let i = 0; i < 4; i++) {
-    const phase = (t * 0.6 + i * 0.4) % 1;
-    const py = y - phase * 22;
-    const px = x + Math.sin(phase * 4 + i) * 2;
-    const size = 3 - Math.floor(phase * 2);
-    const alpha = (1 - phase) * 0.5;
-    ctx.fillStyle = `rgba(200, 200, 200, ${alpha})`;
-    if (size > 0) ctx.fillRect(px, py, size, size);
-  }
-}
-
-function drawPalisade(w, h, lvl) {
-  // Vista dall'alto: la palizzata è un bordo spesso di legno marrone tutto intorno
-  // al perimetro, con piccoli picchetti come "denti" del bordo.
-  const ctx = VCTX;
-  const T = 8;  // spessore del muro
-  // Bordo principale (marrone medio)
-  ctx.fillStyle = '#5a4028';
-  ctx.fillRect(0, 0, w, T);          // top
-  ctx.fillRect(0, h - T, w, T);      // bottom
-  ctx.fillRect(0, 0, T, h);          // left
-  ctx.fillRect(w - T, 0, T, h);      // right
-  // Pattern picchetti scuri (i listelli)
-  ctx.fillStyle = '#3a2818';
-  for (let x = 2; x < w; x += 5) {
-    ctx.fillRect(x, 0, 1, T);          // top
-    ctx.fillRect(x, h - T, 1, T);      // bottom
-  }
-  for (let y = 2; y < h; y += 5) {
-    ctx.fillRect(0, y, T, 1);          // left
-    ctx.fillRect(w - T, y, T, 1);      // right
-  }
-  // Highlight chiaro sui bordi interni (luce)
-  ctx.fillStyle = '#7a5a3a';
-  ctx.fillRect(0, T - 1, w, 1);
-  ctx.fillRect(0, h - T, w, 1);
-  ctx.fillRect(T - 1, 0, 1, h);
-  ctx.fillRect(w - T, 0, 1, h);
-  // Cancello centrale (apertura sulla strada lastricata)
-  ctx.fillStyle = '#3e5226';
-  const gateOpen = 18;
-  ctx.fillRect(0, h/2 - gateOpen/2, T, gateOpen);
-  ctx.fillRect(w - T, h/2 - gateOpen/2, T, gateOpen);
-  ctx.fillRect(w/2 - gateOpen/2, 0, gateOpen, T);
-  ctx.fillRect(w/2 - gateOpen/2, h - T, gateOpen, T);
-  // Rinforzi se livello > 1 (doppia parete)
-  if (lvl > 1) {
-    ctx.fillStyle = '#3a2818';
-    ctx.fillRect(T, T, w - T*2, 1);
-    ctx.fillRect(T, h - T - 1, w - T*2, 1);
-    ctx.fillRect(T, T, 1, h - T*2);
-    ctx.fillRect(w - T - 1, T, 1, h - T*2);
-  }
-  // Torrette agli angoli se livello >= 3
-  if (lvl >= 3) {
-    [ [0,0], [w-12,0], [0,h-12], [w-12,h-12] ].forEach(([cx, cy]) => {
-      ctx.fillStyle = '#3a2818';
-      ctx.fillRect(cx, cy, 12, 12);
-      ctx.fillStyle = '#7a5a3a';
-      ctx.fillRect(cx + 1, cy + 1, 10, 10);
-      ctx.fillStyle = '#5a4028';
-      ctx.fillRect(cx + 3, cy + 3, 6, 6);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(cx + 5, cy + 5, 2, 2);
+function initVillageRuntime(w, h) {
+  if (villageRuntime.initialized) return;
+  for (let i = 0; i < 12; i++) {
+    villageRuntime.dust.push({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.25
     });
   }
+  for (let i = 0; i < 3; i++) {
+    villageRuntime.crows.push({
+      x: -40 - i * 320, y: 30 + Math.random() * 60,
+      vx: 0.55 + Math.random() * 0.4, bob: i * 1.5
+    });
+  }
+  for (let i = 0; i < 3; i++) {
+    villageRuntime.clouds.push({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: 2.5 + Math.random() * 2, r: 130 + Math.random() * 90
+    });
+  }
+  for (let i = 0; i < 14; i++) {
+    villageRuntime.fireflies.push({
+      x: 80 + Math.random() * (w - 160), y: 120 + Math.random() * (h - 200),
+      ph: Math.random() * Math.PI * 2, sp: 0.4 + Math.random() * 0.5
+    });
+  }
+  villageRuntime.playerPos = { x: w/2, y: h/2 + 40, tx: w/2, ty: h/2 + 40, nextMoveAt: Date.now() + 4000 };
+  villageRuntime.initialized = true;
 }
 
-// Disegna decori legati alla fascia morale: idealista = fiori/lume caldo,
-// pragmatico = barricate/sangue. La densità scala con la distanza dalla
-// neutralità.
-function drawMoraleDecor(w, h) {
-  if (typeof Morale === 'undefined' || G.moraleScore === undefined) return;
-  const v = G.moraleScore || 0;
-  const ctx = VCTX;
-  if (v >= MORALE.IDEAL) {
-    // Idealista: fiori (puntini gialli/rossi) sparsi vicino agli edifici
-    const density = v >= MORALE.PURE_IDEAL ? 14 : 7;
-    for (let i = 0; i < density; i++) {
-      const x = (i * 53 + 17) % w;
-      const y = 30 + (i * 71) % (h - 60);
-      ctx.fillStyle = i % 3 === 0 ? '#f0a040' : (i % 3 === 1 ? '#e08070' : '#c0d050');
-      ctx.fillRect(x, y, 2, 2);
-      ctx.fillStyle = '#609040';
-      ctx.fillRect(x, y + 2, 1, 2);    // stelo
+function updateVillageRuntime(dt, w, h) {
+  const b = villageRuntime.bounds;
+  const pp = villageRuntime.playerPos;
+  if (pp) {
+    const dx = pp.tx - pp.x, dy = pp.ty - pp.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 3) {
+      if (Date.now() > pp.nextMoveAt) {
+        const t = _randomTarget(b);
+        pp.tx = t.tx; pp.ty = t.ty;
+        pp.nextMoveAt = Date.now() + 4000 + Math.random() * 8000;
+      }
+    } else {
+      const step = 17 * dt;
+      pp.x += dx / dist * step; pp.y += dy / dist * step;
     }
-    // lume caldo (overlay tenue color albicocca)
-    ctx.fillStyle = 'rgba(240, 200, 130, 0.06)';
-    ctx.fillRect(0, 0, w, h);
-    // pure-idealist: due piccoli cuori vicino al centro
-    if (v >= MORALE.PURE_IDEAL) {
-      [-1, 1].forEach((sx, idx) => {
-        const cx = w/2 + sx * 14;
-        const cy = h/2 + 36;
-        ctx.fillStyle = '#d04060';
-        ctx.fillRect(cx, cy, 1, 1);
-        ctx.fillRect(cx + 2, cy, 1, 1);
-        ctx.fillRect(cx - 1, cy + 1, 4, 1);
-        ctx.fillRect(cx, cy + 2, 2, 1);
-      });
+  }
+  G.survivors.forEach(s => {
+    let rs = villageRuntime.survivors[s.id];
+    if (!rs) {
+      const t = _randomTarget(b);
+      rs = { x: w/2, y: h/2, tx: t.tx, ty: t.ty, nextMoveAt: Date.now() + 1000, dir: 1 };
+      villageRuntime.survivors[s.id] = rs;
     }
-  } else if (v <= MORALE.PRAG) {
-    // Pragmatico: barricate spinate + macchie di sangue secco + sopravvissuti armati
-    const density = v <= MORALE.PURE_PRAG ? 12 : 6;
-    // macchie di sangue secco (bordeaux) sul terreno
-    for (let i = 0; i < density; i++) {
-      const x = (i * 67 + 23) % w;
-      const y = 20 + (i * 43) % (h - 40);
-      ctx.fillStyle = '#5a1818';
-      ctx.fillRect(x, y, 3, 1);
-      ctx.fillRect(x + 1, y + 1, 2, 1);
-      ctx.fillRect(x, y + 2, 1, 1);
+    const dx = rs.tx - rs.x, dy = rs.ty - rs.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 3) {
+      if (Date.now() > rs.nextMoveAt) {
+        const t = _randomTarget(b);
+        rs.tx = t.tx; rs.ty = t.ty;
+        rs.nextMoveAt = Date.now() + 3000 + Math.random() * 10000;
+      }
+    } else {
+      const speed = 14 + (s.id.charCodeAt(1) % 8);
+      const step = speed * dt;
+      rs.x += dx / dist * step; rs.y += dy / dist * step;
+      rs.dir = dx > 0 ? 1 : -1;
     }
-    // pezzi di filo spinato/barricata pixel sul perimetro
-    if (v <= MORALE.PURE_PRAG) {
-      ctx.fillStyle = '#3a3028';
-      for (let x = 12; x < w - 12; x += 16) {
-        ctx.fillRect(x, 10, 1, 4);
-        ctx.fillRect(x - 1, 11, 3, 1);
-        ctx.fillRect(x, h - 14, 1, 4);
-        ctx.fillRect(x - 1, h - 13, 3, 1);
+  });
+  villageRuntime.dust.forEach(d => {
+    d.x += d.vx * dt * 60; d.y += d.vy * dt * 60;
+    if (d.x < 0 || d.x > w) d.vx *= -1;
+    if (d.y < 0 || d.y > h) d.vy *= -1;
+  });
+  villageRuntime.crows.forEach(c => {
+    c.x += c.vx * dt * 60; c.bob += dt * 5;
+    if (c.x > w + 60) { c.x = -60; c.y = 20 + Math.random() * 80; }
+  });
+  villageRuntime.clouds.forEach(c => {
+    c.x += c.vx * dt;
+    if (c.x - c.r > w) { c.x = -c.r; c.y = Math.random() * h; }
+  });
+  villageRuntime.leaves = villageRuntime.leaves.filter(l => l.y < h + 8);
+  villageRuntime.leaves.forEach(l => {
+    l.y += l.vy * dt * 60;
+    l.x += Math.sin(l.life) * 0.7;
+    l.rot += dt * 3;
+    l.life += dt * 4;
+  });
+  if (Math.random() < 0.02) {
+    const trees = _TREES;
+    const tr = trees[Math.floor(Math.random() * trees.length)];
+    villageRuntime.leaves.push({
+      x: tr[0] + (Math.random() - 0.5) * 30, y: tr[1],
+      vy: 0.5 + Math.random() * 0.4, life: Math.random() * 6, rot: 0
+    });
+  }
+  villageRuntime.fireflies.forEach(f => {
+    f.ph += dt * f.sp;
+    f.x += Math.sin(f.ph * 1.7) * 0.5;
+    f.y += Math.cos(f.ph * 1.3) * 0.35;
+  });
+}
+
+// === TIME OF DAY ===
+function getTimeOfDay() {
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+  if (h >= 7 && h < 19) return { phase: 'day', t: 0, isNight: false, overlayColor: null, overlayAlpha: 0 };
+  if (h >= 5 && h < 7) {
+    const t = (h - 5) / 2;
+    return { phase: 'dawn', t, isNight: false, overlayColor: [235, 140, 80], overlayAlpha: 0.28 * (1 - t * 0.5) };
+  }
+  if (h >= 19 && h < 21) {
+    const t = (h - 19) / 2;
+    return { phase: 'dusk', t, isNight: t > 0.6, overlayColor: [190, 80, 60], overlayAlpha: 0.20 + 0.25 * t };
+  }
+  return { phase: 'night', t: 0, isNight: true, overlayColor: [16, 24, 58], overlayAlpha: 0.62 };
+}
+
+// ============================================================
+// NOISE — value noise deterministica per terreno
+// ============================================================
+function _hash2(ix, iy) {
+  let n = (ix * 374761393 + iy * 668265263) | 0;
+  n = ((n ^ (n >>> 13)) * 1274126177) | 0;
+  return (((n ^ (n >>> 16)) >>> 0) % 100000) / 100000;
+}
+function _smooth5(t) { return t * t * (3 - 2 * t); }
+function _vnoise(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const a = _hash2(ix, iy), b = _hash2(ix + 1, iy);
+  const c = _hash2(ix, iy + 1), d = _hash2(ix + 1, iy + 1);
+  const u = _smooth5(fx), v = _smooth5(fy);
+  return a * (1-u) * (1-v) + b * u * (1-v) + c * (1-u) * v + d * u * v;
+}
+
+// Helper: scurisce/schiarisce un colore HEX (amt<1 scurisce, >1 schiarisce)
+function _darken(hex, amt = 0.75) {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const n = parseInt(full, 16);
+  const f = v => Math.max(0, Math.min(255, Math.floor(v * amt)));
+  return '#' + [f((n>>16)&255), f((n>>8)&255), f(n&255)].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+// ============================================================
+// TERRENO — pre-renderizzato su canvas offscreen, rigenerato al
+// cambio di wall level / fascia morale.
+// ============================================================
+const _TREES = [
+  [46, 190], [912, 190], [46, 500], [912, 500],
+  [420, 178], [560, 500], [180, 505], [780, 505], [560, 175]
+];
+let _terrainCanvas = null;
+let _terrainKey = '';
+
+function _terrainCacheKey() {
+  const wall = G.buildings.wall ? G.buildings.wall.level : 0;
+  let mor = 'neutral';
+  if (typeof MORALE !== 'undefined' && G.moraleScore !== undefined) {
+    const v = G.moraleScore || 0;
+    if (v >= MORALE.PURE_IDEAL) mor = 'pideal';
+    else if (v >= MORALE.IDEAL) mor = 'ideal';
+    else if (v <= MORALE.PURE_PRAG) mor = 'pprag';
+    else if (v <= MORALE.PRAG) mor = 'prag';
+  }
+  return wall + ':' + mor;
+}
+
+function _buildTerrain(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  // --- Erba: noise a 2 ottave, rampa 6 toni ---
+  const GRASS = ['#26351a', '#2d3f1e', '#354a22', '#3d5527', '#46612d', '#507036'];
+  const DIRT  = ['#4a3b26', '#57462d', '#655335'];
+  const CELL = 4;
+  for (let y = 0; y < h; y += CELL) {
+    for (let x = 0; x < w; x += CELL) {
+      const n = _vnoise(x * 0.016, y * 0.016) * 0.65 + _vnoise(x * 0.055, y * 0.055) * 0.35;
+      const gi = Math.max(0, Math.min(GRASS.length - 1, Math.floor(n * GRASS.length)));
+      ctx.fillStyle = GRASS[gi];
+      ctx.fillRect(x, y, CELL, CELL);
+      // chiazze di terra battuta
+      const d = _vnoise(x * 0.012 + 47, y * 0.012 + 13);
+      if (d > 0.74) {
+        const di = Math.min(2, Math.floor((d - 0.74) * 14));
+        ctx.fillStyle = DIRT[di];
+        ctx.fillRect(x, y, CELL, CELL);
       }
     }
-    // overlay tenue color sangue (pulsante minimo)
+  }
+
+  // --- Dettagli sparsi: ciuffi, fiorellini, sassi ---
+  for (let i = 0; i < 240; i++) {
+    const x = Math.floor(_hash2(i, 7) * w);
+    const y = Math.floor(_hash2(i, 91) * h);
+    const kind = _hash2(i, 33);
+    if (kind < 0.62) {              // ciuffo d'erba (V chiara)
+      ctx.fillStyle = '#6d8a44';
+      ctx.fillRect(x, y, 2, 3);
+      ctx.fillRect(x - 2, y + 1, 2, 2);
+      ctx.fillRect(x + 2, y + 1, 2, 2);
+      ctx.fillStyle = '#84a352';
+      ctx.fillRect(x, y, 2, 1);
+    } else if (kind < 0.82) {       // sasso
+      ctx.fillStyle = '#5c584c';
+      ctx.fillRect(x, y, 4, 3);
+      ctx.fillStyle = '#78745f';
+      ctx.fillRect(x, y, 3, 1);
+    } else {                        // fiorellino
+      ctx.fillStyle = kind < 0.9 ? '#c9b458' : '#b47f9c';
+      ctx.fillRect(x, y, 2, 2);
+      ctx.fillStyle = '#4c6a2e';
+      ctx.fillRect(x, y + 2, 1, 2);
+    }
+  }
+
+  // --- Strade lastricate: croce con bordi irregolari ---
+  _paveTerrain(ctx, w, h);
+
+  // --- Ombre morbide degli alberi (baked) ---
+  _TREES.forEach(([tx, ty]) => {
+    const g = ctx.createRadialGradient(tx + 8, ty + 10, 4, tx + 8, ty + 10, 30);
+    g.addColorStop(0, 'rgba(0,0,0,0.30)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(tx - 26, ty - 22, 68, 66);
+  });
+
+  // --- Decor morale (baked nel terreno) ---
+  _bakeMoraleDecor(ctx, w, h);
+
+  return c;
+}
+
+function _paveTerrain(ctx, w, h) {
+  const cy = h / 2, cx = w / 2;
+  const HALF = 26;
+  // terra battuta di fondo con bordo irregolare
+  ctx.fillStyle = '#463626';
+  for (let x = 20; x < w - 20; x += 4) {
+    const e = Math.floor(_vnoise(x * 0.05, 3) * 8);
+    ctx.fillRect(x, cy - HALF - e, 4, HALF * 2 + e * 2);
+  }
+  for (let y = 20; y < h - 20; y += 4) {
+    const e = Math.floor(_vnoise(y * 0.05, 77) * 8);
+    ctx.fillRect(cx - HALF - e, y, HALF * 2 + e * 2, 4);
+  }
+  // pietre irregolari
+  const stone = (x, y, sw, sh, tone) => {
+    const S = ['#8d7f63', '#7d7057', '#6c604a', '#5b503c', '#998a6d'];
+    ctx.fillStyle = S[tone % S.length];
+    ctx.fillRect(x + 1, y + 1, sw - 2, sh - 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    ctx.fillRect(x + 1, y + 1, sw - 2, 1);
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(x + 1, y + sh - 2, sw - 2, 1);
+    if (_hash2(x, y) > 0.86) {       // muschio
+      ctx.fillStyle = '#5d7038';
+      ctx.fillRect(x + 2, y + 2, 2, 2);
+    }
+  };
+  for (let x = 22; x < w - 22; x += 11) {
+    for (let y = cy - HALF + 2; y < cy + HALF - 8; y += 9) {
+      const off = (Math.floor(y / 9) % 2) * 5;
+      stone(x + off, y, 10, 8, Math.floor(_hash2(x, y) * 5));
+    }
+  }
+  for (let y = 22; y < h - 22; y += 9) {
+    for (let x = cx - HALF + 2; x < cx + HALF - 8; x += 11) {
+      const off = (Math.floor(x / 11) % 2) * 4;
+      stone(x, y + off, 10, 8, Math.floor(_hash2(y, x) * 5));
+    }
+  }
+}
+
+function _bakeMoraleDecor(ctx, w, h) {
+  if (typeof MORALE === 'undefined' || G.moraleScore === undefined) return;
+  const v = G.moraleScore || 0;
+  if (v >= MORALE.IDEAL) {
+    const density = v >= MORALE.PURE_IDEAL ? 26 : 13;
+    for (let i = 0; i < density; i++) {
+      const x = (i * 107 + 31) % w;
+      const y = 60 + (i * 143) % (h - 120);
+      ctx.fillStyle = i % 3 === 0 ? '#e8a34c' : (i % 3 === 1 ? '#d97f70' : '#c4cf62');
+      ctx.fillRect(x, y, 3, 3);
+      ctx.fillRect(x - 2, y + 1, 2, 2);
+      ctx.fillRect(x + 3, y + 1, 2, 2);
+      ctx.fillStyle = '#547a34';
+      ctx.fillRect(x + 1, y + 3, 2, 4);
+    }
+    ctx.fillStyle = 'rgba(240, 200, 130, 0.05)';
+    ctx.fillRect(0, 0, w, h);
+  } else if (v <= MORALE.PRAG) {
+    const density = v <= MORALE.PURE_PRAG ? 22 : 11;
+    for (let i = 0; i < density; i++) {
+      const x = (i * 133 + 47) % w;
+      const y = 40 + (i * 87) % (h - 80);
+      ctx.fillStyle = '#4d1414';
+      ctx.fillRect(x, y, 6, 2);
+      ctx.fillRect(x + 2, y + 2, 4, 2);
+      ctx.fillRect(x, y + 4, 2, 1);
+    }
+    if (v <= MORALE.PURE_PRAG) {
+      ctx.fillStyle = '#3a3028';
+      for (let x = 30; x < w - 30; x += 34) {
+        ctx.fillRect(x, 22, 2, 8);
+        ctx.fillRect(x - 3, 24, 8, 2);
+        ctx.fillRect(x, h - 30, 2, 8);
+        ctx.fillRect(x - 3, h - 28, 8, 2);
+      }
+    }
     ctx.fillStyle = 'rgba(120, 30, 30, 0.05)';
     ctx.fillRect(0, 0, w, h);
   }
 }
 
-function drawBuilding(key, x, y, lvl) {
-  const ctx = VCTX;
-  // Palette: [bordo/scuro, corpo-mid, corpo-light, dettaglio, accent]
-  const palettes = {
-    hq:           ['#3a2010','#806548','#a8866a','#5a3a20','#d4a02f'],
-    sawmill:      ['#3a1a08','#8a5828','#b07840','#6a3a18','#a06028'],
-    workshop:     ['#1a1a1a','#5a5a5a','#909090','#3a3a3a','#c8c8c8'],
-    lab:          ['#102030','#5080a0','#80a8c0','#2a4a60','#a0d0e8'],
-    market:       ['#402810','#a07028','#c89438','#7a5018','#f0c050'],
-    barracks:     ['#1a1a10','#48542a','#6a7838','#2a3018','#a8a08a'],
-    watchtower:   ['#201810','#806040','#a08858','#5a4028','#ffe080'],
-    ambulatorio:  ['#3a1010','#e8e8e8','#ffffff','#a05050','#d02020'],
-    zen_garden:   ['#5a7a40','#d8e0b8','#e8f0c8','#80a060','#406018'],
-    mensa_comune: ['#3a1810','#a06848','#c89068','#7a4828','#f0d098'],
-    altar_skulls: ['#000000','#3a2828','#604040','#1a1a1a','#c02020'],
-    arsenale:     ['#0a0a10','#3a3a40','#5a5a60','#1a1a20','#c0c0a0']
-  };
-  const p = palettes[key] || ['#1a1a1a','#605040','#807060','#3a2a18','#ffffff'];
-  // Forme: w, h, offset dall'angolo dello slot 48x48
-  const SHAPES = {
-    hq:           { w:44, h:42, ax:2,  ay:4 },
-    sawmill:      { w:48, h:34, ax:0,  ay:8 },
-    workshop:     { w:40, h:42, ax:4,  ay:4 },
-    lab:          { w:30, h:48, ax:9,  ay:0 },
-    market:       { w:48, h:32, ax:0,  ay:12 },
-    barracks:     { w:48, h:38, ax:0,  ay:6 },
-    watchtower:   { w:22, h:48, ax:13, ay:0 },
-    ambulatorio:  { w:40, h:40, ax:4,  ay:6 },
-    zen_garden:   { w:46, h:46, ax:1,  ay:1 },
-    mensa_comune: { w:48, h:36, ax:0,  ay:8 },
-    altar_skulls: { w:36, h:36, ax:6,  ay:8 },
-    arsenale:     { w:48, h:32, ax:0,  ay:12 }
-  };
-  const sh = SHAPES[key] || { w:44, h:44, ax:2, ay:2 };
-  const bx = x + sh.ax, by = y + sh.ay, bw = sh.w, bh = sh.h;
-  // Ombra a terra
+// ============================================================
+// EDIFICI — sprite 3/4 pre-renderizzati (cache per key:lvl)
+// Ogni sprite vive in un canvas 176×200; lo slot 96×96 ha
+// origine a (40, 78) dentro lo sprite.
+// ============================================================
+const _SPR_W = 176, _SPR_H = 200, _SPR_OX = 40, _SPR_OY = 78;
+const _bSpriteCache = {};
+
+// Palette per edificio: [outline, wallLight, wallMid, wallDark, roofLight, roofMid, roofDark, accent]
+const _BPAL = {
+  hq:           ['#2a1608', '#b28a5e', '#93704a', '#6f5236', '#8a4a2e', '#6e3a24', '#542c1a', '#e8b64a'],
+  sawmill:      ['#26140a', '#a87848', '#8a5f38', '#68462a', '#7d6647', '#645138', '#4a3c28', '#c9863d'],
+  workshop:     ['#141414', '#8d8d8d', '#6e6e6e', '#4f4f4f', '#a8a8ac', '#8a8a90', '#68686e', '#e88a3a'],
+  lab:          ['#0e1c28', '#7ba6bf', '#5f8aa3', '#476a80', '#a9d3e8', '#8ab8d0', '#6b98b0', '#7ce8a8'],
+  market:       ['#2c1c0c', '#c09452', '#a07a40', '#7c5c30', '#c05248', '#ede2cb', '#95372f', '#e8c052'],
+  barracks:     ['#161a10', '#7c8454', '#616a40', '#484f2e', '#5c6438', '#484f2a', '#363c1e', '#b8b096'],
+  watchtower:   ['#1c140c', '#a8845c', '#8a6a48', '#684e34', '#6e5a40', '#57462f', '#403322', '#ffe080'],
+  ambulatorio:  ['#2a1210', '#f2efe6', '#dbd6c8', '#bcb5a3', '#c8c2b2', '#aca592', '#8c8574', '#d63428'],
+  zen_garden:   ['#3c5228', '#eee8cc', '#ddd5b2', '#c4bb96', '#8aa060', '#6d8248', '#506334', '#3f6020'],
+  mensa_comune: ['#2a140c', '#c49772', '#a67a56', '#805c40', '#a04a34', '#843a28', '#662c1e', '#f0d098'],
+  altar_skulls: ['#000000', '#544242', '#3e3030', '#2a2020', '#3a2e2e', '#2c2222', '#1e1616', '#e03428'],
+  arsenale:     ['#0a0a0e', '#5e5e66', '#48484f', '#343439', '#6c6c74', '#55555c', '#3e3e44', '#c8c8a0']
+};
+
+function _getBuildingSprite(key, lvl) {
+  const ck = key + ':' + lvl;
+  if (_bSpriteCache[ck]) return _bSpriteCache[ck];
+  const c = document.createElement('canvas');
+  c.width = _SPR_W; c.height = _SPR_H;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  _renderBuildingSprite(ctx, key, lvl);
+  _bSpriteCache[ck] = c;
+  return c;
+}
+
+// --- primitive condivise ---
+function _sprShadow(ctx, x, y, w, h) {
+  const g = ctx.createRadialGradient(x + w/2, y + h, 6, x + w/2, y + h, w * 0.72);
+  g.addColorStop(0, 'rgba(0,0,0,0.38)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(x - w * 0.3, y + h - w * 0.35, w * 1.6, w * 0.75);
+}
+
+function _sprWall(ctx, p, x, y, w, h, opts = {}) {
+  // outline
+  ctx.fillStyle = p[0];
+  ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+  // corpo
+  ctx.fillStyle = p[2];
+  ctx.fillRect(x, y, w, h);
+  // luce da sinistra
+  ctx.fillStyle = p[1];
+  ctx.fillRect(x, y, 5, h);
+  // ombra a destra
+  ctx.fillStyle = p[3];
+  ctx.fillRect(x + w - 6, y, 6, h);
+  // contatto col suolo
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillRect(x, y + h - 4, w, 4);
+  if (opts.planks) {
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
+    for (let py = y + 7; py < y + h - 4; py += 8) ctx.fillRect(x, py, w, 1);
+  }
+  if (opts.bricks) {
+    ctx.fillStyle = 'rgba(0,0,0,0.10)';
+    for (let py = y + 6; py < y + h - 4; py += 7) {
+      ctx.fillRect(x, py, w, 1);
+      const off = (Math.floor(py / 7) % 2) * 7;
+      for (let px = x + off; px < x + w; px += 14) ctx.fillRect(px, py - 6, 1, 6);
+    }
+  }
+  if (opts.metal) {
+    ctx.fillStyle = 'rgba(255,255,255,0.07)';
+    for (let px = x + 4; px < x + w - 4; px += 6) ctx.fillRect(px, y, 2, h - 4);
+  }
+}
+
+function _sprGableRoof(ctx, p, x, y, w, rh, opts = {}) {
+  const over = 6;                       // sporgenza gronda
+  const rx = x - over, rw = w + over * 2;
+  // outline
+  ctx.fillStyle = p[0];
+  ctx.fillRect(rx - 2, y - 2, rw + 4, rh + 4);
+  // file di tegole con scurimento verso il basso
+  const rows = Math.max(3, Math.floor(rh / 6));
+  for (let i = 0; i < rows; i++) {
+    const ry = y + (i * rh / rows);
+    const rhh = rh / rows + 1;
+    ctx.fillStyle = i === 0 ? p[4] : (i < rows * 0.55 ? p[5] : p[6]);
+    ctx.fillRect(rx, ry, rw, rhh);
+    // scalettatura tegole
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    const off = (i % 2) * 6;
+    for (let px = rx + off; px < rx + rw; px += 12) ctx.fillRect(px, ry, 1, rhh);
+    ctx.fillRect(rx, ry + rhh - 1, rw, 1);
+  }
+  // colmo luminoso
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.fillRect(rx, y, rw, 2);
+  // sottogronda
   ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(bx + 3, by + 3, bw, bh);
-  // === SILHOUETTE SPECIFICA PER OGNI EDIFICIO ===
+  ctx.fillRect(rx, y + rh, rw, 2);
+  if (opts.patch) {                     // toppa di lamiera post-apocalittica
+    ctx.fillStyle = '#7c7c84';
+    ctx.fillRect(rx + rw * 0.62, y + rh * 0.3, 14, 9);
+    ctx.fillStyle = '#5a5a62';
+    ctx.fillRect(rx + rw * 0.62, y + rh * 0.3 + 8, 14, 1);
+  }
+}
+
+function _sprWindow(ctx, p, x, y, w, h) {
+  ctx.fillStyle = p[0];
+  ctx.fillRect(x - 1, y - 1, w + 2, h + 2);
+  // vetro con riflesso cielo (due toni diagonali)
+  ctx.fillStyle = '#31424e';
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = '#4c6a7a';
+  ctx.fillRect(x, y, Math.ceil(w * 0.5), Math.ceil(h * 0.5));
+  // traversa
+  ctx.fillStyle = p[0];
+  ctx.fillRect(x + Math.floor(w/2), y, 1, h);
+  ctx.fillRect(x, y + Math.floor(h/2), w, 1);
+  // davanzale
+  ctx.fillStyle = p[1];
+  ctx.fillRect(x - 1, y + h + 1, w + 2, 2);
+}
+
+function _sprDoor(ctx, p, x, y, w, h) {
+  ctx.fillStyle = p[0];
+  ctx.fillRect(x - 2, y - 2, w + 4, h + 2);
+  ctx.fillStyle = '#241408';
+  ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = '#38220e';
+  for (let px = x + 2; px < x + w - 1; px += 4) ctx.fillRect(px, y + 1, 1, h - 1);
+  ctx.fillStyle = p[7];
+  ctx.fillRect(x + w - 3, y + Math.floor(h/2), 2, 2);   // maniglia
+}
+
+function _sprFlagPole(ctx, x, y, len, flagColor, dark) {
+  ctx.fillStyle = '#1a1208';
+  ctx.fillRect(x, y - len, 2, len);
+  ctx.fillStyle = flagColor;
+  ctx.fillRect(x + 2, y - len + 1, 14, 8);
+  ctx.fillStyle = dark || _darken(flagColor, 0.7);
+  ctx.fillRect(x + 2, y - len + 6, 14, 3);
+}
+
+// --- renderer per singolo edificio ---
+function _renderBuildingSprite(ctx, key, lvl) {
+  const p = _BPAL[key] || _BPAL.hq;
+  const X = _SPR_OX, Y = _SPR_OY;      // origine slot 96×96
+
   if (key === 'hq') {
-    // Quadrata con tetto a punta + bandiera dorata
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 6, bw, bh - 6);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 8, bw - 4, bh - 10);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 8, bw - 4, 1);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 8, 1, bh - 10);
-    // Tetto a punta (triangolo)
-    ctx.fillStyle = p[3];
-    for (let i = 0; i < 8; i++) ctx.fillRect(bx + i, by + 6 - i, bw - i*2, 1);
-    ctx.fillStyle = p[0];
-    for (let i = 0; i < 8; i++) ctx.fillRect(bx + bw - i - 1, by + 6 - i, 1, 1);
-    // Bandiera dorata
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 8, 1, 12);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2, by - 7, 8, 5);
-    // Porta scura + finestre
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 8, 6, 8);
-    ctx.fillStyle = '#ffe080';
-    ctx.fillRect(bx + 6, by + 14, 4, 4);
-    ctx.fillRect(bx + bw - 10, by + 14, 4, 4);
+    const w = 84, wallH = 52, roofH = 30;
+    const x = X + 6, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH, { planks: true });
+    _sprGableRoof(ctx, p, x, yTop, w, roofH, { patch: lvl >= 3 });
+    _sprDoor(ctx, p, x + w/2 - 7, Y + 96 - 22, 14, 22);
+    _sprWindow(ctx, p, x + 10, yTop + roofH + 12, 12, 12);
+    _sprWindow(ctx, p, x + w - 22, yTop + roofH + 12, 12, 12);
+    if (lvl >= 2) _sprWindow(ctx, p, x + w/2 - 6, yTop + roofH + 10, 12, 10);
+    _sprFlagPole(ctx, x + w/2 - 1, yTop, 22, p[7]);
+    if (lvl >= 4) {                    // balconata di legno
+      ctx.fillStyle = p[3];
+      ctx.fillRect(x - 4, yTop + roofH + 26, w + 8, 4);
+      ctx.fillStyle = p[0];
+      for (let px = x - 4; px < x + w + 4; px += 8) ctx.fillRect(px, yTop + roofH + 26, 1, 8);
+    }
   }
   else if (key === 'sawmill') {
-    // Capannone allungato con tetto a doppio spiovente
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 8, bw - 4, bh - 10);
-    ctx.fillStyle = p[3];
-    // Doppio spiovente (visto dall'alto = due triangoli)
-    for (let i = 0; i < 8; i++) {
-      ctx.fillRect(bx + 2, by + i, bw - 4, 1);
-    }
-    // Spina centrale
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 3, bw - 4, 1);
-    // Pile di tronchi laterali
-    ctx.fillStyle = '#6a4218';
-    ctx.fillRect(bx + bw - 12, by + bh + 2, 10, 3);
-    ctx.fillRect(bx + bw - 12, by + bh + 6, 10, 3);
-    ctx.fillStyle = '#3a2010';
+    const w = 92, wallH = 40, roofH = 24;
+    const x = X + 2, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH, { planks: true });
+    _sprGableRoof(ctx, p, x, yTop, w, roofH, { patch: true });
+    _sprDoor(ctx, p, x + 12, Y + 96 - 20, 14, 20);
+    // sega circolare sul fianco
+    ctx.fillStyle = '#c9c9c9';
+    ctx.beginPath(); ctx.arc(x + w - 22, yTop + roofH + 22, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#8a8a8a';
+    ctx.beginPath(); ctx.arc(x + w - 22, yTop + roofH + 22, 11, 0, Math.PI); ctx.fill();
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath(); ctx.arc(x + w - 22, yTop + roofH + 22, 3, 0, Math.PI * 2); ctx.fill();
+    // cataste di tronchi
     for (let i = 0; i < 3; i++) {
-      ctx.fillRect(bx + bw - 11 + i*4, by + bh + 2, 1, 3);
-      ctx.fillRect(bx + bw - 11 + i*4, by + bh + 6, 1, 3);
+      ctx.fillStyle = i % 2 ? '#7a5222' : '#8a6030';
+      ctx.fillRect(x - 14, Y + 78 - i * 6, 22, 6);
+      ctx.fillStyle = '#c9a05e';
+      ctx.fillRect(x - 12, Y + 80 - i * 6, 3, 3);
+      ctx.fillRect(x + 2, Y + 80 - i * 6, 3, 3);
     }
-    // Sega circolare visibile
-    ctx.fillStyle = '#c0c0c0';
-    ctx.fillRect(bx + 8, by + bh/2 + 4, 8, 8);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + 11, by + bh/2 + 7, 2, 2);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
+    // ciminiera
+    ctx.fillStyle = p[0]; ctx.fillRect(x + 16, yTop - 12, 10, 16);
+    ctx.fillStyle = p[3]; ctx.fillRect(x + 17, yTop - 11, 8, 14);
   }
   else if (key === 'workshop') {
-    // Quadrato con tetto metallico + ciminiera grossa
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto metallico a strisce (alluminio corrugato)
-    ctx.fillStyle = p[2];
-    for (let i = 4; i < bw - 4; i += 3) {
-      ctx.fillRect(bx + i, by + 4, 1, bh - 12);
-    }
-    // Ciminiera grossa
-    ctx.fillStyle = p[0]; ctx.fillRect(bx + bw - 12, by - 6, 8, 12);
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw - 11, by - 7, 6, 1);
-    // Forgia (cerchio rosso al centro)
-    ctx.fillStyle = '#ff6020';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 6);
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(bx + bw/2 - 2, by + bh/2 - 1, 4, 2);
-    // Incudine fuori
+    const w = 76, wallH = 48, roofH = 16;
+    const x = X + 10, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH, { metal: true });
+    // tetto piatto in lamiera
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 6, yTop - 2, w + 12, roofH + 4);
+    ctx.fillStyle = p[5]; ctx.fillRect(x - 4, yTop, w + 8, roofH);
+    ctx.fillStyle = p[4]; ctx.fillRect(x - 4, yTop, w + 8, 3);
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    for (let px = x - 4; px < x + w + 4; px += 7) ctx.fillRect(px, yTop, 1, roofH);
+    // ciminiera grossa
+    ctx.fillStyle = p[0]; ctx.fillRect(x + w - 22, yTop - 20, 14, 24);
+    ctx.fillStyle = p[3]; ctx.fillRect(x + w - 20, yTop - 18, 10, 22);
+    ctx.fillStyle = p[4]; ctx.fillRect(x + w - 22, yTop - 20, 14, 3);
+    // bocca forgia (glow animato disegnato a runtime)
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x + w/2 - 12, Y + 96 - 26, 24, 26);
+    ctx.fillStyle = '#2a1408';
+    ctx.fillRect(x + w/2 - 10, Y + 96 - 24, 20, 24);
+    // incudine
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw + 2, by + bh - 8, 6, 3);
-    ctx.fillRect(bx + bw + 3, by + bh - 5, 4, 4);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 6, by + bh - 6, 6, 6);
+    ctx.fillRect(x + w + 4, Y + 88, 12, 4);
+    ctx.fillRect(x + w + 7, Y + 92, 6, 5);
   }
   else if (key === 'lab') {
-    // Torre stretta con cupola circolare blu in cima
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 10, bw, bh - 10);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 12, bw - 4, bh - 14);
-    // Cupola (semicerchio approssimato)
-    ctx.fillStyle = p[0]; ctx.fillRect(bx - 2, by + 6, bw + 4, 6);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx - 1, by + 4, bw + 2, 8);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 1, by + 2, bw - 2, 8);
-    ctx.fillStyle = p[4]; ctx.fillRect(bx + 3, by, bw - 6, 6);
-    // Antenna in cima
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(bx + bw/2 - 0.5, by - 6, 1, 6);
-    ctx.fillStyle = p[4]; ctx.fillRect(bx + bw/2 - 2, by - 7, 4, 1);
-    // Provette in vetrate
-    ctx.fillStyle = '#80ffa0';
-    ctx.fillRect(bx + 3, by + 24, 2, 6);
-    ctx.fillRect(bx + 6, by + 24, 2, 6);
-    ctx.fillStyle = '#ff80c0';
-    ctx.fillRect(bx + bw - 8, by + 24, 2, 6);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
+    const w = 56, wallH = 62, domeH = 22;
+    const x = X + 20, yTop = Y + 96 - wallH - domeH;
+    _sprShadow(ctx, x, yTop + domeH, w, wallH);
+    _sprWall(ctx, p, x, yTop + domeH, w, wallH, { bricks: true });
+    // cupola
+    ctx.fillStyle = p[0];
+    ctx.beginPath(); ctx.arc(x + w/2, yTop + domeH + 2, w/2 + 3, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = p[5];
+    ctx.beginPath(); ctx.arc(x + w/2, yTop + domeH + 2, w/2, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = p[4];
+    ctx.beginPath(); ctx.arc(x + w/2 - 6, yTop + domeH, w/2 - 10, Math.PI * 1.05, Math.PI * 1.7); ctx.fill();
+    // antenna
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(x + w/2 - 1, yTop - 14, 2, 16);
+    ctx.fillStyle = p[7]; ctx.fillRect(x + w/2 - 3, yTop - 16, 6, 3);
+    // vetrate verticali illuminate di verde
+    ctx.fillStyle = p[0]; ctx.fillRect(x + 8, yTop + domeH + 12, 12, 26);
+    ctx.fillStyle = '#153a28'; ctx.fillRect(x + 9, yTop + domeH + 13, 10, 24);
+    ctx.fillStyle = p[7]; ctx.fillRect(x + 10, yTop + domeH + 24, 3, 10);
+    ctx.fillRect(x + 15, yTop + domeH + 18, 3, 16);
+    _sprWindow(ctx, p, x + w - 20, yTop + domeH + 14, 12, 14);
+    _sprDoor(ctx, p, x + w/2 - 6, Y + 96 - 18, 12, 18);
   }
   else if (key === 'market') {
-    // Bancarella aperta: pali e tendoni a strisce, niente muri pieni
-    // Pali agli angoli
-    ctx.fillStyle = p[3];
-    [0, bw - 2, 0, bw - 2].forEach((dx, i) => {
-      const dy = i < 2 ? 0 : bh - 4;
-      ctx.fillRect(bx + dx, by + dy, 2, 4);
+    // tendone aperto su pali
+    const w = 88, x = X + 4;
+    _sprShadow(ctx, x, Y + 40, w, 52);
+    // pali
+    ctx.fillStyle = '#3c2812';
+    [[x + 2, Y + 48], [x + w - 6, Y + 48], [x + 2, Y + 86], [x + w - 6, Y + 86]].forEach(([px, py]) => {
+      ctx.fillRect(px, py, 4, Math.min(30, Math.max(6, Y + 96 - py)));
     });
-    // Tendone (tetto a strisce rosso/bianco)
-    for (let i = 0; i < bh - 8; i += 3) {
-      ctx.fillStyle = (Math.floor(i / 3) % 2 === 0) ? '#b04040' : '#f0e8d0';
-      ctx.fillRect(bx + 1, by + 4 + i, bw - 2, 3);
+    // tendone a strisce con onda inferiore
+    for (let i = 0; i < 9; i++) {
+      ctx.fillStyle = i % 2 === 0 ? p[4] : p[5];
+      ctx.fillRect(x - 4 + i * (w + 8) / 9, Y + 30, (w + 8) / 9 + 1, 34);
     }
-    // Bordo nero del tendone
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(x - 4, Y + 56, w + 8, 8);
     ctx.fillStyle = p[0];
-    ctx.fillRect(bx + 1, by + 4, bw - 2, 1);
-    ctx.fillRect(bx + 1, by + bh - 5, bw - 2, 1);
-    // Banco centrale con merci colorate
-    ctx.fillStyle = '#7a5018';
-    ctx.fillRect(bx + 6, by + bh + 2, bw - 12, 4);
-    // Frutta/oggetti
-    ctx.fillStyle = '#f0c050'; ctx.fillRect(bx + 8, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#80c060'; ctx.fillRect(bx + 14, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#d04060'; ctx.fillRect(bx + 20, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#a070d0'; ctx.fillRect(bx + 26, by + bh + 3, 2, 2);
-    // Bandiera dorata sopra
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 4, 1, 8);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2, by - 3, 5, 3);
+    ctx.fillRect(x - 5, Y + 28, w + 10, 3);
+    // smerlo inferiore
+    for (let i = 0; i < 9; i++) {
+      const sx = x - 4 + i * (w + 8) / 9;
+      ctx.fillStyle = i % 2 === 0 ? p[4] : p[5];
+      ctx.fillRect(sx + 2, Y + 64, (w + 8) / 9 - 4, 4);
+    }
+    // banco con merci
+    ctx.fillStyle = '#2c1c0c'; ctx.fillRect(x + 8, Y + 74, w - 16, 16);
+    ctx.fillStyle = '#7c5c30'; ctx.fillRect(x + 10, Y + 76, w - 20, 12);
+    const goods = ['#e8c052', '#8cc060', '#d05060', '#a878d8', '#e8883a'];
+    goods.forEach((gc, i) => {
+      ctx.fillStyle = gc;
+      ctx.fillRect(x + 14 + i * 13, Y + 78, 7, 5);
+      ctx.fillStyle = _darken(gc, 0.7);
+      ctx.fillRect(x + 14 + i * 13, Y + 81, 7, 2);
+    });
+    _sprFlagPole(ctx, x + w/2, Y + 28, 18, p[7]);
   }
   else if (key === 'barracks') {
-    // Caserma lunga col tetto verde militare
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 2, bw - 4, 1);
-    // Tetto piatto militare
-    ctx.fillStyle = p[3];
-    for (let i = 6; i < bh - 4; i += 4) {
-      ctx.fillRect(bx + 4, by + i, bw - 8, 1);
+    const w = 92, wallH = 44, roofH = 18;
+    const x = X + 2, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH, { planks: true });
+    // tetto militare basso
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 6, yTop - 2, w + 12, roofH + 4);
+    ctx.fillStyle = p[5]; ctx.fillRect(x - 4, yTop, w + 8, roofH);
+    ctx.fillStyle = p[4]; ctx.fillRect(x - 4, yTop, w + 8, 3);
+    // mimetica sul tetto
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    for (let i = 0; i < 8; i++) {
+      ctx.fillRect(x + (i * 23) % (w - 10), yTop + 3 + (i * 7) % (roofH - 8), 10, 5);
     }
-    // Bandiera nera
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 8, 1, 10);
-    ctx.fillRect(bx + bw/2, by - 7, 6, 4);
-    // Sacchi di sabbia davanti
-    ctx.fillStyle = '#8a7050';
-    for (let sx = 4; sx < bw - 4; sx += 8) {
-      ctx.fillRect(bx + sx, by + bh, 6, 4);
+    _sprDoor(ctx, p, x + w/2 - 8, Y + 96 - 24, 16, 24);
+    _sprWindow(ctx, p, x + 10, yTop + roofH + 10, 12, 10);
+    _sprWindow(ctx, p, x + w - 22, yTop + roofH + 10, 12, 10);
+    // sacchi di sabbia
+    for (let i = 0; i < 5; i++) {
+      ctx.fillStyle = i % 2 ? '#8a7050' : '#9a8060';
+      ctx.fillRect(x + 4 + i * 17, Y + 96, 14, 8);
+      ctx.fillStyle = '#b09070';
+      ctx.fillRect(x + 4 + i * 17, Y + 96, 14, 2);
     }
-    ctx.fillStyle = '#a08868';
-    for (let sx = 4; sx < bw - 4; sx += 8) ctx.fillRect(bx + sx, by + bh, 6, 1);
-    // Porta centrale
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 4, by + bh - 8, 8, 8);
+    _sprFlagPole(ctx, x + w/2 - 1, yTop, 20, '#242424', '#101010');
   }
   else if (key === 'watchtower') {
-    // Torre alta stretta con merlatura + faretto in cima
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 8, bw, bh - 8);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 10, bw - 4, bh - 12);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 10, bw - 4, 1);
-    // Merlatura quadrata in cima (corona)
-    ctx.fillStyle = p[3];
-    for (let i = 0; i < bw; i += 3) {
-      ctx.fillRect(bx + i, by + 4, 2, 4);
-    }
-    ctx.fillStyle = p[1];
-    ctx.fillRect(bx, by + 6, bw, 2);
-    // Faretto giallo in cima
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 - 2, by, 4, 4);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(bx + bw/2 - 1, by + 1, 2, 2);
-    // Cono di luce sceso
-    ctx.fillStyle = 'rgba(255,224,128,0.15)';
-    for (let i = 0; i < 12; i++) {
-      ctx.fillRect(bx + bw/2 - 2 - i, by + 4 + i, 4 + i*2, 2);
-    }
-    // Strisce verticali sui muri (tipo travi)
-    ctx.fillStyle = p[3];
-    ctx.fillRect(bx + 4, by + 14, 1, bh - 18);
-    ctx.fillRect(bx + bw - 5, by + 14, 1, bh - 18);
-    // Piccola finestra (feritoia)
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 1, by + bh/2, 2, 4);
-  }
-  else if (key === 'ambulatorio') {
-    // Bianco con croce rossa enorme
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Bordo tetto
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 2, by + 2, bw - 4, 2);
-    // Croce rossa enorme
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 - 2, by + 8, 4, bh - 14);
-    ctx.fillRect(bx + 8, by + bh/2 - 2, bw - 16, 4);
-    // Vetrate verdi (vetri ospedale)
-    ctx.fillStyle = '#80c0a0';
-    ctx.fillRect(bx + 4, by + 6, 3, 4);
-    ctx.fillRect(bx + bw - 7, by + 6, 3, 4);
-    // Porta
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
-  }
-  else if (key === 'zen_garden') {
-    // Sabbia bianca con cerchi concentrici + pietra al centro
-    ctx.fillStyle = p[3]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
-    // Cerchi concentrici (linee leggere)
-    ctx.fillStyle = p[1];
-    for (let r = 4; r < bw/2 - 1; r += 5) {
-      ctx.fillRect(bx + r, by + r, bw - r*2, 1);
-      ctx.fillRect(bx + r, by + bh - r - 1, bw - r*2, 1);
-      ctx.fillRect(bx + r, by + r, 1, bh - r*2);
-      ctx.fillRect(bx + bw - r - 1, by + r, 1, bh - r*2);
-    }
-    // Pietra zen al centro
-    ctx.fillStyle = '#3a3a30';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 6);
-    ctx.fillStyle = '#6a6a5a';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 1);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh/2 + 2, 6, 1);
-    // Bambù negli angoli (puntini verdi)
-    ctx.fillStyle = p[4];
-    [[3, 3], [bw - 5, 3], [3, bh - 5], [bw - 5, bh - 5]].forEach(([dx, dy]) => {
-      ctx.fillRect(bx + dx, by + dy, 2, 2);
-    });
-  }
-  else if (key === 'mensa_comune') {
-    // Capannone caldo con camino + cuore sopra
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto a tegole rosse calde
-    ctx.fillStyle = p[3];
-    for (let i = 5; i < bh - 4; i += 3) ctx.fillRect(bx + 3, by + i, bw - 6, 1);
-    // Camino con cucina visibile
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 4, by - 6, 5, 10);
-    ctx.fillStyle = '#ff6020'; ctx.fillRect(bx + 5, by - 4, 3, 1);
-    // Tavolone con piatti
-    ctx.fillStyle = '#5a3818';
-    ctx.fillRect(bx + 8, by + 14, bw - 16, bh - 24);
-    ctx.fillStyle = '#f0e8d0';
-    for (let py = 16; py < bh - 14; py += 6) {
-      for (let px = 11; px < bw - 11; px += 7) {
-        ctx.fillRect(bx + px, by + py, 4, 4);
+    const w = 40, towerH = 118;
+    const x = X + 28, yTop = Y + 96 - towerH;
+    _sprShadow(ctx, x, yTop + 60, w, towerH - 60);
+    // gambe a traliccio
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x - 2, yTop + 40, w + 4, towerH - 40);
+    ctx.fillStyle = p[2];
+    ctx.fillRect(x, yTop + 42, w, towerH - 44);
+    ctx.fillStyle = p[1]; ctx.fillRect(x, yTop + 42, 4, towerH - 44);
+    ctx.fillStyle = p[3]; ctx.fillRect(x + w - 5, yTop + 42, 5, towerH - 44);
+    // travi incrociate
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    for (let i = 0; i < 3; i++) {
+      const sy = yTop + 52 + i * 22;
+      for (let k = 0; k < w - 6; k += 2) {
+        ctx.fillRect(x + 3 + k, sy + (k % 20 < 10 ? k % 10 : 10 - (k % 10)), 2, 2);
       }
     }
-    // Cuore sopra il tetto
-    ctx.fillStyle = '#d04060';
-    ctx.fillRect(bx + bw/2 - 1, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 + 1, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 - 2, by - 7, 4, 1);
-    ctx.fillRect(bx + bw/2 - 1, by - 6, 2, 1);
-    // Porta
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
+    // cabina in cima
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 10, yTop + 14, w + 20, 30);
+    ctx.fillStyle = p[2]; ctx.fillRect(x - 8, yTop + 16, w + 16, 26);
+    ctx.fillStyle = p[1]; ctx.fillRect(x - 8, yTop + 16, 5, 26);
+    // finestrone di guardia scuro
+    ctx.fillStyle = '#141c24';
+    ctx.fillRect(x - 2, yTop + 22, w + 4, 12);
+    // tettuccio
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 14, yTop + 6, w + 28, 10);
+    ctx.fillStyle = p[5]; ctx.fillRect(x - 12, yTop + 8, w + 24, 7);
+    ctx.fillStyle = p[4]; ctx.fillRect(x - 12, yTop + 8, w + 24, 2);
+    // faro (glow a runtime)
+    ctx.fillStyle = p[7];
+    ctx.fillRect(x + w/2 - 4, yTop, 8, 7);
+    ctx.fillStyle = '#fff8d0';
+    ctx.fillRect(x + w/2 - 2, yTop + 2, 4, 3);
+    // scala
+    ctx.fillStyle = '#241608';
+    ctx.fillRect(x + w/2 - 6, yTop + 44, 2, towerH - 48);
+    ctx.fillRect(x + w/2 + 4, yTop + 44, 2, towerH - 48);
+    for (let sy = yTop + 48; sy < yTop + towerH - 6; sy += 7) {
+      ctx.fillRect(x + w/2 - 6, sy, 12, 2);
+    }
+  }
+  else if (key === 'ambulatorio') {
+    const w = 78, wallH = 48, roofH = 14;
+    const x = X + 9, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH);
+    // tetto piano chiaro
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 5, yTop - 2, w + 10, roofH + 4);
+    ctx.fillStyle = p[5]; ctx.fillRect(x - 3, yTop, w + 6, roofH);
+    ctx.fillStyle = p[4]; ctx.fillRect(x - 3, yTop, w + 6, 3);
+    // croce rossa su insegna
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + w/2 - 11, yTop + roofH + 6, 22, 22);
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x + w/2 - 12, yTop + roofH + 5, 24, 1);
+    ctx.fillRect(x + w/2 - 12, yTop + roofH + 28, 24, 1);
+    ctx.fillStyle = p[7];
+    ctx.fillRect(x + w/2 - 3, yTop + roofH + 9, 6, 16);
+    ctx.fillRect(x + w/2 - 8, yTop + roofH + 14, 16, 6);
+    _sprDoor(ctx, p, x + w/2 - 7, Y + 96 - 20, 14, 20);
+    _sprWindow(ctx, p, x + 8, yTop + roofH + 14, 12, 12);
+    _sprWindow(ctx, p, x + w - 20, yTop + roofH + 14, 12, 12);
+  }
+  else if (key === 'zen_garden') {
+    // giardino a terra: sabbia rastrellata + pietre + acero
+    const w = 88, h = 80, x = X + 4, y = Y + 12;
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+    ctx.fillStyle = p[2];
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = p[1];
+    ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
+    // onde rastrellate concentriche
+    ctx.strokeStyle = 'rgba(120,110,80,0.55)';
+    ctx.lineWidth = 1;
+    for (let r = 8; r < 40; r += 7) {
+      ctx.beginPath();
+      ctx.arc(x + w * 0.36, y + h * 0.5, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    for (let r = 6; r < 22; r += 7) {
+      ctx.beginPath();
+      ctx.arc(x + w * 0.78, y + h * 0.3, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // pietre
+    const rock = (rx, ry, rw2, rh2) => {
+      ctx.fillStyle = '#3c3c34';
+      ctx.fillRect(rx, ry, rw2, rh2);
+      ctx.fillStyle = '#5e5e52';
+      ctx.fillRect(rx, ry, rw2, 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(rx - 1, ry + rh2, rw2 + 2, 2);
+    };
+    rock(x + w * 0.36 - 6, y + h * 0.5 - 5, 13, 10);
+    rock(x + w * 0.78 - 4, y + h * 0.3 - 3, 9, 7);
+    // acero rosso nell'angolo
+    ctx.fillStyle = '#4a1a10';
+    ctx.fillRect(x + 12, y + h - 26, 3, 10);
+    const maple = ['#8c2c1c', '#a83828', '#c04834'];
+    maple.forEach((mc, i) => {
+      ctx.fillStyle = mc;
+      ctx.beginPath();
+      ctx.arc(x + 14 - i * 2, y + h - 30 - i * 3, 10 - i * 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    // lanterna di pietra
+    ctx.fillStyle = '#4c4c40';
+    ctx.fillRect(x + w - 18, y + h - 26, 8, 12);
+    ctx.fillRect(x + w - 20, y + h - 28, 12, 3);
+    ctx.fillStyle = '#2c2c24';
+    ctx.fillRect(x + w - 16, y + h - 22, 4, 4);
+  }
+  else if (key === 'mensa_comune') {
+    const w = 88, wallH = 42, roofH = 22;
+    const x = X + 4, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w, wallH, { planks: true });
+    _sprGableRoof(ctx, p, x, yTop, w, roofH);
+    // porta larga da fienile
+    _sprDoor(ctx, p, x + w/2 - 10, Y + 96 - 24, 20, 24);
+    _sprWindow(ctx, p, x + 8, yTop + roofH + 10, 12, 12);
+    _sprWindow(ctx, p, x + w - 20, yTop + roofH + 10, 12, 12);
+    // camino fumante
+    ctx.fillStyle = p[0]; ctx.fillRect(x + 12, yTop - 14, 11, 18);
+    ctx.fillStyle = '#6e5240'; ctx.fillRect(x + 13, yTop - 13, 9, 16);
+    ctx.fillStyle = p[0]; ctx.fillRect(x + 11, yTop - 15, 13, 3);
+    // insegna cuore
+    ctx.fillStyle = '#f2e2c2';
+    ctx.fillRect(x + w/2 - 9, yTop + roofH + 6, 18, 12);
+    ctx.fillStyle = '#c23c50';
+    ctx.fillRect(x + w/2 - 4, yTop + roofH + 9, 3, 3);
+    ctx.fillRect(x + w/2 + 1, yTop + roofH + 9, 3, 3);
+    ctx.fillRect(x + w/2 - 5, yTop + roofH + 11, 10, 3);
+    ctx.fillRect(x + w/2 - 3, yTop + roofH + 14, 6, 2);
+    ctx.fillRect(x + w/2 - 1, yTop + roofH + 16, 2, 1);
   }
   else if (key === 'altar_skulls') {
-    // Piramide visto dall'alto = quadrato nero con teschi in cerchio + fiamma centrale
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 4, by + 4, bw - 8, bh - 8);
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 8, by + 8, bw - 16, bh - 16);
-    // Teschi in cerchio (8 teschi)
-    const cx = bx + bw/2, cy = by + bh/2;
-    for (let i = 0; i < 8; i++) {
-      const ang = (i / 8) * Math.PI * 2;
-      const sx = cx + Math.cos(ang) * 10;
-      const sy = cy + Math.sin(ang) * 10;
-      ctx.fillStyle = '#e8d8a0';
-      ctx.fillRect(sx - 2, sy - 2, 4, 4);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(sx - 1, sy - 1, 1, 1);
-      ctx.fillRect(sx + 1, sy - 1, 1, 1);
+    // ziggurat scuro a 3 gradoni con teschi e bracere
+    const x = X + 8, w = 80;
+    _sprShadow(ctx, x, Y + 40, w, 56);
+    const steps = [[x, Y + 62, w, 34], [x + 10, Y + 44, w - 20, 26], [x + 20, Y + 28, w - 40, 22]];
+    steps.forEach(([sx, sy, sw, shh]) => {
+      ctx.fillStyle = p[0];
+      ctx.fillRect(sx - 2, sy - 2, sw + 4, shh + 4);
+      ctx.fillStyle = p[2];
+      ctx.fillRect(sx, sy, sw, shh);
+      ctx.fillStyle = p[1];
+      ctx.fillRect(sx, sy, sw, 3);
+      ctx.fillStyle = p[3];
+      ctx.fillRect(sx, sy + shh - 4, sw, 4);
+      // crepe
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fillRect(sx + sw * 0.3, sy + 4, 1, shh - 8);
+      ctx.fillRect(sx + sw * 0.72, sy + 6, 1, shh - 10);
+    });
+    // teschi sul gradone frontale
+    for (let i = 0; i < 5; i++) {
+      const sx = x + 8 + i * 15, sy = Y + 68;
+      ctx.fillStyle = '#ded0a4';
+      ctx.fillRect(sx, sy, 8, 7);
+      ctx.fillRect(sx + 1, sy + 7, 6, 2);
+      ctx.fillStyle = '#141414';
+      ctx.fillRect(sx + 1, sy + 2, 2, 2);
+      ctx.fillRect(sx + 5, sy + 2, 2, 2);
+      ctx.fillRect(sx + 3, sy + 5, 2, 1);
     }
-    // Fiamma centrale viva
-    const tF = Date.now() / 200;
-    ctx.fillStyle = (Math.floor(tF) % 2 === 0) ? '#ff6020' : '#ffa040';
-    ctx.fillRect(cx - 2, cy - 3, 4, 5);
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(cx - 1, cy - 1, 2, 2);
+    // bracere in cima (fiamma a runtime)
+    ctx.fillStyle = '#141414';
+    ctx.fillRect(x + w/2 - 8, Y + 18, 16, 8);
+    ctx.fillRect(x + w/2 - 5, Y + 26, 10, 4);
   }
   else if (key === 'arsenale') {
-    // Bunker basso e largo, tetto cemento, filo spinato e bandiera
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto cemento liscio
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 4, by + 4, bw - 8, bh - 12);
-    // Filo spinato (dentelli scuri)
-    ctx.fillStyle = '#1a1a1a';
-    for (let i = 0; i < bw; i += 3) {
-      ctx.fillRect(bx + i, by + 2, 1, 2);
+    // bunker in cemento semi-interrato
+    const w = 88, wallH = 38, x = X + 4, yTop = Y + 96 - wallH;
+    _sprShadow(ctx, x, yTop, w, wallH);
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x - 2, yTop - 2, w + 4, wallH + 4);
+    // corpo con angoli smussati
+    ctx.fillStyle = p[2];
+    ctx.fillRect(x, yTop, w, wallH);
+    ctx.fillStyle = p[1];
+    ctx.fillRect(x + 4, yTop - 8, w - 8, 10);
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x + 2, yTop - 10, w - 4, 3);
+    // texture cemento
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    for (let i = 0; i < 14; i++) {
+      ctx.fillRect(x + (i * 19) % (w - 6), yTop + 4 + (i * 11) % (wallH - 10), 4, 2);
     }
-    // Bandiera nera col teschio
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 10, 1, 12);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2, by - 9, 7, 4);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 + 2, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 + 4, by - 8, 1, 1);
-    // Casse di munizioni
-    ctx.fillStyle = '#3a3028';
-    ctx.fillRect(bx + 4, by + bh + 1, 8, 5);
-    ctx.fillRect(bx + 14, by + bh + 1, 8, 5);
-    ctx.fillStyle = '#c02020';
-    ctx.fillRect(bx + 6, by + bh + 4, 4, 1);
-    ctx.fillRect(bx + 16, by + bh + 4, 4, 1);
-    // Porta blindata
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 6, 6, 6);
+    // porta blindata
+    ctx.fillStyle = p[0];
+    ctx.fillRect(x + w/2 - 10, yTop + wallH - 26, 20, 26);
+    ctx.fillStyle = '#33333a';
+    ctx.fillRect(x + w/2 - 8, yTop + wallH - 24, 16, 24);
+    ctx.fillStyle = p[7];
+    ctx.beginPath(); ctx.arc(x + w/2, yTop + wallH - 12, 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = p[7]; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x + w/2, yTop + wallH - 12, 4, 0, Math.PI * 2); ctx.stroke();
+    // feritoie
+    ctx.fillStyle = '#101014';
+    ctx.fillRect(x + 10, yTop + 8, 14, 4);
+    ctx.fillRect(x + w - 24, yTop + 8, 14, 4);
+    // filo spinato sul tetto
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let px = x + 6; px < x + w - 6; px += 4) {
+      ctx.moveTo(px, yTop - 10);
+      ctx.lineTo(px + 2, yTop - 14);
+      ctx.lineTo(px + 4, yTop - 10);
+    }
+    ctx.stroke();
+    // casse munizioni
+    [['#3a3028', x + 2], ['#45392c', x + 20]].forEach(([cc, cx2]) => {
+      ctx.fillStyle = cc;
+      ctx.fillRect(cx2, Y + 98, 16, 10);
+      ctx.fillStyle = '#c02020';
+      ctx.fillRect(cx2 + 4, Y + 102, 8, 2);
+    });
+    _sprFlagPole(ctx, x + w - 14, yTop - 10, 18, '#1c1c1c', '#0c0c0c');
   }
-  else {
-    // Default rect
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-  }
-  // === ELEMENTI COMUNI: targhetta icona + pip livello ===
-  ctx.fillStyle = 'rgba(0,0,0,0.75)';
-  ctx.fillRect(x + 1, y + 48 - 11, 12, 9);
-  ctx.fillStyle = p[4];
+  // pip livello: borchie dorate su targhetta in basso a sinistra dello slot
+  ctx.fillStyle = 'rgba(10, 6, 4, 0.82)';
+  ctx.fillRect(X, Y + 96 + 2, 14 + lvl * 7, 12);
+  ctx.fillStyle = p[7] || '#e8b64a';
   ctx.font = 'bold 9px monospace';
-  ctx.fillText(BUILDINGS[key].icon, x + 3, y + 48 - 4);
+  ctx.fillText((typeof BUILDINGS !== 'undefined' && BUILDINGS[key]) ? BUILDINGS[key].icon : '?', X + 3, Y + 96 + 11);
   for (let i = 0; i < lvl; i++) {
-    ctx.fillStyle = p[4];
-    ctx.fillRect(x + 14 + i*4, y + 48 - 9, 2, 2);
+    ctx.fillStyle = '#e8b64a';
+    ctx.fillRect(X + 15 + i * 7, Y + 96 + 6, 4, 4);
+    ctx.fillStyle = '#8a6a20';
+    ctx.fillRect(X + 15 + i * 7, Y + 96 + 9, 4, 1);
   }
 }
-// === SOPRAVVISSUTO === sprite 10×18 pixel-perfect, con outline scuro per
-// contrasto sull'erba. Coordinate forzate a integer (Math.round) per evitare
-// l'anti-aliasing che sfumava lo sprite vecchio (6×12). Faccia visibile,
-// pantaloni distinti, postura riconoscibile a distanza.
-//
-// PARAMS:
-//   x, y      → posizione TESTA (in alto-sinistra dello sprite logico)
-//   color     → tinta del busto/maglia
-//   skin      → tinta pelle (default avorio)
-//   label     → testo opzionale sopra (renderizzato da drawCharLabel)
-//   accentBg  → colore bordo della label (default usa `color`)
-function drawSurvivor(x, y, color='#9bbc0f', skin='#d8c89c', label='', accentBg=null) {
-  const ctx = VCTX;
-  // Pixel-snap → niente anti-aliasing sub-pixel
-  x = Math.round(x);
-  y = Math.round(y);
-  // Helper: pixel singolo (con un colore)
-  const px = (px_, py_, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(px_, py_, w, h); };
 
-  // === OMBRA ovale a terra ===
-  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+// posizione (slot 96×96) di ogni edificio — griglia 2× della v1
+const _BPOS = {
+  sawmill:      [ 72, 144], zen_garden: [264, 144], altar_skulls: [600, 144], workshop: [792, 144],
+  watchtower:   [ 72, 312], hq: [432, 312], barracks: [792, 312],
+  lab:          [ 72, 480], mensa_comune: [264, 480], ambulatorio: [432, 480],
+  arsenale:     [600, 480], market: [792, 480]
+};
+// NB: y indica la BASE dello slot (dove poggia l'edificio) per il depth-sort.
+
+// luci notturne per edificio (offset dallo slot origin = base-96)
+const _BLIGHTS = {
+  hq:           [{ dx: 48, dy: 60, r: 46, c: '255,190,90' }],
+  sawmill:      [{ dx: 24, dy: 66, r: 34, c: '255,180,80' }],
+  workshop:     [{ dx: 48, dy: 78, r: 42, c: '255,120,40' }],
+  lab:          [{ dx: 42, dy: 56, r: 40, c: '110,255,170' }],
+  market:       [{ dx: 48, dy: 64, r: 34, c: '255,200,110' }],
+  barracks:     [{ dx: 48, dy: 66, r: 38, c: '255,190,90' }],
+  watchtower:   [{ dx: 48, dy: -20, r: 60, c: '255,230,140' }],
+  ambulatorio:  [{ dx: 48, dy: 58, r: 40, c: '255,240,220' }],
+  mensa_comune: [{ dx: 48, dy: 62, r: 44, c: '255,180,90' }],
+  altar_skulls: [{ dx: 48, dy: 24, r: 40, c: '255,110,40' }],
+  arsenale:     [{ dx: 48, dy: 62, r: 30, c: '200,220,160' }],
+  zen_garden:   [{ dx: 74, dy: 62, r: 24, c: '255,210,140' }]
+};
+
+// ============================================================
+// ALBERI — canopy a blob multipli con leggero sway
+// ============================================================
+function drawTreeAt(x, y, type = 0, t = 0) {
+  const ctx = VCTX;
+  const palettes = [
+    ['#1c3212', '#2c4a1a', '#3e6224', '#548032', '#6c9a42'],
+    ['#2a2208', '#443818', '#5e4e26', '#7a6836', '#948248'],
+    ['#16280e', '#264018', '#365822', '#4a702e', '#5e883c']
+  ];
+  const p = palettes[type % palettes.length];
+  const sway = Math.sin(t * 0.7 + x * 0.05) * 1.5;
+  // tronco
+  ctx.fillStyle = '#2c1c0e';
+  ctx.fillRect(x + 6, y + 8, 5, 10);
+  ctx.fillStyle = '#43301a';
+  ctx.fillRect(x + 7, y + 8, 2, 10);
+  // canopy: cluster di cerchi
+  const blobs = [
+    [8, 0, 14, 0], [-2, 4, 10, 1], [18, 5, 10, 1],
+    [4, -8, 10, 2], [13, -7, 9, 2], [8, 2, 11, 3]
+  ];
+  blobs.forEach(([bx, by, r, tone]) => {
+    ctx.fillStyle = p[tone];
+    ctx.beginPath();
+    ctx.arc(x + bx + sway * (1 - by / 14), y + by - 4, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  // highlight NW
+  ctx.fillStyle = p[4];
   ctx.beginPath();
-  ctx.ellipse(x + 5, y + 17, 6, 1.5, 0, 0, Math.PI * 2);
+  ctx.arc(x + 2 + sway, y - 9, 5, 0, Math.PI * 2);
   ctx.fill();
-
-  // === SCARPE === (riga sotto le gambe)
-  px(x + 2, y + 15, 2, 1, '#0a0604');
-  px(x + 6, y + 15, 2, 1, '#0a0604');
-  // === GAMBE === (pantaloni scuri, 4px alte)
-  px(x + 2, y + 11, 2, 4, '#2a1a10');
-  px(x + 6, y + 11, 2, 4, '#2a1a10');
-  // outline gambe (sottile, lato esterno)
-  px(x + 1, y + 11, 1, 4, '#0a0604');
-  px(x + 8, y + 11, 1, 4, '#0a0604');
-
-  // === BUSTO === maglia 6×5 col bordo scuro
-  // bordo outline
-  px(x + 1, y + 5, 8, 7, '#0a0604');
-  // riempimento maglia
-  px(x + 2, y + 6, 6, 5, color);
-  // ombra di colore sul lato sinistro (volume)
-  px(x + 2, y + 6, 1, 5, _darken(color, 0.75));
-  // collo (linea)
-  px(x + 4, y + 5, 2, 1, _darken(color, 0.55));
-
-  // === BRACCIA === lungo i lati del busto, 2px ognuno
-  px(x, y + 6, 1, 5, color);     // braccio sinistro
-  px(x + 9, y + 6, 1, 5, color); // braccio destro
-  // outline braccia
-  px(x, y + 6, 1, 1, '#0a0604');
-  px(x + 9, y + 6, 1, 1, '#0a0604');
-  px(x, y + 10, 1, 1, '#0a0604');
-  px(x + 9, y + 10, 1, 1, '#0a0604');
-
-  // === MANI === pixel singolo per mano
-  px(x, y + 11, 1, 1, skin);
-  px(x + 9, y + 11, 1, 1, skin);
-
-  // === TESTA === 6×6 con outline
-  // outline
-  px(x + 1, y - 2, 8, 8, '#0a0604');
-  // riempimento pelle
-  px(x + 2, y - 1, 6, 6, skin);
-  // ombra collo sotto al mento
-  px(x + 3, y + 4, 4, 1, _darken(skin, 0.7));
-
-  // === CAPELLI === fascia scura sopra
-  px(x + 2, y - 2, 6, 2, '#2a1a08');
-  px(x + 1, y - 1, 1, 2, '#2a1a08');
-  px(x + 8, y - 1, 1, 2, '#2a1a08');
-
-  // === FACCIA ===
-  // occhi (2 pixel scuri, ben spaziati)
-  px(x + 3, y + 1, 1, 1, '#0a0604');
-  px(x + 6, y + 1, 1, 1, '#0a0604');
-  // naso (mezzo pixel di ombra)
-  px(x + 4, y + 2, 2, 1, _darken(skin, 0.85));
-  // bocca (riga sottile)
-  px(x + 4, y + 3, 2, 1, '#3a1810');
-
-  // === LABEL sopra la testa ===
-  if (label) drawCharLabel(x + 5, y - 6, label, accentBg || color);
-}
-
-// === LABEL personaggio === pill nera con bordo colorato + triangolino
-// Ancorata col centro su (cx, baseY). Font 10px bold, integer-aligned.
-function drawCharLabel(cx, baseY, text, borderColor) {
-  const ctx = VCTX;
-  cx = Math.round(cx);
-  baseY = Math.round(baseY);
-  ctx.font = 'bold 9px "Courier New", monospace';
-  ctx.textBaseline = 'alphabetic';
-  // Misura testo (cache breve sarebbe overkill — solo pochi villager)
-  const tw = Math.ceil(ctx.measureText(text).width);
-  const padX = 4;
-  const padY = 2;
-  const boxW = tw + padX * 2;
-  const boxH = 12;
-  const boxX = cx - Math.round(boxW / 2);
-  const boxY = baseY - boxH - 3; // 3 pixel sopra al triangolino
-  // shadow drop sotto il box
-  ctx.fillStyle = 'rgba(0,0,0,0.45)';
-  ctx.fillRect(boxX + 1, boxY + 1, boxW, boxH);
-  // fondo nero opaco (no trasparenze)
-  ctx.fillStyle = '#0a0604';
-  ctx.fillRect(boxX, boxY, boxW, boxH);
-  // bordo colorato (1px)
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(boxX + 0.5, boxY + 0.5, boxW - 1, boxH - 1);
-  // triangolino sotto al centro che indica il personaggio
-  ctx.fillStyle = borderColor;
   ctx.beginPath();
-  ctx.moveTo(cx - 3, boxY + boxH);
-  ctx.lineTo(cx + 3, boxY + boxH);
-  ctx.lineTo(cx, boxY + boxH + 3);
-  ctx.closePath();
+  ctx.arc(x + 9 + sway, y - 12, 4, 0, Math.PI * 2);
   ctx.fill();
-  // testo bianco crisp
-  ctx.fillStyle = '#f0e8d0';
-  ctx.fillText(text, boxX + padX, boxY + boxH - 3);
 }
 
-// Helper: scurisce un colore HEX di un fattore (0..1, dove 1 = invariato)
-function _darken(hex, amt = 0.75) {
-  const h = hex.replace('#', '');
-  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-  const n = parseInt(full, 16);
-  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  r = Math.max(0, Math.floor(r * amt));
-  g = Math.max(0, Math.floor(g * amt));
-  b = Math.max(0, Math.floor(b * amt));
-  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
-}
-
-// === ZOMBIE === sprite 10×18 pixel-perfect, postura curva, occhi rossi,
-// braccia tese in avanti che oscillano (animate). Outline scuro per contrasto.
-function drawZombie(x, y, t=0) {
+// ============================================================
+// FUMO — soffici cerchi in dissolvenza
+// ============================================================
+function drawSmoke(x, y, t) {
   const ctx = VCTX;
-  x = Math.round(x);
-  y = Math.round(y);
-  const armOff = Math.floor(Math.sin(t * 3) * 1); // -1, 0, 1
-  const px = (px_, py_, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(px_, py_, w, h); };
+  for (let i = 0; i < 5; i++) {
+    const phase = (t * 0.45 + i * 0.28) % 1;
+    const py = y - phase * 44;
+    const px = x + Math.sin(phase * 5 + i * 1.7) * 5 + phase * 6;
+    const r = 3 + phase * 6;
+    const alpha = (1 - phase) * 0.34;
+    ctx.fillStyle = `rgba(205, 205, 210, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// PALIZZATA — tronchi verticali con punte, torrette, cancelli
+// ============================================================
+function drawPalisade(w, h, lvl) {
+  const ctx = VCTX;
+  const T = 18;
+  const GATE = 52;
+  const logDark = '#3c2a16', logMid = '#59422a', logHi = '#75593a', tip = '#8a6c48';
+  const seg = (x, y, horiz, len) => {
+    for (let i = 0; i < len; i += 9) {
+      const lx = horiz ? x + i : x;
+      const ly = horiz ? y : y + i;
+      const tone = _hash2(lx, ly) > 0.5 ? logMid : _darken(logMid, 0.88);
+      ctx.fillStyle = logDark;
+      ctx.fillRect(lx, ly, horiz ? 9 : T, horiz ? T : 9);
+      ctx.fillStyle = tone;
+      ctx.fillRect(lx + 1, ly + 1, (horiz ? 9 : T) - 2, (horiz ? T : 9) - 2);
+      ctx.fillStyle = logHi;
+      ctx.fillRect(lx + 1, ly + 1, horiz ? 7 : 3, horiz ? 3 : 7);
+      // punta del tronco (cerchietto chiaro = visto leggermente dall'alto)
+      ctx.fillStyle = tip;
+      if (horiz) ctx.fillRect(lx + 3, ly + T/2 - 2, 4, 4);
+      else ctx.fillRect(lx + T/2 - 2, ly + 3, 4, 4);
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      if (horiz) ctx.fillRect(lx + 4, ly + T/2 - 1, 2, 2);
+      else ctx.fillRect(lx + T/2 - 1, ly + 4, 2, 2);
+    }
+  };
+  // quattro lati con apertura cancello al centro
+  seg(0, 0, true, w/2 - GATE/2);
+  seg(w/2 + GATE/2, 0, true, w/2 - GATE/2);
+  seg(0, h - T, true, w/2 - GATE/2);
+  seg(w/2 + GATE/2, h - T, true, w/2 - GATE/2);
+  seg(0, T, false, h/2 - GATE/2 - T);
+  seg(0, h/2 + GATE/2, false, h/2 - GATE/2 - T);
+  seg(w - T, T, false, h/2 - GATE/2 - T);
+  seg(w - T, h/2 + GATE/2, false, h/2 - GATE/2 - T);
+  // ombra interna della palizzata
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.fillRect(T, T, w - T*2, 5);
+  ctx.fillRect(T, T, 5, h - T*2);
+  // battenti del cancello (aperti, appoggiati ai lati)
+  ctx.fillStyle = logDark;
+  [[w/2 - GATE/2 - 4, 0], [w/2 + GATE/2 - 8, 0], [w/2 - GATE/2 - 4, h - T], [w/2 + GATE/2 - 8, h - T]].forEach(([gx, gy]) => {
+    ctx.fillRect(gx, gy, 12, T);
+    ctx.fillStyle = logHi;
+    ctx.fillRect(gx + 2, gy + 2, 8, T - 4);
+    ctx.fillStyle = logDark;
+  });
+  // rinforzi metallici lvl 2+
+  if (lvl >= 2) {
+    ctx.fillStyle = '#6a6a72';
+    for (let x = 24; x < w - 24; x += 60) {
+      ctx.fillRect(x, 6, 4, 6);
+      ctx.fillRect(x, h - 12, 4, 6);
+    }
+    for (let y = 24; y < h - 24; y += 60) {
+      ctx.fillRect(6, y, 6, 4);
+      ctx.fillRect(w - 12, y, 6, 4);
+    }
+  }
+  // torrette angolari lvl 3+
+  if (lvl >= 3) {
+    [[2, 2], [w - 30, 2], [2, h - 30], [w - 30, h - 30]].forEach(([cx2, cy2]) => {
+      ctx.fillStyle = logDark;
+      ctx.fillRect(cx2, cy2, 28, 28);
+      ctx.fillStyle = logMid;
+      ctx.fillRect(cx2 + 2, cy2 + 2, 24, 24);
+      ctx.fillStyle = logHi;
+      ctx.fillRect(cx2 + 2, cy2 + 2, 24, 4);
+      // merli
+      ctx.fillStyle = logDark;
+      for (let i = 0; i < 24; i += 8) {
+        ctx.fillRect(cx2 + 2 + i, cy2 + 2, 4, 4);
+      }
+      // guardiano (puntino)
+      ctx.fillStyle = '#c8a060';
+      ctx.fillRect(cx2 + 12, cy2 + 12, 4, 4);
+    });
+  }
+  // spuntoni esterni lvl 4+
+  if (lvl >= 4) {
+    ctx.fillStyle = '#8a7a5a';
+    for (let x = 40; x < w - 40; x += 26) {
+      ctx.fillRect(x, T + 2, 2, 7);
+      ctx.fillRect(x - 2, T + 7, 6, 2);
+      ctx.fillRect(x, h - T - 9, 2, 7);
+      ctx.fillRect(x - 2, h - T - 9, 6, 2);
+    }
+  }
+}
+
+// ============================================================
+// PERSONAGGI — sprite 28×44 (2×), outline, shading, classi
+// ============================================================
+function drawSurvivor(x, y, optsOrColor, skinLegacy, labelLegacy, accentLegacy) {
+  let opts;
+  if (optsOrColor && typeof optsOrColor === 'object' && !Array.isArray(optsOrColor)) {
+    opts = optsOrColor;
+  } else {
+    opts = { color: optsOrColor, skin: skinLegacy, label: labelLegacy, accentBg: accentLegacy };
+  }
+  const ctx = VCTX;
+  x = Math.round(x); y = Math.round(y);
+  const color    = opts.color || '#9bbc0f';
+  const dark     = _darken(color, 0.68);
+  const skin     = opts.skin || '#e2c396';
+  const skinSh   = _darken(skin, 0.8);
+  const klass    = opts.klass || '';
+  const label    = opts.label || '';
+  const accentBg = opts.accentBg || color;
+  const frame    = (opts.frame !== undefined) ? (opts.frame & 1) : 0;
+  const isPlayer = opts.isPlayer === true;
+  const OUT = '#12100c';
+  const px = (dx, dy, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x + dx, y + dy, w, h); };
 
   // ombra
   ctx.fillStyle = 'rgba(0,0,0,0.40)';
   ctx.beginPath();
-  ctx.ellipse(x + 5, y + 17, 6, 1.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 14, y + 42, 12, 3.4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // PIEDI
-  px(x + 2, y + 15, 2, 1, '#0a0a04');
-  px(x + 6, y + 15, 2, 1, '#0a0a04');
-  // GAMBE strascicate (un po' divaricate)
-  px(x + 2, y + 11, 2, 4, '#2a3814');
-  px(x + 6, y + 11, 2, 4, '#2a3814');
-  px(x + 1, y + 11, 1, 4, '#0a0604');
-  px(x + 8, y + 11, 1, 4, '#0a0604');
+  // gambe (2-frame)
+  const lL = frame === 0 ? 2 : 0, lR = frame === 0 ? 0 : 2;
+  px(5, 28 + lL, 6, 12, '#2c2018'); px(17, 28 + lR, 6, 12, '#2c2018');
+  px(6, 28 + lL, 2, 11, '#43301f'); px(18, 28 + lR, 2, 11, '#43301f');
+  px(4, 28 + lL, 1, 12, OUT); px(11, 28 + lL, 1, 12, OUT);
+  px(16, 28 + lR, 1, 12, OUT); px(23, 28 + lR, 1, 12, OUT);
+  // scarponi
+  px(3, 39 + lL, 9, 3, '#181008'); px(15, 39 + lR, 9, 3, '#181008');
+  px(3, 39 + lL, 9, 1, '#302015'); px(15, 39 + lR, 9, 1, '#302015');
 
-  // BUSTO stracciato 6×6
-  px(x + 1, y + 5, 8, 7, '#0a0604'); // outline
-  px(x + 2, y + 6, 6, 5, '#3a4a18'); // tela strappata
-  // lacerazioni / chiazze
-  px(x + 3, y + 7, 1, 1, '#5a6a28');
-  px(x + 6, y + 9, 1, 1, '#5a6a28');
-  px(x + 4, y + 10, 2, 1, '#1a2a08');
+  // busto
+  px(3, 14, 22, 15, OUT);
+  px(5, 16, 18, 12, color);
+  px(5, 16, 5, 12, _darken(color, 1.25));   // luce sinistra
+  px(19, 16, 4, 12, dark);                  // ombra destra
+  px(5, 26, 18, 2, dark);                   // cintura implicita
+  // cinghia diagonale (zaino da sopravvissuto)
+  px(7, 16, 2, 12, '#3a2c1a');
+  // braccia (2-frame swing)
+  const aL = frame === 0 ? 0 : 2, aR = frame === 0 ? 2 : 0;
+  px(1, 17 + aL, 4, 10, OUT); px(23, 17 + aR, 4, 10, OUT);
+  px(2, 18 + aL, 2, 8, color); px(24, 18 + aR, 2, 8, color);
+  // mani
+  px(2, 25 + aL, 2, 2, skin); px(24, 25 + aR, 2, 2, skin);
 
-  // BRACCIA TESE IN AVANTI (animate, escono dai lati)
-  px(x - 1, y + 6 + armOff, 2, 5, '#5a7a34');
-  px(x + 9, y + 6 - armOff, 2, 5, '#5a7a34');
-  // outline braccia
-  px(x - 1, y + 5 + armOff, 2, 1, '#0a0604');
-  px(x + 9, y + 5 - armOff, 2, 1, '#0a0604');
-  // MANI PUTRIDE in avanti
-  px(x - 1, y + 11 + armOff, 2, 1, '#7a9a44');
-  px(x + 9, y + 11 - armOff, 2, 1, '#7a9a44');
+  // testa 16×14
+  px(6, 0, 16, 15, OUT);
+  px(8, 2, 12, 12, skin);
+  px(17, 2, 3, 12, skinSh);
+  // capelli (variati per label hash)
+  const hh = label ? (label.charCodeAt(0) % 4) : 0;
+  const hairC = ['#241608', '#3c2410', '#583818', '#1c1c20'][hh];
+  px(7, 1, 14, 4, hairC);
+  px(7, 4, 3, 3, hairC);
+  px(18, 4, 3, 3, hairC);
+  // occhi + bocca
+  px(11, 7, 2, 2, '#141414'); px(16, 7, 2, 2, '#141414');
+  px(12, 11, 5, 1, '#8a5c48');
+  // guance
+  px(9, 9, 2, 1, '#d09a78'); px(18, 9, 2, 1, '#d09a78');
 
-  // TESTA 6×6 verdognola con outline
-  px(x + 1, y - 2, 8, 8, '#0a0604');
-  px(x + 2, y - 1, 6, 6, '#7a9a44');
-  // capelli stracciati
-  px(x + 2, y - 2, 6, 2, '#2a1a08');
-  px(x + 3, y - 3, 2, 1, '#2a1a08');
-  px(x + 6, y - 3, 1, 1, '#2a1a08');
+  // === ACCESSORI DI CLASSE ===
+  if (isPlayer) {
+    // bandana rossa
+    px(7, 1, 14, 3, '#b02818');
+    px(20, 2, 4, 3, '#b02818');
+    px(21, 5, 2, 3, '#901c10');
+  } else if (klass === 'Medico') {
+    px(10, 18, 8, 8, '#f0ece0');            // pettorina bianca
+    px(13, 19, 2, 6, '#d02020');            // croce
+    px(11, 21, 6, 2, '#d02020');
+  } else if (klass === 'Soldato') {
+    px(6, 0, 16, 5, '#4a5228');             // elmetto
+    px(6, 4, 16, 2, '#363c1c');
+    px(25, 20, 3, 9, '#2c2c2c');            // fucile a tracolla
+  } else if (klass === 'Scienziato') {
+    px(4, 15, 3, 13, '#e8e8e0');            // camice aperto
+    px(21, 15, 3, 13, '#e8e8e0');
+    px(9, 6, 4, 3, '#3a4a58'); px(15, 6, 4, 3, '#3a4a58');  // occhiali
+    px(13, 7, 2, 1, '#3a4a58');
+  } else if (klass === 'Mercante') {
+    px(22, 24, 6, 7, '#8a6a2a');            // sacchetto monete
+    px(23, 25, 4, 2, '#e8c052');
+  } else if (klass === 'Fabbro') {
+    px(8, 24, 12, 5, '#54350f');            // grembiule in cuoio
+    px(0, 24, 4, 8, '#4c4c50');             // martello
+    px(0, 22, 4, 3, '#77777c');
+  } else if (klass === 'Boscaiolo') {
+    // camicia a quadri
+    px(5, 16, 18, 12, '#8a2c1c');
+    ctx.fillStyle = '#5e1c12';
+    for (let qx = 5; qx < 23; qx += 5) ctx.fillRect(x + qx, y + 16, 2, 12);
+    for (let qy = 16; qy < 28; qy += 5) ctx.fillRect(x + 5, y + qy, 18, 2);
+    px(25, 18, 3, 11, '#54350f');           // manico ascia
+    px(24, 15, 5, 4, '#8c8c92');            // lama
+  }
+  if (label) drawCharLabel(x + 14, y - 2, label, accentBg);
+}
 
-  // FACCIA — occhi rossi sangue
-  px(x + 3, y + 1, 1, 1, '#e04020');
-  px(x + 6, y + 1, 1, 1, '#e04020');
-  // alone rosso (effetto sangue/infezione)
-  px(x + 2, y + 1, 1, 1, '#7a2010');
-  px(x + 7, y + 1, 1, 1, '#7a2010');
-  // bocca aperta scura
-  px(x + 3, y + 3, 4, 2, '#1a0a04');
-  // denti
-  px(x + 4, y + 3, 1, 1, '#c8b890');
-  px(x + 5, y + 4, 1, 1, '#c8b890');
+function drawCharLabel(cx, baseY, text, borderColor) {
+  const ctx = VCTX;
+  cx = Math.round(cx); baseY = Math.round(baseY);
+  ctx.font = '18px "VT323", "Courier New", monospace';
+  ctx.textBaseline = 'middle';
+  const tw = Math.ceil(ctx.measureText(text).width);
+  const padX = 8, boxH = 21, r = 6;
+  const boxW = tw + padX * 2;
+  const boxX = cx - Math.round(boxW / 2);
+  const boxY = baseY - boxH - 6;
+  // ombra
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX + 2, boxY + 2, boxW, boxH, r); else ctx.rect(boxX + 2, boxY + 2, boxW, boxH);
+  ctx.fill();
+  // pill scura
+  ctx.fillStyle = 'rgba(10, 8, 6, 0.88)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, r); else ctx.rect(boxX, boxY, boxW, boxH);
+  ctx.fill();
+  // bordo colore personaggio
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 1.25;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX + 0.6, boxY + 0.6, boxW - 1.2, boxH - 1.2, r); else ctx.rect(boxX + 0.6, boxY + 0.6, boxW - 1.2, boxH - 1.2);
+  ctx.stroke();
+  // punta verso il personaggio
+  ctx.fillStyle = borderColor;
+  ctx.beginPath();
+  ctx.moveTo(cx - 4, boxY + boxH - 0.5);
+  ctx.lineTo(cx + 4, boxY + boxH - 0.5);
+  ctx.lineTo(cx, boxY + boxH + 4);
+  ctx.closePath();
+  ctx.fill();
+  // testo
+  ctx.fillStyle = '#f6efd8';
+  ctx.fillText(text, boxX + padX, boxY + boxH / 2 + 1);
+  ctx.textBaseline = 'alphabetic';
+}
+
+// ============================================================
+// ZOMBIE — sprite 28×44, postura sbilenca, glow occhi di notte
+// ============================================================
+function drawZombie(x, y, t = 0) {
+  const ctx = VCTX;
+  x = Math.round(x); y = Math.round(y);
+  const frame = Math.floor(t * 2.5) & 1;
+  const armOff = frame === 0 ? 0 : 2;
+  const lean = Math.sin(t * 1.8) * 2;
+  const OUT = '#0a0c06';
+  const px = (dx, dy, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x + dx, y + dy, w, h); };
+
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.beginPath();
+  ctx.ellipse(x + 14, y + 42, 12, 3.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // gambe strascicate
+  const lL = frame === 0 ? 0 : 2, lR = frame === 0 ? 2 : 0;
+  px(5, 28 + lL, 6, 12, '#2c3814'); px(17, 28 + lR, 6, 12, '#2c3814');
+  px(4, 28 + lL, 1, 12, OUT); px(23, 28 + lR, 1, 12, OUT);
+  px(3, 39 + lL, 9, 3, '#1c2410'); px(15, 39 + lR, 9, 3, '#1c2410');
+
+  // busto stracciato (inclinato)
+  px(3 + lean, 14, 22, 15, OUT);
+  px(5 + lean, 16, 18, 12, '#44541e');
+  px(19 + lean, 16, 4, 12, '#333f16');
+  // strappi e sangue
+  px(8 + lean, 20, 6, 2, '#22300c');
+  px(14 + lean, 24, 5, 2, '#22300c');
+  px(11 + lean, 17, 2, 2, '#7a2810');
+  px(17 + lean, 21, 2, 3, '#7a2810');
+  // costole
+  px(7 + lean, 22, 2, 1, '#dcd0ac'); px(19 + lean, 22, 2, 1, '#dcd0ac');
+
+  // braccia protese in avanti
+  px(-3 + lean, 16 + armOff, 5, 12, OUT);
+  px(-2 + lean, 17 + armOff, 3, 10, '#5e7a34');
+  px(26 + lean, 16 - armOff, 5, 12, OUT);
+  px(27 + lean, 17 - armOff, 3, 10, '#5e7a34');
+  // mani putride con dita
+  px(-4 + lean, 28 + armOff, 5, 3, '#7c9c48');
+  px(27 + lean, 28 - armOff, 5, 3, '#7c9c48');
+  px(-5 + lean, 30 + armOff, 2, 2, '#7c9c48');
+  px(31 + lean, 30 - armOff, 2, 2, '#7c9c48');
+
+  // testa verdastra
+  px(6 + lean * 1.4, 0, 16, 15, OUT);
+  px(8 + lean * 1.4, 2, 12, 12, '#7c9c48');
+  px(17 + lean * 1.4, 2, 3, 12, '#5e7a30');
+  // capelli radi
+  px(8 + lean * 1.4, 1, 10, 3, '#2c1c0a');
+  px(9 + lean * 1.4, 0, 3, 2, '#2c1c0a');
+  px(15 + lean * 1.4, 0, 2, 2, '#2c1c0a');
+  // occhi rossi (con glow notturno gestito dal light pass)
+  px(10 + lean * 1.4, 6, 3, 3, '#e83818');
+  px(16 + lean * 1.4, 6, 3, 3, '#e83818');
+  px(11 + lean * 1.4, 7, 1, 1, '#ffb090');
+  px(17 + lean * 1.4, 7, 1, 1, '#ffb090');
+  // bocca spalancata + denti
+  px(11 + lean * 1.4, 10, 7, 4, '#1c0c06');
+  px(12 + lean * 1.4, 10, 2, 1, '#c8b890');
+  px(16 + lean * 1.4, 10, 2, 1, '#c8b890');
+  px(14 + lean * 1.4, 13, 2, 1, '#c8b890');
+  // bava
+  px(17 + lean * 1.4, 14, 1, 2, '#7a3010');
+}
+
+// ============================================================
+// ATMOSFERA — polvere, corvi, foglie, ombre nuvole, lucciole
+// ============================================================
+function drawAtmosphere(w, h, tod) {
+  const ctx = VCTX;
+  // ombre delle nuvole (solo di giorno)
+  if (!tod.isNight) {
+    villageRuntime.clouds.forEach(c => {
+      const g = ctx.createRadialGradient(c.x, c.y, c.r * 0.2, c.x, c.y, c.r);
+      g.addColorStop(0, 'rgba(10, 20, 8, 0.10)');
+      g.addColorStop(1, 'rgba(10, 20, 8, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
+    });
+  }
+  // polvere
+  ctx.fillStyle = 'rgba(225, 215, 185, 0.40)';
+  villageRuntime.dust.forEach(d => {
+    ctx.fillRect(Math.round(d.x), Math.round(d.y), 2, 2);
+  });
+  // foglie che roteano
+  villageRuntime.leaves.forEach(l => {
+    const s = 2 + Math.abs(Math.sin(l.rot)) * 2;
+    ctx.fillStyle = Math.sin(l.rot * 2) > 0 ? '#9aa848' : '#7c8a38';
+    ctx.fillRect(Math.round(l.x), Math.round(l.y), Math.round(s), 3);
+  });
+  // corvi con battito d'ali a 3 pose
+  villageRuntime.crows.forEach(c => {
+    const cx = Math.round(c.x);
+    const cy = Math.round(c.y + Math.sin(c.bob) * 2.5);
+    const wing = Math.sin(c.bob * 2.4);
+    ctx.fillStyle = '#0c0806';
+    ctx.fillRect(cx, cy, 7, 3);
+    ctx.fillRect(cx + 7, cy + 1, 2, 1);      // becco
+    const wy = wing > 0.3 ? -3 : (wing < -0.3 ? 3 : 0);
+    ctx.fillRect(cx - 4, cy + wy, 5, 2);
+    ctx.fillRect(cx + 6, cy + wy, 5, 2);
+    if (wy === 0) { ctx.fillRect(cx - 5, cy, 6, 1); ctx.fillRect(cx + 6, cy, 6, 1); }
+  });
+  // lucciole (solo notte/dusk)
+  if (tod.isNight || tod.phase === 'dusk') {
+    villageRuntime.fireflies.forEach(f => {
+      const a = 0.35 + 0.65 * Math.max(0, Math.sin(f.ph * 2.2));
+      ctx.fillStyle = `rgba(220, 255, 130, ${a * 0.9})`;
+      ctx.fillRect(Math.round(f.x), Math.round(f.y), 2, 2);
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 7);
+      g.addColorStop(0, `rgba(190, 240, 90, ${a * 0.35})`);
+      g.addColorStop(1, 'rgba(190, 240, 90, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(f.x - 7, f.y - 7, 14, 14);
+    });
+  }
+}
+
+// ============================================================
+// LUCE — overlay notturno con "buchi" di luce calda + glow
+// ============================================================
+let _lightCanvas = null;
+function drawTimeOfDayOverlay(w, h, tod, lights) {
+  const ctx = VCTX;
+  if (!tod.overlayColor) return;
+  const [r, g, b] = tod.overlayColor;
+  if (!_lightCanvas) {
+    _lightCanvas = document.createElement('canvas');
+    _lightCanvas.width = w; _lightCanvas.height = h;
+  }
+  const lc = _lightCanvas.getContext('2d');
+  lc.globalCompositeOperation = 'source-over';
+  lc.clearRect(0, 0, w, h);
+  lc.fillStyle = `rgba(${r}, ${g}, ${b}, ${tod.overlayAlpha})`;
+  lc.fillRect(0, 0, w, h);
+  // buchi di luce
+  if (tod.isNight || tod.phase === 'dusk') {
+    lc.globalCompositeOperation = 'destination-out';
+    lights.forEach(L => {
+      const gr = lc.createRadialGradient(L.x, L.y, 2, L.x, L.y, L.r);
+      gr.addColorStop(0, 'rgba(0,0,0,0.9)');
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      lc.fillStyle = gr;
+      lc.fillRect(L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+    });
+    lc.globalCompositeOperation = 'source-over';
+  }
+  ctx.drawImage(_lightCanvas, 0, 0);
+  // glow caldo additivo sopra
+  if (tod.isNight || tod.phase === 'dusk') {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    lights.forEach(L => {
+      const gr = ctx.createRadialGradient(L.x, L.y, 1, L.x, L.y, L.r * 0.8);
+      gr.addColorStop(0, `rgba(${L.c || '255,190,90'}, 0.28)`);
+      gr.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gr;
+      ctx.fillRect(L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+    });
+    ctx.restore();
+  }
+  if (tod.isNight) {
+    // stelle con twinkle
+    for (let i = 0; i < 70; i++) {
+      const sx = (i * 97 + 23) % w;
+      const sy = (i * 61 + 11) % Math.floor(h * 0.5);
+      const tt = Date.now() / 1000 + i * 0.7;
+      const alpha = 0.4 + 0.5 * Math.max(0, Math.sin(tt * 1.5));
+      ctx.fillStyle = `rgba(255, 255, 240, ${alpha})`;
+      ctx.fillRect(sx, sy, i % 7 === 0 ? 2 : 1, i % 7 === 0 ? 2 : 1);
+    }
+    // luna con alone
+    const mx = w - 100, my = 60;
+    const halo = ctx.createRadialGradient(mx, my, 10, mx, my, 55);
+    halo.addColorStop(0, 'rgba(230, 225, 200, 0.30)');
+    halo.addColorStop(1, 'rgba(230, 225, 200, 0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(mx - 55, my - 55, 110, 110);
+    ctx.fillStyle = '#eee6cc';
+    ctx.beginPath(); ctx.arc(mx, my, 17, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.9)`;
+    ctx.beginPath(); ctx.arc(mx - 7, my - 4, 14, 0, Math.PI * 2); ctx.fill();
+    // crateri
+    ctx.fillStyle = 'rgba(180, 172, 148, 0.5)';
+    ctx.beginPath(); ctx.arc(mx + 5, my + 4, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx + 9, my - 3, 2, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+// ============================================================
+// HUD — pill auto-dimensionate, font pixel VT323
+// ============================================================
+const _HUD_FONT = '24px "VT323", "Courier New", monospace';
+function drawHudBox(x, y, text, textColor, align = 'left') {
+  const ctx = VCTX;
+  ctx.font = _HUD_FONT;
+  ctx.textBaseline = 'middle';
+  const tw = Math.ceil(ctx.measureText(text).width);
+  const padX = 12, bh = 32, r = 7;
+  const bw = tw + padX * 2;
+  const bx = align === 'right' ? x - bw : x;
+  // ombra
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(bx + 2, y + 2, bw, bh, r); else ctx.rect(bx + 2, y + 2, bw, bh);
+  ctx.fill();
+  // corpo
+  ctx.fillStyle = 'rgba(10, 8, 6, 0.85)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(bx, y, bw, bh, r); else ctx.rect(bx, y, bw, bh);
+  ctx.fill();
+  // bordo colorato
+  ctx.strokeStyle = textColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(bx + 0.75, y + 0.75, bw - 1.5, bh - 1.5, r); else ctx.rect(bx + 0.75, y + 0.75, bw - 1.5, bh - 1.5);
+  ctx.stroke();
+  // testo (con leggera ombra per stacco)
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillText(text, bx + padX + 1, y + bh / 2 + 2);
+  ctx.fillStyle = textColor;
+  ctx.fillText(text, bx + padX, y + bh / 2 + 1);
+  ctx.textBaseline = 'alphabetic';
+  return bw;
+}
+
+// ============================================================
+// DRAW VILLAGE — orchestratore per-frame
+// ============================================================
+function drawVillage() {
+  const w = VC.width, h = VC.height;
+  const t = Date.now() / 1000;
+  initVillageRuntime(w, h);
+  const now = Date.now();
+  const dt = villageRuntime.lastFrameTime ? Math.min(0.1, (now - villageRuntime.lastFrameTime) / 1000) : 0.05;
+  villageRuntime.lastFrameTime = now;
+  updateVillageRuntime(dt, w, h);
+  const tod = getTimeOfDay();
+
+  // --- terreno (cache) ---
+  const tk = _terrainCacheKey();
+  if (!_terrainCanvas || _terrainKey !== tk) {
+    _terrainCanvas = _buildTerrain(w, h);
+    _terrainKey = tk;
+  }
+  VCTX.drawImage(_terrainCanvas, 0, 0);
+
+  // --- alberi (dietro agli edifici della riga in cui stanno) ---
+  _TREES.forEach(([tx, ty], i) => drawTreeAt(tx, ty, i % 3, t));
+
+  // --- palizzata ---
+  if (G.buildings.wall.level > 0) drawPalisade(w, h, G.buildings.wall.level);
+
+  // --- edifici con depth sort per riga ---
+  const lights = [];
+  const drawList = [];
+  Object.entries(_BPOS).forEach(([k, [x, yBase]]) => {
+    const lvl = G.buildings[k] ? G.buildings[k].level : 0;
+    if (lvl > 0) drawList.push({ k, x, yBase, lvl });
+  });
+  drawList.sort((a, b) => a.yBase - b.yBase);
+  drawList.forEach(({ k, x, yBase, lvl }) => {
+    const spr = _getBuildingSprite(k, lvl);
+    // slot origin = base − 96; sprite blit = slot − offsets
+    VCTX.drawImage(spr, x - _SPR_OX, (yBase - 96) - _SPR_OY);
+    // registra luci notturne
+    (_BLIGHTS[k] || []).forEach(L => {
+      lights.push({ x: x + L.dx, y: (yBase - 96) + L.dy, r: L.r, c: L.c });
+    });
+  });
+
+  // --- animazioni sopra gli sprite ---
+  // fumo dai camini
+  if (G.buildings.sawmill && G.buildings.sawmill.level > 0)
+    drawSmoke(_BPOS.sawmill[0] + 22, _BPOS.sawmill[1] - 96 + 10, t);
+  if (G.buildings.workshop && G.buildings.workshop.level > 0)
+    drawSmoke(_BPOS.workshop[0] + 66, _BPOS.workshop[1] - 96 - 4, t + 0.7);
+  if (G.buildings.mensa_comune && G.buildings.mensa_comune.level > 0)
+    drawSmoke(_BPOS.mensa_comune[0] + 18, _BPOS.mensa_comune[1] - 96 + 6, t + 1.3);
+  // forgia dell'officina: glow pulsante
+  if (G.buildings.workshop && G.buildings.workshop.level > 0) {
+    const fx = _BPOS.workshop[0] + 48, fy = _BPOS.workshop[1] - 14;
+    const pulse = 0.55 + 0.45 * Math.sin(t * 6);
+    VCTX.fillStyle = `rgba(255, ${110 + pulse * 60}, 30, ${0.5 + pulse * 0.4})`;
+    VCTX.fillRect(fx - 8, fy - 8, 16, 10);
+    VCTX.fillStyle = `rgba(255, 230, 120, ${pulse * 0.8})`;
+    VCTX.fillRect(fx - 4, fy - 5, 8, 5);
+  }
+  // fiamma del bracere dell'altare
+  if (G.buildings.altar_skulls && G.buildings.altar_skulls.level > 0) {
+    const ax = _BPOS.altar_skulls[0] + 48, ay = _BPOS.altar_skulls[1] - 96 + 20;
+    for (let i = 0; i < 3; i++) {
+      const fl = (t * 3 + i * 0.7) % 1;
+      VCTX.fillStyle = ['#ff5a20', '#ffa040', '#ffe060'][i];
+      const fw = 10 - i * 3 - fl * 3;
+      VCTX.fillRect(ax - fw / 2, ay - 6 - fl * 8 - i * 3, fw, 6);
+    }
+  }
+
+  // --- zombie perimetrali (minaccia) --- shamble lento con stato persistente
+  const threat = todayThreatPct();
+  const nZombies = Math.min(Math.floor(threat / 15), 6);
+  _syncZombies(nZombies, w, h);
+  villageRuntime.zombies.forEach(z => {
+    // andatura irregolare: accelera e quasi si ferma, da vero morto che cammina
+    const stagger = Math.max(0, Math.sin(t * 1.2 + z.ph) + 0.45);
+    z.d += z.dir * z.speed * stagger * dt;
+    z.d = ((z.d % z.L) + z.L) % z.L;
+    // ogni tanto cambia idea e torna indietro
+    if (Math.random() < 0.0012) z.dir *= -1;
+    const [zx, zy] = _perimPoint(z.d, w, h);
+    // ondeggiamento laterale (barcolla verso/lontano dal muro)
+    const sway = Math.sin(t * 0.7 + z.ph) * 5;
+    drawZombie(zx - 14 + sway * 0.5, zy - 22 + sway * 0.3, t + z.ph);
+    if (tod.isNight) lights.push({ x: zx, y: zy - 12, r: 16, c: '255,60,30' });
+  });
+
+  // --- personaggi (depth sort per y) ---
+  const chars = [];
+  const playerLabel = (G.player && G.player.name) ? G.player.name.toUpperCase().slice(0, 16) : 'TU';
+  const pp = villageRuntime.playerPos;
+  if (pp) {
+    const moving = Math.abs(pp.tx - pp.x) + Math.abs(pp.ty - pp.y) > 3;
+    chars.push({
+      y: pp.y,
+      draw: () => drawSurvivor(pp.x - 14, pp.y - 20, {
+        color: '#c84020', skin: '#e8c890', label: playerLabel,
+        accentBg: '#f0c040', isPlayer: true,
+        frame: moving ? (Math.floor(Date.now() / 260) & 1) : 0
+      })
+    });
+  }
+  G.survivors.forEach((s, i) => {
+    const rs = villageRuntime.survivors[s.id];
+    if (!rs) return;
+    const moving = Math.abs(rs.tx - rs.x) + Math.abs(rs.ty - rs.y) > 3;
+    chars.push({
+      y: rs.y,
+      draw: () => drawSurvivor(rs.x - 14, rs.y - 20, {
+        color: s.color, skin: '#e8c890',
+        label: (s.name || '').toUpperCase().slice(0, 16),
+        accentBg: s.color, klass: s.class,
+        frame: moving ? (Math.floor(Date.now() / 260 + i * 3) & 1) : 0
+      })
+    });
+  });
+  chars.sort((a, b) => a.y - b.y).forEach(c => c.draw());
+
+  // --- conseguenze visibili: giornata post-attacco o festa da streak ---
+  const _todayS = (typeof todayStr === 'function') ? todayStr() : null;
+  const _wasAttacked = !!(G.lastAttack && _todayS && G.lastAttack.date === _todayS);
+  if (_wasAttacked) {
+    _drawAttackAftermath(w, h, t, lights, drawList);
+  } else if (G.player && (G.player.streak || 0) >= 7) {
+    _drawFesta(w, h, t, lights);
+  }
+
+  // --- atmosfera ---
+  drawAtmosphere(w, h, tod);
+
+  // --- luce e notte ---
+  drawTimeOfDayOverlay(w, h, tod, lights);
+
+  // --- vignette ---
+  const vg = VCTX.createRadialGradient(w/2, h/2, Math.min(w, h) * 0.42, w/2, h/2, Math.max(w, h) * 0.72);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.38)');
+  VCTX.fillStyle = vg;
+  VCTX.fillRect(0, 0, w, h);
+
+  // --- HUD ---
+  drawHudBox(10, 8, 'GIORNO ' + (G.day || 1), '#f2ead2');
+  const dscale = difficultyScale();
+  const dColor = dscale.mult > 1.4 ? '#ff8060' : (dscale.mult > 1.1 ? '#f0c040' : '#90d070');
+  drawHudBox(w - 10, 8, dscale.label.toUpperCase(), dColor, 'right');
+  if (tod.phase !== 'day') {
+    const labels = { dawn: '☀ ALBA', dusk: '☀ TRAMONTO', night: '☾ NOTTE' };
+    const colors = { dawn: '#ffb070', dusk: '#ff8050', night: '#a0b0e0' };
+    drawHudBox(10, h - 40, labels[tod.phase], colors[tod.phase]);
+  }
+  if (threat > 0) {
+    const tc = threat > 50 ? '#ff6040' : (threat > 25 ? '#f0c040' : '#a0b088');
+    drawHudBox(w - 10, h - 40, 'MINACCIA ' + threat + '%', tc, 'right');
+  }
+
+  // === MODALITÀ GAME BOY === col tema "gameboy" il villaggio diventa un vero DMG:
+  // risoluzione abbattuta, 4 tonalità di verde, dithering ordinato.
+  if (document.documentElement.getAttribute('data-theme') === 'gameboy') {
+    _gbPostProcess(w, h);
+  }
+}
+
+// === POST-PROCESS DMG === downsample a 240×144 (proporzione GB) + quantizzazione
+// alla palette originale del Game Boy con dithering Bayer 2×2, poi upscale nitido.
+let _gbLo = null;
+function _gbPostProcess(w, h) {
+  const gw = 240, gh = 144;
+  if (!_gbLo) {
+    _gbLo = document.createElement('canvas');
+    _gbLo.width = gw; _gbLo.height = gh;
+  }
+  const lctx = _gbLo.getContext('2d', { willReadFrequently: true });
+  lctx.imageSmoothingEnabled = true;          // il downsample media i colori
+  lctx.drawImage(VC, 0, 0, gw, gh);
+  const img = lctx.getImageData(0, 0, gw, gh);
+  const d = img.data;
+  // Palette DMG originale (dal più scuro al più chiaro)
+  const P0 = [15, 56, 15], P1 = [48, 98, 48], P2 = [139, 172, 15], P3 = [155, 188, 15];
+  for (let i = 0; i < d.length; i += 4) {
+    const lum = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    const p = i >> 2;
+    const px = p % gw, py = (p / gw) | 0;
+    // Bayer 2×2: soglia leggermente diversa per pixel adiacenti = dithering retrò
+    const dith = (((px & 1) + ((py & 1) << 1)) * 8) - 12;
+    const q = lum + dith;
+    const c = q < 50 ? P0 : q < 105 ? P1 : q < 165 ? P2 : P3;
+    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+  }
+  lctx.putImageData(img, 0, 0);
+  VCTX.imageSmoothingEnabled = false;         // upscale a blocchi, niente sfumature
+  VCTX.drawImage(_gbLo, 0, 0, w, h);
+}
+
+// === ZOMBIE PERIMETRALI — stato persistente ===
+// Ogni zombie ha una posizione lungo il perimetro (distanza d su lunghezza L),
+// direzione, velocità propria e fase per lo sway. Camminano a ~8-12 px/s.
+function _perimPoint(d, w, h) {
+  const inset = 30;
+  const pw = w - inset * 2, ph = h - inset * 2;
+  const L = 2 * (pw + ph);
+  d = ((d % L) + L) % L;
+  if (d < pw) return [inset + d, inset];
+  d -= pw;
+  if (d < ph) return [w - inset, inset + d];
+  d -= ph;
+  if (d < pw) return [w - inset - d, h - inset];
+  d -= pw;
+  return [inset, h - inset - d];
+}
+function _syncZombies(n, w, h) {
+  const zs = villageRuntime.zombies || (villageRuntime.zombies = []);
+  const L = 2 * ((w - 60) + (h - 60));
+  while (zs.length < n) {
+    zs.push({
+      d: Math.random() * L,
+      dir: Math.random() < 0.5 ? -1 : 1,
+      speed: 9 + Math.random() * 7,
+      ph: Math.random() * Math.PI * 2,
+      L
+    });
+  }
+  if (zs.length > n) zs.length = n;
+}
+
+// === CONSEGUENZE: giorno post-attacco — fumo nero, bruciature, assi rotte ===
+function _drawAttackAftermath(w, h, t, lights, drawList) {
+  const ctx = VCTX;
+  // 2 edifici "colpiti" scelti deterministicamente in base al giorno
+  const built = drawList.filter(d => d.k !== 'zen_garden');
+  if (built.length > 0) {
+    const day = G.day || 1;
+    const hit = [built[day % built.length]];
+    if (built.length > 1) hit.push(built[(day + 3) % built.length]);
+    hit.forEach((b, i) => {
+      const bx = b.x + 30 + i * 20, by = b.yBase - 96 + 14;
+      // fumo nero denso
+      for (let k = 0; k < 6; k++) {
+        const phase = (t * 0.35 + k * 0.22 + i * 0.5) % 1;
+        const py = by - phase * 60;
+        const px = bx + Math.sin(phase * 4 + k) * 7 + phase * 10;
+        const r = 4 + phase * 9;
+        ctx.fillStyle = `rgba(30, 26, 24, ${(1 - phase) * 0.5})`;
+        ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
+      }
+      // braci sull'edificio
+      const ember = 0.5 + 0.5 * Math.sin(t * 7 + i * 2);
+      ctx.fillStyle = `rgba(255, ${90 + ember * 70}, 30, ${0.35 + ember * 0.4})`;
+      ctx.fillRect(bx - 6, by + 34, 5, 3);
+      ctx.fillRect(bx + 10, by + 44, 4, 3);
+      if (getTimeOfDay().isNight) lights.push({ x: bx, y: by + 40, r: 26, c: '255,90,30' });
+    });
+  }
+  // bruciature sul terreno vicino ai cancelli
+  ctx.fillStyle = 'rgba(20, 14, 10, 0.45)';
+  [[w/2 - 60, 40], [w/2 + 30, h - 52], [60, h/2 + 30]].forEach(([sx, sy], i) => {
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 26 - i * 4, 10 - i * 2, 0.3 * i, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  // assi rotte sparse
+  ctx.fillStyle = '#3c2a16';
+  [[w/2 - 40, 54], [w/2 + 52, h - 44]].forEach(([sx, sy]) => {
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(0.5);
+    ctx.fillRect(-14, -2, 28, 4);
+    ctx.rotate(-1.1);
+    ctx.fillRect(-10, -2, 20, 4);
+    ctx.restore();
+  });
+}
+
+// === CONSEGUENZE: streak ≥ 7 — festoni e falò al centro del villaggio ===
+function _drawFesta(w, h, t, lights) {
+  const ctx = VCTX;
+  const cx = w / 2, cy = h / 2;
+  // festoni: due corde con bandierine sopra l'incrocio
+  const bunting = (x1, y1, x2, y2, seed) => {
+    const cols = ['#e05050', '#f0c040', '#50a860', '#5080c0', '#c070b0'];
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const tt = i / (n - 1);
+      const sag = Math.sin(tt * Math.PI) * 14;
+      const px = x1 + (x2 - x1) * tt;
+      const py = y1 + (y2 - y1) * tt + sag + Math.sin(t * 2 + i + seed) * 1.5;
+      if (i < n - 1) {
+        const tt2 = (i + 1) / (n - 1);
+        const nx = x1 + (x2 - x1) * tt2;
+        const ny = y1 + (y2 - y1) * tt2 + Math.sin(tt2 * Math.PI) * 14;
+        ctx.strokeStyle = 'rgba(40, 30, 20, 0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(nx, ny); ctx.stroke();
+      }
+      // bandierina triangolare
+      ctx.fillStyle = cols[(i + seed) % cols.length];
+      ctx.beginPath();
+      ctx.moveTo(px - 5, py);
+      ctx.lineTo(px + 5, py);
+      ctx.lineTo(px, py + 9);
+      ctx.closePath();
+      ctx.fill();
+    }
+  };
+  bunting(cx - 110, cy - 52, cx + 110, cy - 52, 0);
+  bunting(cx - 96, cy + 34, cx + 96, cy + 34, 2);
+  // pali dei festoni
+  ctx.fillStyle = '#2c1c0e';
+  [[cx - 112, cy - 52], [cx + 108, cy - 52], [cx - 98, cy + 34], [cx + 94, cy + 34]].forEach(([px, py]) => {
+    ctx.fillRect(px, py, 4, 36);
+  });
+  // falò
+  const fy = cy + 78;
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath(); ctx.ellipse(cx, fy + 8, 20, 6, 0, 0, Math.PI * 2); ctx.fill();
+  // cerchio di pietre
+  ctx.fillStyle = '#55504a';
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    ctx.fillRect(cx + Math.cos(a) * 17 - 2, fy + Math.sin(a) * 6 - 1, 5, 4);
+  }
+  // tronchi incrociati
+  ctx.save();
+  ctx.translate(cx, fy);
+  ctx.rotate(0.5); ctx.fillStyle = '#4c3018'; ctx.fillRect(-13, -2, 26, 5);
+  ctx.rotate(-1.0); ctx.fillRect(-13, -2, 26, 5);
+  ctx.restore();
+  // fiamma a 3 strati con flicker
+  for (let i = 0; i < 3; i++) {
+    const fl = Math.sin(t * (6 + i * 2) + i) * 2;
+    const cols = ['#ff5a20', '#ffa040', '#ffe060'];
+    const fw = 16 - i * 5;
+    const fh = 20 - i * 6 + fl;
+    ctx.fillStyle = cols[i];
+    ctx.beginPath();
+    ctx.moveTo(cx - fw / 2, fy);
+    ctx.quadraticCurveTo(cx - fw / 2, fy - fh * 0.6, cx, fy - fh);
+    ctx.quadraticCurveTo(cx + fw / 2, fy - fh * 0.6, cx + fw / 2, fy);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // scintille
+  for (let i = 0; i < 4; i++) {
+    const sp = (t * 0.8 + i * 0.25) % 1;
+    ctx.fillStyle = `rgba(255, 200, 80, ${1 - sp})`;
+    ctx.fillRect(cx + Math.sin(t * 3 + i * 2) * 8, fy - 18 - sp * 26, 2, 2);
+  }
+  lights.push({ x: cx, y: fy - 8, r: 80, c: '255,160,60' });
 }
 
 // === ANIMAZIONE VILLAGGIO — throttle ~20fps + pausa quando tab nascosta ===
@@ -8604,6 +10533,52 @@ function stopVillageAnim() {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') stopVillageAnim();
   else if (document.visibilityState === 'visible') startVillageAnim();
+});
+
+// === INTERAZIONE VILLAGGIO — tap su un edificio apre la sua scheda ===
+function _villageCanvasCoords(e) {
+  const r = VC.getBoundingClientRect();
+  const cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+  const cy = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+  return [(cx - r.left) * VC.width / r.width, (cy - r.top) * VC.height / r.height];
+}
+function _villageHitTest(mx, my) {
+  // slot edifici (anche non costruiti: invito a costruire)
+  for (const [k, pos] of Object.entries(_BPOS)) {
+    const x = pos[0], yBase = pos[1];
+    const top = yBase - 96 - (k === 'watchtower' ? 44 : 18);
+    if (mx >= x - 8 && mx <= x + 104 && my >= top && my <= yBase + 8) return k;
+  }
+  // perimetro = mura
+  const T = 26;
+  if (mx < T || mx > VC.width - T || my < T || my > VC.height - T) return 'wall';
+  return null;
+}
+function openBuildingFromVillage(key) {
+  const tabBtn = document.querySelector('#tabs button[data-tab="build"]');
+  if (tabBtn) tabBtn.click();
+  setTimeout(() => {
+    const grid = document.getElementById('buildingGrid');
+    if (!grid) return;
+    const idx = Object.keys(BUILDINGS).indexOf(key);
+    const card = grid.children[idx];
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('flash-highlight');
+    setTimeout(() => card.classList.remove('flash-highlight'), 2000);
+  }, 130);
+}
+VC.addEventListener('click', e => {
+  const [mx, my] = _villageCanvasCoords(e);
+  const k = _villageHitTest(mx, my);
+  if (k) {
+    if (typeof sfxClick === 'function') sfxClick();
+    openBuildingFromVillage(k);
+  }
+});
+VC.addEventListener('mousemove', e => {
+  const [mx, my] = _villageCanvasCoords(e);
+  VC.style.cursor = _villageHitTest(mx, my) ? 'pointer' : 'default';
 });
 
 // -------------------- ZOMBIE ATTACK --------------------
@@ -8690,6 +10665,9 @@ function performAttack(prob) {
     G.buildings.wall.level = Math.max(0, G.buildings.wall.level - 1);
     effects.push(`mura danneggiate`);
   }
+
+  // Traccia l'attacco: il villaggio mostrerà fumo e danni per il resto del giorno
+  G.lastAttack = { date: todayStr(), dmg: finalDamage };
 
   sfxAttack();
   document.querySelector('.crt').classList.add('shake');
@@ -8883,7 +10861,35 @@ function endDay() {
 
   logEvent(`Fine giorno ${G.day - 1}: passivi e reset.`, 'evt-rest');
   checkAchievements();
-  showModal(`GIORNO ${G.day}`, msg);
+
+  // === RECAP STRUTTURATO DI FINE GIORNATA ===
+  const streakN = G.player.streak || 0;
+  const recapHtml = `
+    <div class="recap">
+      <p class="recap-sub">Il giorno ${G.day - 1} è passato. Ecco cosa ha portato la notte.</p>
+      <div class="recap-chips">
+        ${sawmillGain ? `<span class="recap-chip">🪵 +${sawmillGain}</span>` : ''}
+        ${workshopGain ? `<span class="recap-chip">⚙ +${workshopGain}</span>` : ''}
+        ${labGain ? `<span class="recap-chip">📜 +${labGain}</span>` : ''}
+        <span class="recap-chip">❤ ${G.player.hp}/${G.player.maxHp}</span>
+        ${G.player.freezes ? `<span class="recap-chip">❄ ${G.player.freezes}</span>` : ''}
+      </div>
+      <div class="recap-streak ${streakN > 0 ? 'on' : 'off'}">
+        ${streakN > 0
+          ? `🔥 STREAK: ${streakN} ${streakN === 1 ? 'GIORNO' : 'GIORNI'}${streakN === (G.player.longestStreak || 0) && streakN > 1 ? ' · RECORD' : ''}`
+          : 'Streak interrotto. Domani si riparte.'}
+      </div>
+      <div class="recap-attack ${attackResult ? 'bad' : 'ok'}">
+        ${attackResult
+          ? `☠ ATTACCO SUBITO — ${escapeHtml(attackResult.join(', '))}`
+          : '✔ Nessun attacco. Il villaggio riposa.'}
+      </div>
+      ${inactionReport.length ? `<p class="recap-line warn">⚠ ${escapeHtml(inactionReport.join(' · '))}</p>` : ''}
+      ${survivorReport.length ? `<p class="recap-line">${escapeHtml(survivorReport.join(' · '))}</p>` : ''}
+      ${dailyReset ? `<p class="recap-line dim">${dailyReset} missioni quotidiane pronte per domani.</p>` : ''}
+      ${expiredLines.length ? `<p class="recap-line warn">⌛ ${escapeHtml(expiredLines.join(' · '))}</p>` : ''}
+    </div>`;
+  showModalHTML(`GIORNO ${G.day}`, recapHtml, !!attackResult);
 
   // Catena di modali: riepilogo → (eventuale) feedback morale → (eventuale) evento.
   // Ogni modal aspetta la chiusura del precedente prima di mostrarsi.
@@ -8922,6 +10928,13 @@ document.getElementById('endDayBtn').addEventListener('click', endDay);
 function showModal(title, text, attack=false) {
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalText').textContent = text;
+  document.getElementById('modalBox').classList.toggle('attack', !!attack);
+  document.getElementById('modalBg').classList.add('active');
+}
+// Variante con markup (usata dal recap di fine giornata)
+function showModalHTML(title, html, attack=false) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').innerHTML = html;
   document.getElementById('modalBox').classList.toggle('attack', !!attack);
   document.getElementById('modalBg').classList.add('active');
 }
@@ -9037,6 +11050,36 @@ window.tutorOpen = tutorOpen;
   if (b1) b1.addEventListener('click', onClick);
   const b2 = document.getElementById('installAppBtnHeader');
   if (b2) b2.addEventListener('click', onClick);
+})();
+
+// === Calendar export button ===
+(function bindCalBtn() {
+  const b = document.getElementById('exportCalBtn');
+  if (b) b.addEventListener('click', () => Calendar.exportAllScheduled());
+})();
+
+// === Notification permission button ===
+(function bindNotifBtn() {
+  const b = document.getElementById('notifEnableBtn');
+  if (!b) return;
+  // Aggiorna label in base al permesso corrente
+  function refreshLabel() {
+    if (!('Notification' in window)) { b.textContent = '🔔 NON SUPPORTATO'; b.disabled = true; return; }
+    const p = Notification.permission;
+    if (p === 'granted') b.textContent = '🔔 NOTIFICHE ATTIVE ✓';
+    else if (p === 'denied') b.textContent = '🔔 BLOCCATE (apri impostazioni browser)';
+    else b.textContent = '🔔 ATTIVA NOTIFICHE';
+  }
+  refreshLabel();
+  b.addEventListener('click', async () => {
+    const res = await Notifier.requestPermission();
+    refreshLabel();
+    if (res === 'granted') {
+      Notifier.fire('Notifiche attivate', 'Da ora ti avviso quando hai missioni in scadenza oggi.');
+    } else if (res === 'denied') {
+      showModal('NOTIFICHE BLOCCATE', 'Hai bloccato le notifiche in passato. Per riattivarle, vai nelle impostazioni del browser per questo sito.');
+    }
+  });
 })();
 
 document.getElementById('exportBtn').addEventListener('click', () => {
@@ -9871,6 +11914,8 @@ function boot() {
   if (G.player.freezes === undefined) G.player.freezes = 2;
   if (G.player.longestStreak === undefined) G.player.longestStreak = 0;
   if (!Array.isArray(G.missions)) G.missions = [];
+  // Reset counter mission "current" e "awarded" se la finestra di cadenza è scaduta
+  try { if (typeof resetAllCountersIfNeeded === 'function') resetAllCountersIfNeeded(); } catch(_) {}
   if (!Array.isArray(G.focus)) G.focus = [];
   if (!Array.isArray(G.resistMissions)) G.resistMissions = [];
   if (!Array.isArray(G.resistSessions)) G.resistSessions = [];
