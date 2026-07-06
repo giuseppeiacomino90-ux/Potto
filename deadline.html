@@ -495,7 +495,7 @@
   .mission-list { list-style: none; }
   .mission-item {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     gap: 10px;
     align-items: center;
     padding: 8px 10px;
@@ -2129,10 +2129,17 @@
     outline-offset: 2px;
   }
 
-  /* modali: vetro smerigliato */
+  /* modali: vetro smerigliato + scroll interno quando il contenuto è lungo */
   .event-modal, .cheat-modal {
     border-radius: 14px;
     box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .modal {
+    max-height: 86dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    border-radius: 14px;
   }
   .overlay {
     backdrop-filter: blur(4px);
@@ -2220,14 +2227,110 @@
   .recap-line.warn { color: var(--rust); }
   .recap-line.dim { color: var(--gb-dark); }
 
+  /* tasto ⚰ "seppellisci per oggi": sobrio, si accende al passaggio */
+  .mission-item button.fail-btn {
+    background: transparent;
+    border: 2px solid var(--gb-darkest);
+    color: var(--gb-dark);
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+  .mission-item button.fail-btn:hover {
+    border-color: var(--bone);
+    color: var(--bone);
+    background: var(--bg-mid);
+    transform: none;
+  }
+
   /* flash della card edificio quando arrivi dal villaggio */
   @keyframes fableFlash {
     50% { border-color: var(--gb-glow); box-shadow: 0 0 0 3px var(--gb-glow), 0 8px 22px var(--shadow); }
   }
   .building-card.flash-highlight { animation: fableFlash 0.6s ease 3; }
+
+  /* === FIX MOBILE === */
+  /* Scrim status bar iOS: striscia opaca sopra tutto, alta quanto la safe area.
+     Su desktop e Android è alta 0 e invisibile. */
+  #iosStatusScrim {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: var(--bg-deep);
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  @media (max-width: 800px) {
+    /* Barra filtri missioni: etichetta su riga propria, bottoni uniformi */
+    .mission-filter-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .filter-label {
+      flex-basis: 100%;
+      margin: 0 0 2px;
+      font-size: 11px;
+    }
+    .filter-btn {
+      flex: 0 0 auto;
+      font-size: 10px;
+      padding: 9px 13px;
+      min-height: 40px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Badge difficoltà: riga propria sotto il nome, allineata al testo,
+       mai sovrapposta al bordo della card */
+    .mission-item {
+      grid-template-columns: 44px 1fr 36px 36px;  /* check · nome · ⚰ · × */
+      grid-auto-rows: auto;
+      row-gap: 4px;
+      overflow: hidden;
+    }
+    .mission-item .difficulty-badge {
+      grid-column: 2 / 5;
+      grid-row: 2;
+      justify-self: start;
+      margin: 0;
+      font-size: 10px;
+      padding: 4px 10px;
+    }
+    .mission-item button.fail-btn {
+      grid-column: 3;
+      grid-row: 1;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      font-size: 15px;
+    }
+    .mission-item button.danger-btn {
+      grid-column: 4;
+    }
+
+    /* Bottone elimina: meno invadente */
+    .mission-item button.danger-btn {
+      opacity: 0.75;
+      border-radius: 8px;
+    }
+
+    /* Meta missione: tutto su una riga quando possibile */
+    .mission-meta { line-height: 1.5; }
+  }
 </style>
 </head>
 <body>
+
+<!-- Scrim: maschera la status bar iOS translucent — il contenuto non scorre più sotto l'orologio -->
+<div id="iosStatusScrim" aria-hidden="true"></div>
 
 <div class="crt">
 
@@ -2369,6 +2472,10 @@
     <!-- MISSIONI -->
     <div class="tab-pane" id="tab-missions">
       <h2 class="section-title">::MISSIONI ATTIVE::</h2>
+      <div class="row mb8" style="align-items:center; gap:10px; flex-wrap:wrap">
+        <button id="checkinBtn" class="btn small" title="Rifai la diagnosi: le risposte generano nuove missioni su misura">🩺 CHECK-IN</button>
+        <span class="muted" style="font-size:13px">Rifai la diagnosi quando vuoi: nuove risposte, nuove missioni su misura.</span>
+      </div>
       <form class="add-mission-form" id="addMissionForm">
         <input type="text" id="newMissionName" placeholder="Es. Allenamento, lettura, lavorare al progetto..." required>
         <select id="newMissionCategory">
@@ -2526,10 +2633,10 @@
           <option value="Altro">☢ Altro</option>
         </select>
         <select id="newResistResource" title="Risorsa primaria generata dalla resistenza">
-          <option value="legno">🪵 Legno</option>
+          <option value="legno">☰ Legno</option>
           <option value="ferro" selected>⚙ Ferro</option>
-          <option value="ricerca">📜 Ricerca</option>
-          <option value="monete">💰 Monete</option>
+          <option value="ricerca">⚗︎ Ricerca</option>
+          <option value="monete">$ Monete</option>
         </select>
         <input type="number" id="newResistTarget" min="10" max="1440" value="60" title="Obiettivo indicativo in minuti">
         <button class="btn" type="submit">+ CREA TIMER</button>
@@ -2553,10 +2660,10 @@
             <option value="Altro">☢ Altro</option>
           </select>
           <select id="manualResistResource">
-            <option value="legno">🪵 Legno</option>
+            <option value="legno">☰ Legno</option>
             <option value="ferro" selected>⚙ Ferro</option>
-            <option value="ricerca">📜 Ricerca</option>
-            <option value="monete">💰 Monete</option>
+            <option value="ricerca">⚗︎ Ricerca</option>
+            <option value="monete">$ Monete</option>
           </select>
           <input type="number" id="manualResistMinutes" min="1" max="1440" value="30" title="Minuti di resistenza completati">
           <button class="btn" type="submit">+ REGISTRA</button>
@@ -2764,6 +2871,17 @@
     <h2 id="modalTitle">EVENTO</h2>
     <p id="modalText"></p>
     <button id="modalClose" class="btn">CONTINUA</button>
+  </div>
+</div>
+
+<!-- CHECK-IN INIZIALE — questionario sui pattern quotidiani -->
+<div class="modal-bg" id="checkinBg">
+  <div class="modal" style="max-width:560px; text-align:left">
+    <h2 style="text-align:center">::CHECK-IN::</h2>
+    <p class="muted" id="checkinProgress" style="font-size:14px; text-align:center"></p>
+    <p id="checkinQ" style="font-size:20px"></p>
+    <div id="checkinOpts" style="display:flex; flex-direction:column; gap:8px; margin-top:10px"></div>
+    <p class="muted mt16" style="font-size:13px; text-align:center">Risposte oneste = missioni giuste. Nessuna risposta è sbagliata.</p>
   </div>
 </div>
 
@@ -3324,8 +3442,14 @@ const ACHIEVEMENTS = [
   { id: 'architect', name: 'Architetto', icon: '🏛', desc: 'Costruisci 5 edifici diversi.',
     check: g => Object.values(g.buildings).filter(b => b.level > 0).length >= 5,
     progress: g => `${Object.values(g.buildings).filter(b => b.level > 0).length}/5` },
-  { id: 'master_builder', name: 'Capomastro', icon: '🏗', desc: 'Porta tutti gli edifici al livello massimo.',
-    check: g => Object.entries(BUILDINGS).every(([k, def]) => g.buildings[k].level >= def.maxLevel) },
+  { id: 'master_builder', name: 'Capomastro', icon: '🏗', desc: 'Porta tutti gli edifici base al livello massimo.',
+    // Esclude gli edifici dei personaggi speciali (cuccia, sala_disco) e conta
+    // l'ambulatorio al suo massimo base (3): l'evoluzione Clinica è un extra.
+    check: g => Object.entries(BUILDINGS).every(([k, def]) => {
+      if (k === 'cuccia' || k === 'sala_disco') return true;
+      const cap = (k === 'ambulatorio') ? 3 : def.maxLevel;
+      return g.buildings[k] && g.buildings[k].level >= cap;
+    }) },
   { id: 'recruiter', name: 'Reclutatore', icon: '🤝', desc: 'Recluta 3 sopravvissuti.',
     check: g => g.survivors.length >= 3,
     progress: g => `${g.survivors.length}/3` },
@@ -3345,7 +3469,7 @@ const ACHIEVEMENTS = [
     progress: g => `${g.day}/30 giorni` },
   { id: 'polymath', name: 'Polimate', icon: '🌐', desc: 'Porta ogni skill almeno a livello 5.',
     check: g => Object.keys(CATEGORIES).every(k => (g.skills?.[k]?.level || 1) >= 5) },
-  { id: 'wealthy', name: 'Mercante d\'Ossa', icon: '💰', desc: 'Possiedi 1000 monete in un colpo solo.',
+  { id: 'wealthy', name: 'Mercante d\'Ossa', icon: '$', desc: 'Possiedi 1000 monete in un colpo solo.',
     check: g => g.resources.monete >= 1000 }
 ];
 
@@ -3377,11 +3501,25 @@ const BUILDINGS = {
     unlockReason: () => 'Sempre disponibile.'
   },
   sawmill: {
-    name: 'Segheria', icon: 'S',
-    desc: 'Genera legno passivamente alla fine di ogni giorno.',
+    // EVOLUZIONE: con Sasy the Troll + missione personale, diventa la Capannina
+    // del Tuttofare (+1 legno/giorno bonus).
+    get name() {
+      const evolved = (typeof charMissionDone === 'function') && charMissionDone('sasy_troll');
+      return evolved ? 'Capannina del Tuttofare' : 'Segheria';
+    },
+    icon: 'S',
+    get desc() {
+      const evolved = (typeof charMissionDone === 'function') && charMissionDone('sasy_troll');
+      return evolved
+        ? 'La vecchia segheria, ribattezzata da Sasy. Ora ripara anche ciò che non è rotto: +1 legno bonus al giorno.'
+        : 'Genera legno passivamente alla fine di ogni giorno.';
+    },
     maxLevel: 5,
     cost: lvl => ({ legno: 20+lvl*10 }),
-    effect: lvl => `+${lvl*2} legno / giorno.`,
+    effect: lvl => {
+      const evolved = (typeof charMissionDone === 'function') && charMissionDone('sasy_troll');
+      return `+${lvl*2}${evolved && lvl > 0 ? '+1' : ''} legno / giorno.`;
+    },
     unlock: () => true,
     unlockReason: () => 'Sempre disponibile.'
   },
@@ -3431,11 +3569,24 @@ const BUILDINGS = {
     unlockReason: () => 'Costruisci le Mura e sopravvivi almeno a un attacco zombie.'
   },
   ambulatorio: {
-    name: 'Ambulatorio', icon: 'A',
-    desc: 'Piccolo ambulatorio medico. Permette di ripristinare HP in cambio di risorse.',
-    maxLevel: 3,
+    // EVOLUZIONE: con Scalvo ingaggiato + la sua missione personale completata,
+    // l'Ambulatorio può salire ai livelli 4-5 e diventa la Piccola Clinica Anestesista.
+    get name() {
+      const evolved = (typeof G !== 'undefined') && G.buildings && G.buildings.ambulatorio && G.buildings.ambulatorio.level >= 4;
+      return evolved ? 'Piccola Clinica Anestesista' : 'Ambulatorio';
+    },
+    icon: 'A',
+    get desc() {
+      const canEvolve = (typeof charMissionDone === 'function') && hasSpecial('scalvo') && charMissionDone('scalvo');
+      return canEvolve
+        ? 'Con Scalvo in corsia l\'ambulatorio può evolvere in Piccola Clinica Anestesista (Lv.4-5): cure più potenti, sedazione compresa.'
+        : 'Piccolo ambulatorio medico. Permette di ripristinare HP in cambio di risorse.';
+    },
+    get maxLevel() {
+      return ((typeof charMissionDone === 'function') && hasSpecial('scalvo') && charMissionDone('scalvo')) ? 5 : 3;
+    },
     cost: lvl => ({ legno: 15+lvl*10, ferro: 10+lvl*5, ricerca: 5+lvl*5 }),
-    effect: lvl => `Cura attiva: ${15 + lvl*10} HP per ${Math.max(1, 6 - lvl)} ricerca + ${Math.max(1, 4 - lvl)} monete.`,
+    effect: lvl => `Cura attiva: ${15 + lvl*10} HP per ${Math.max(1, 6 - lvl)} ricerca + ${Math.max(1, 4 - lvl)} monete.${lvl >= 4 ? ' Clinica operativa: Scalvo sorveglia i parametri.' : ''}`,
     unlock: g => g.buildings.lab.level >= 1,
     unlockReason: () => 'Serve il Laboratorio costruito.'
   },
@@ -3482,6 +3633,26 @@ const BUILDINGS = {
     effect: lvl => `-${lvl*2} HP danno subito da attacchi. +${lvl} ferro al giorno.`,
     unlock: g => g.buildings.workshop.level >= 1 && (g.moraleScore || 0) <= -50,
     unlockReason: () => 'Officina costruita e morale almeno -50 (pragmatico puro).'
+  },
+
+  // === STRUTTURE DEI PERSONAGGI SPECIALI — richiedono il personaggio + la sua missione ===
+  cuccia: {
+    name: 'Cuccia del Cane', icon: 'W',
+    desc: 'La postazione di guardia di Doggo. Un cane sveglio vale mezza torre di guardia.',
+    maxLevel: 2,
+    cost: lvl => ({ legno: 10+lvl*8 }),
+    effect: lvl => `Difesa +${lvl*4}% (Doggo di guardia abbaia agli intrusi).`,
+    unlock: g => (typeof charMissionDone === 'function') && hasSpecial('doggo') && charMissionDone('doggo'),
+    unlockReason: () => 'Ingaggia Doggo e completa la sua missione personale.'
+  },
+  sala_disco: {
+    name: 'Piccola Sala Disco', icon: 'J',
+    desc: 'Il regno di DJ Lello. Di notte i bassi rimbombano fin oltre la palizzata: le orde ballano invece di mordere.',
+    maxLevel: 3,
+    cost: lvl => ({ legno: 20+lvl*10, ferro: 15+lvl*10 }),
+    effect: lvl => `+${lvl} monete/giorno (serate) · +${lvl} XP Sociale/giorno.`,
+    unlock: g => (typeof charMissionDone === 'function') && hasSpecial('dj_lello') && charMissionDone('dj_lello'),
+    unlockReason: () => 'Ingaggia DJ Lello e completa la sua missione personale.'
   }
 };
 
@@ -3684,6 +3855,37 @@ const SPECIAL_CHARACTERS = [
 function hasSpecial(id) {
   return Array.isArray(G?.specialChars) && G.specialChars.includes(id);
 }
+// Helper: la missione personale del personaggio è stata completata?
+function charMissionDone(id) {
+  return !!(G && G.charMissionsDone && G.charMissionsDone[id]);
+}
+
+// === MISSIONI PERSONALI DEI PERSONAGGI SPECIALI ===
+// All'ingaggio, il personaggio ti affida una missione a suo tema ({n} = nome custom).
+// Completarla rafforza il legame e sblocca evoluzioni/edifici dedicati.
+const CHAR_MISSIONS = {
+  papa:           { name: 'Chiama tuo padre — o fai un gesto pratico che farebbe lui', diff: 'Facile', cat: 'Sociale' },
+  mamma:          { name: 'Chiama tua madre — o cucina un piatto che sa di casa', diff: 'Facile', cat: 'Sociale' },
+  luoluo:         { name: 'Addestramento di {n}: 20 minuti di esercizio fisico in silenzio, senza telefono', diff: 'Media', cat: 'Forza' },
+  giulio_chrome:  { name: 'Seminario di {n}: leggi una poesia di Majakovskij e scrivi due righe su cosa ti ha lasciato', diff: 'Media', cat: 'Intelletto' },
+  scalvo:         { name: 'Turno in corsia con {n}: ripassa una manovra di primo soccorso (o dona il sangue)', diff: 'Media', cat: 'Salute' },
+  margareta:      { name: 'Protocollo di {n}: routine completa di cura personale, dall\'inizio alla fine', diff: 'Facile', cat: 'Salute' },
+  giugno_denardo: { name: 'La sfida di {n}: fai una cosa che rimandi per paura, oggi', diff: 'Difficile', cat: 'Spirito' },
+  doggo:          { name: 'Porta {n} (o te stesso) a fare una passeggiata lunga, 30+ minuti', diff: 'Facile', cat: 'Salute' },
+  sasy_troll:     { name: 'Officina di {n}: ripara o sistema una cosa rotta che ignori da settimane', diff: 'Media', cat: 'Forza' },
+  roby_plettron:  { name: 'Il giro di {n}: vendi o regala 3 oggetti che non usi più', diff: 'Media', cat: 'Intelletto' },
+  mary_c:         { name: 'Pratiche di {n}: sbriga quella scadenza burocratica che rimandi', diff: 'Media', cat: 'Intelletto' },
+  the_prof:       { name: 'Lezione di {n}: studia 30 minuti una cosa che non c\'entra col tuo lavoro', diff: 'Facile', cat: 'Intelletto' },
+  notarium:       { name: 'Atto di {n}: metti per iscritto un impegno con te stesso e firmalo', diff: 'Facile', cat: 'Spirito' },
+  dj_lello:       { name: 'Sessione di {n}: ascolta un album intero senza fare nient\'altro', diff: 'Facile', cat: 'Spirito' }
+};
+// Cosa sblocca ogni missione personale (mostrato nel modal di completamento)
+const CHAR_MISSION_UNLOCKS = {
+  scalvo:     'l\'Ambulatorio può evolvere in Piccola Clinica Anestesista (Lv.4-5)',
+  doggo:      'nuovo edificio disponibile: Cuccia del Cane',
+  dj_lello:   'nuovo edificio disponibile: Piccola Sala Disco',
+  sasy_troll: 'la Segheria diventa la Capannina del Tuttofare (+1 legno/giorno)'
+};
 function getSpecial(id) {
   return SPECIAL_CHARACTERS.find(c => c.id === id);
 }
@@ -6367,6 +6569,30 @@ function deleteMission(id) {
   saveState();
 }
 
+// === TASTO ⚰ — SEPPELLISCI PER OGGI ===
+// La missione sparisce dalla lista per il resto della giornata e "risorge"
+// domani. Niente punizioni: ammettere il fallimento è già abbastanza.
+const FAIL_QUIPS = [
+  'Oggi i morti hanno vinto. Domani si rianima.',
+  'Caduta in battaglia. Risorge domattina, puntuale come un\'orda.',
+  'Seppellita con tutti gli onori. Domani scava per uscire.',
+  'Non è morta: dorme da zombie. La rivedi domani.',
+  'Ritirata strategica. Anche i sopravvissuti migliori arretrano.',
+  'Il villaggio ha visto. Il villaggio non giudica. Domani però...'
+];
+function failMission(id) {
+  const m = G.missions.find(x => x.id === id);
+  if (!m || m.completed) return;
+  m.failedDate = todayStr();
+  const quip = FAIL_QUIPS[Math.floor(Math.random() * FAIL_QUIPS.length)];
+  logEvent(`⚰ "${m.name}" — ${quip}`, 'evt-rest');
+  if (typeof haptic === 'function') haptic('warning');
+  if (typeof beep === 'function') { try { beep(180, 0.08, 'square', 0.05); setTimeout(() => beep(120, 0.12, 'square', 0.05), 90); } catch (_) {} }
+  renderMissions();
+  saveState();
+  showModal('SEPPELLITA PER OGGI', `"${m.name}"\n\n${quip}`);
+}
+
 // Filtri di visualizzazione missioni — runtime, non salvati nel save game.
 // Default view = OGGI: il giocatore vede solo cosa fare oggi, non un muro di task.
 const missionFilter = { when: 'today', cad: 'all' };
@@ -6409,6 +6635,8 @@ function renderMissions() {
   ul.innerHTML = '';
   // Applica filtri: when + cadenza
   let pool = G.missions.filter(m => {
+    // Missione "seppellita" oggi col tasto ⚰: sparisce e risorge domani
+    if (m.failedDate === todayStr() && !m.completed) return false;
     if (!missionMatchesWhen(m, missionFilter.when)) return false;
     if (missionFilter.cad !== 'all' && m.cadence !== missionFilter.cad) return false;
     return true;
@@ -6519,6 +6747,7 @@ function renderMissions() {
           ${refRow}
         </div>
         <span class="difficulty-badge ${DIFF_CLASS[m.difficulty]}">${m.difficulty}</span>
+        ${m.completed ? '<span></span>' : `<button class="btn small fail-btn" data-fail="${m.id}" title="Oggi non ce l'hai fatta: la seppellisco, risorge domani">⚰</button>`}
         <button class="btn small danger-btn" data-del="${m.id}">×</button>
       `;
     }
@@ -6552,6 +6781,9 @@ function renderMissions() {
   });
   ul.querySelectorAll('[data-del]').forEach(b => {
     b.addEventListener('click', () => deleteMission(b.dataset.del));
+  });
+  ul.querySelectorAll('[data-fail]').forEach(b => {
+    b.addEventListener('click', () => failMission(b.dataset.fail));
   });
   // Calendar export per-mission
   ul.querySelectorAll('[data-cal-export]').forEach(b => {
@@ -6809,7 +7041,7 @@ function renderFocusToday() {
       <div></div>
       <div>
         <div class="mission-name">${f.type} — ${f.minutes} min</div>
-        <div class="mission-meta">+${f.legno}🪵 +${f.ferro}⚙ +${f.ricerca}📜</div>
+        <div class="mission-meta">+${f.legno}☰ +${f.ferro}⚙ +${f.ricerca}⚗︎</div>
       </div>
       <span class="difficulty-badge diff-m">FOCUS</span>
       <span></span>`;
@@ -6820,9 +7052,9 @@ function renderFocusToday() {
 
 // -------------------- RESISTENZA / ANTI-AZIONE --------------------
 const RESIST_RATES = {
-  legno:   { perMinute: 0.30, icon: '🪵', label: 'Legno',   skill: 'Salute' },
+  legno:   { perMinute: 0.30, icon: '☰', label: 'Legno',   skill: 'Salute' },
   ferro:   { perMinute: 0.30, icon: '⚙',  label: 'Ferro',   skill: 'Spirito' },
-  ricerca: { perMinute: 0.30, icon: '📜', label: 'Ricerca', skill: 'Intelletto' },
+  ricerca: { perMinute: 0.30, icon: '⚗︎', label: 'Ricerca', skill: 'Intelletto' },
   monete:  { perMinute: 0.14, icon: '$',  label: 'Monete',  skill: 'Spirito' }
 };
 const RESIST_KIND_SKILL = {
@@ -7327,7 +7559,7 @@ function payCost(cost) {
 }
 function costString(cost) {
   return Object.entries(cost).map(([k,v]) => {
-    const ico = { legno:'🪵', ferro:'⚙', ricerca:'📜', monete:'$' }[k] || k;
+    const ico = { legno:'☰', ferro:'⚙', ricerca:'⚗︎', monete:'$' }[k] || k;
     return `${ico} ${v}`;
   }).join('  ');
 }
@@ -7355,7 +7587,7 @@ function renderBuildings() {
       const info = ambulatorioHealInfo();
       const hurt = G.player.hp < G.player.maxHp;
       const canAffordHeal = (G.resources.ricerca >= info.costRicerca) && (G.resources.monete >= info.costMonete);
-      extraAction = `<button class="btn small" data-heal="1" ${(hurt && canAffordHeal) ? '' : 'disabled'} title="${hurt ? '' : 'Sei già al massimo'}">CURA +${info.healAmount} HP — ${info.costRicerca}📜 ${info.costMonete}$</button>`;
+      extraAction = `<button class="btn small" data-heal="1" ${(hurt && canAffordHeal) ? '' : 'disabled'} title="${hurt ? '' : 'Sei già al massimo'}">CURA +${info.healAmount} HP — ${info.costRicerca}⚗︎ ${info.costMonete}$</button>`;
     }
     // Badge allineamento (idealista / pragmatica)
     let alignBadge = '';
@@ -7408,7 +7640,7 @@ function useAmbulatorio() {
   G.player.hp = Math.min(G.player.maxHp, G.player.hp + info.healAmount);
   const real = G.player.hp - before;
   sfxComplete();
-  logEvent(`Ambulatorio: +${real} HP per ${info.costRicerca}📜 ${info.costMonete}$`, 'evt-success');
+  logEvent(`Ambulatorio: +${real} HP per ${info.costRicerca}⚗︎ ${info.costMonete}$`, 'evt-success');
   renderAll();
   saveState();
 }
@@ -7582,7 +7814,7 @@ function renderSurvivors() {
     const c = document.createElement('div');
     c.className = 'survivor-card';
     const bonusTxt = Object.entries(s.bonus).map(([k,v]) => {
-      const ico = { legno:'🪵', ferro:'⚙', ricerca:'📜', monete:'$', defense:'🛡', hp:'❤' }[k] || k;
+      const ico = { legno:'☰', ferro:'⚙', ricerca:'⚗︎', monete:'$', defense:'🛡', hp:'❤' }[k] || k;
       return `${ico}+${v}`;
     }).join(' · ');
     c.innerHTML = `
@@ -7639,7 +7871,17 @@ function buyCharacter(id) {
   G.specialChars.push(id);
   sfxLevelUp();
   logEvent(`Personaggio speciale ingaggiato: ${displayName} (${def.role}).`, 'evt-success');
-  showModal('NUOVO ALLEATO SPECIALE', `${displayName} si è unito al rifugio.\n${def.bonus}`);
+  // Missione personale del personaggio (se non già presente/completata)
+  let missionLine = '';
+  const cm = CHAR_MISSIONS[id];
+  if (cm && !charMissionDone(id) && !G.missions.some(m => m.charId === id)) {
+    const mName = cm.name.replace('{n}', displayName);
+    addMission(mName, cm.diff, 'once', cm.cat);
+    const nm = G.missions[G.missions.length - 1];
+    if (nm) nm.charId = id;
+    missionLine = `\n\n✎ ${displayName} ti affida una missione personale: "${mName}". La trovi tra le MISSIONI.`;
+  }
+  showModal('NUOVO ALLEATO SPECIALE', `${displayName} si è unito al rifugio.\n${def.bonus}${missionLine}`);
   renderAll();
   saveState();
 }
@@ -8728,6 +8970,58 @@ function _randomTarget(b) {
   return { tx: b.minX + Math.random() * (b.maxX - b.minX),
            ty: b.minY + Math.random() * (b.maxY - b.minY) };
 }
+// Meta VICINA alla posizione attuale: pochi passi, poi sosta. Molto più naturale
+// del pellegrinaggio continuo da un capo all'altro della mappa.
+function _nearbyTarget(x, y, b, minR = 40, maxR = 150) {
+  const a = Math.random() * Math.PI * 2;
+  const r = minR + Math.random() * (maxR - minR);
+  return {
+    tx: Math.max(b.minX, Math.min(b.maxX, x + Math.cos(a) * r)),
+    ty: Math.max(b.minY, Math.min(b.maxY, y + Math.sin(a) * r))
+  };
+}
+
+// === OSTACOLI === gli edifici costruiti sono zone in cui non si cammina.
+function _buildingRects() {
+  const rects = [];
+  if (typeof _BPOS === 'undefined' || !G.buildings) return rects;
+  for (const k in _BPOS) {
+    const lvl = G.buildings[k] ? G.buildings[k].level : 0;
+    if (lvl > 0) {
+      const x = _BPOS[k][0], yBase = _BPOS[k][1];
+      rects.push([x - 8, yBase - 100, 112, 108]);   // slot 96×96 + margine
+    }
+  }
+  return rects;
+}
+function _insideObstacle(x, y, rects) {
+  for (let i = 0; i < rects.length; i++) {
+    const r = rects[i];
+    if (x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3]) return true;
+  }
+  return false;
+}
+// Meta vicina che NON cade dentro un edificio (fino a 8 tentativi)
+function _freeTarget(x, y, b, obst, minR, maxR) {
+  for (let i = 0; i < 8; i++) {
+    const t = _nearbyTarget(x, y, b, minR, maxR);
+    if (!_insideObstacle(t.tx, t.ty, obst)) return t;
+  }
+  return { tx: x, ty: y };   // niente di libero nei paraggi: resta dove sei
+}
+// Passo con aggiramento: se il passo entra in un edificio, scivola lungo il
+// bordo (solo-X o solo-Y); se è tutto bloccato, rinuncia alla meta.
+function _stepAvoid(rs, dx, dy, dist, step, obst) {
+  const nx = rs.x + dx / dist * step;
+  const ny = rs.y + dy / dist * step;
+  // se sei già dentro (spawn sfortunato o edificio costruito addosso): esci liberamente
+  if (_insideObstacle(rs.x, rs.y, obst)) { rs.x = nx; rs.y = ny; return; }
+  if (!_insideObstacle(nx, ny, obst)) { rs.x = nx; rs.y = ny; return; }
+  if (!_insideObstacle(nx, rs.y, obst)) { rs.x = nx; return; }
+  if (!_insideObstacle(rs.x, ny, obst)) { rs.y = ny; return; }
+  rs.tx = rs.x; rs.ty = rs.y;
+  rs.nextMoveAt = Date.now() + 400 + Math.random() * 800;
+}
 
 function initVillageRuntime(w, h) {
   if (villageRuntime.initialized) return;
@@ -8761,40 +9055,77 @@ function initVillageRuntime(w, h) {
 
 function updateVillageRuntime(dt, w, h) {
   const b = villageRuntime.bounds;
+  const obst = _buildingRects();   // edifici costruiti = zone da aggirare
   const pp = villageRuntime.playerPos;
   if (pp) {
     const dx = pp.tx - pp.x, dy = pp.ty - pp.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist < 3) {
+      // fermo: riparte solo dopo una sosta di 6-20 secondi, per pochi passi
       if (Date.now() > pp.nextMoveAt) {
-        const t = _randomTarget(b);
+        const t = _freeTarget(pp.x, pp.y, b, obst);
         pp.tx = t.tx; pp.ty = t.ty;
-        pp.nextMoveAt = Date.now() + 4000 + Math.random() * 8000;
+        pp.nextMoveAt = Date.now() + 6000 + Math.random() * 14000;
       }
     } else {
-      const step = 17 * dt;
-      pp.x += dx / dist * step; pp.y += dy / dist * step;
+      _stepAvoid(pp, dx, dy, dist, 17 * dt, obst);
     }
   }
   G.survivors.forEach(s => {
     let rs = villageRuntime.survivors[s.id];
     if (!rs) {
       const t = _randomTarget(b);
-      rs = { x: w/2, y: h/2, tx: t.tx, ty: t.ty, nextMoveAt: Date.now() + 1000, dir: 1 };
+      rs = { x: w/2, y: h/2 + 70, tx: t.tx, ty: t.ty, nextMoveAt: Date.now() + 1000, dir: 1 };
       villageRuntime.survivors[s.id] = rs;
     }
     const dx = rs.tx - rs.x, dy = rs.ty - rs.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist < 3) {
+      // sosta 5-18 secondi, poi pochi passi verso una meta vicina
       if (Date.now() > rs.nextMoveAt) {
-        const t = _randomTarget(b);
+        const t = _freeTarget(rs.x, rs.y, b, obst);
         rs.tx = t.tx; rs.ty = t.ty;
-        rs.nextMoveAt = Date.now() + 3000 + Math.random() * 10000;
+        rs.nextMoveAt = Date.now() + 5000 + Math.random() * 13000;
       }
     } else {
       const speed = 14 + (s.id.charCodeAt(1) % 8);
-      const step = speed * dt;
-      rs.x += dx / dist * step; rs.y += dy / dist * step;
+      _stepAvoid(rs, dx, dy, dist, speed * dt, obst);
+      rs.dir = dx > 0 ? 1 : -1;
+    }
+  });
+  // === Personaggi speciali acquistati: vagano anche loro ===
+  (G.specialChars || []).forEach(sid => {
+    const key = 'sp_' + sid;
+    let rs = villageRuntime.survivors[key];
+    if (!rs) {
+      // spawn in un punto libero (non dentro un edificio)
+      let sx = w/2, sy = h/2 + 70;
+      for (let k = 0; k < 12; k++) {
+        const cx2 = b.minX + Math.random() * (b.maxX - b.minX);
+        const cy2 = b.minY + Math.random() * (b.maxY - b.minY);
+        if (!_insideObstacle(cx2, cy2, obst)) { sx = cx2; sy = cy2; break; }
+      }
+      const t2 = _freeTarget(sx, sy, b, obst);
+      rs = { x: sx, y: sy, tx: t2.tx, ty: t2.ty, nextMoveAt: Date.now() + 2000, dir: 1 };
+      villageRuntime.survivors[key] = rs;
+    }
+    const dx = rs.tx - rs.x, dy = rs.ty - rs.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 3) {
+      if (Date.now() > rs.nextMoveAt) {
+        // Doggo scorrazza lontano con soste brevi; gli umani pochi passi e soste lunghe
+        const t2 = sid === 'doggo'
+          ? _freeTarget(rs.x, rs.y, b, obst, 100, 320)
+          : _freeTarget(rs.x, rs.y, b, obst);
+        rs.tx = t2.tx; rs.ty = t2.ty;
+        rs.nextMoveAt = sid === 'doggo'
+          ? Date.now() + 1500 + Math.random() * 5000
+          : Date.now() + 5000 + Math.random() * 13000;
+      }
+    } else {
+      // Doggo corre, gli altri camminano
+      const speed = sid === 'doggo' ? 36 : 13 + (sid.charCodeAt(0) % 6);
+      _stepAvoid(rs, dx, dy, dist, speed * dt, obst);
       rs.dir = dx > 0 ? 1 : -1;
     }
   });
@@ -9072,11 +9403,15 @@ const _BPAL = {
   zen_garden:   ['#3c5228', '#eee8cc', '#ddd5b2', '#c4bb96', '#8aa060', '#6d8248', '#506334', '#3f6020'],
   mensa_comune: ['#2a140c', '#c49772', '#a67a56', '#805c40', '#a04a34', '#843a28', '#662c1e', '#f0d098'],
   altar_skulls: ['#000000', '#544242', '#3e3030', '#2a2020', '#3a2e2e', '#2c2222', '#1e1616', '#e03428'],
-  arsenale:     ['#0a0a0e', '#5e5e66', '#48484f', '#343439', '#6c6c74', '#55555c', '#3e3e44', '#c8c8a0']
+  arsenale:     ['#0a0a0e', '#5e5e66', '#48484f', '#343439', '#6c6c74', '#55555c', '#3e3e44', '#c8c8a0'],
+  cuccia:       ['#241408', '#a87848', '#8a5f38', '#68462a', '#8a4a2e', '#6e3a24', '#542c1a', '#e8b64a'],
+  sala_disco:   ['#12081a', '#7a5090', '#5e3a72', '#442a54', '#3a2248', '#2c1a38', '#20122a', '#e850c8']
 };
 
 function _getBuildingSprite(key, lvl) {
-  const ck = key + ':' + lvl;
+  // le evoluzioni cambiano l'aspetto a parità di livello → entrano nella cache key
+  const evo = (key === 'sawmill' && typeof charMissionDone === 'function' && charMissionDone('sasy_troll')) ? ':evo' : '';
+  const ck = key + ':' + lvl + evo;
   if (_bSpriteCache[ck]) return _bSpriteCache[ck];
   const c = document.createElement('canvas');
   c.width = _SPR_W; c.height = _SPR_H;
@@ -9248,6 +9583,24 @@ function _renderBuildingSprite(ctx, key, lvl) {
     // ciminiera
     ctx.fillStyle = p[0]; ctx.fillRect(x + 16, yTop - 12, 10, 16);
     ctx.fillStyle = p[3]; ctx.fillRect(x + 17, yTop - 11, 8, 14);
+    // EVOLUZIONE Capannina del Tuttofare: insegna dipinta + attrezzi appesi
+    if (typeof charMissionDone === 'function' && charMissionDone('sasy_troll')) {
+      ctx.fillStyle = '#3c2a16';
+      ctx.fillRect(x + w/2 - 26, yTop + roofH + 4, 52, 13);
+      ctx.strokeStyle = '#e8b64a'; ctx.lineWidth = 1;
+      ctx.strokeRect(x + w/2 - 25.5, yTop + roofH + 4.5, 51, 12);
+      ctx.fillStyle = '#e8b64a';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('TUTTOFARE', x + w/2 - 22, yTop + roofH + 13);
+      // chiave inglese e martello appesi al muro
+      ctx.fillStyle = '#8a8a92';
+      ctx.fillRect(x + 8, yTop + roofH + 20, 3, 10);
+      ctx.fillRect(x + 6, yTop + roofH + 18, 7, 3);
+      ctx.fillStyle = '#77777c';
+      ctx.fillRect(x + w - 16, yTop + roofH + 18, 8, 4);
+      ctx.fillStyle = '#54350f';
+      ctx.fillRect(x + w - 13, yTop + roofH + 22, 3, 9);
+    }
   }
   else if (key === 'workshop') {
     const w = 76, wallH = 48, roofH = 16;
@@ -9423,6 +9776,108 @@ function _renderBuildingSprite(ctx, key, lvl) {
     _sprDoor(ctx, p, x + w/2 - 7, Y + 96 - 20, 14, 20);
     _sprWindow(ctx, p, x + 8, yTop + roofH + 14, 12, 12);
     _sprWindow(ctx, p, x + w - 20, yTop + roofH + 14, 12, 12);
+    // EVOLUZIONE Piccola Clinica Anestesista (Lv.4-5): piano superiore + insegna Zz
+    if (lvl >= 4) {
+      // piano superiore azzurro chirurgico
+      ctx.fillStyle = p[0]; ctx.fillRect(x + 4, yTop - 18, w - 8, 20);
+      ctx.fillStyle = '#cfe0ea'; ctx.fillRect(x + 6, yTop - 16, w - 12, 16);
+      ctx.fillStyle = '#a8c4d4'; ctx.fillRect(x + w - 16, yTop - 16, 10, 16);
+      // finestre piano alto (sala operatoria)
+      _sprWindow(ctx, p, x + 12, yTop - 12, 10, 9);
+      _sprWindow(ctx, p, x + w - 28, yTop - 12, 10, 9);
+      // insegna "Zz" dell'anestesista
+      ctx.fillStyle = '#10405a';
+      ctx.fillRect(x + w/2 - 10, yTop - 15, 20, 13);
+      ctx.fillStyle = '#8ce0ff';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText('Zz', x + w/2 - 6, yTop - 5);
+      // flebo accanto alla porta (dettaglio da corsia)
+      if (lvl >= 5) {
+        ctx.fillStyle = '#5a5a62';
+        ctx.fillRect(x - 8, Y + 96 - 26, 2, 26);
+        ctx.fillRect(x - 12, Y + 96 - 26, 10, 2);
+        ctx.fillStyle = '#c8e8f0';
+        ctx.fillRect(x - 12, Y + 96 - 24, 4, 7);
+      }
+    }
+  }
+  else if (key === 'cuccia') {
+    // Cuccia di Doggo: piccola casetta col tetto a spiovente, osso e ciotola
+    const w2 = 48, wallH = 26, roofH = 16;
+    const x = X + 24, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w2, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w2, wallH, { planks: true });
+    _sprGableRoof(ctx, p, x, yTop, w2, roofH);
+    // apertura ad arco scura
+    ctx.fillStyle = '#180e06';
+    ctx.beginPath();
+    ctx.arc(x + w2/2, Y + 96 - 3, 10, Math.PI, 0);
+    ctx.fill();
+    ctx.fillRect(x + w2/2 - 10, Y + 96 - 3, 20, 3);
+    // osso inchiodato sopra l'ingresso
+    ctx.fillStyle = '#e8dcc0';
+    ctx.fillRect(x + w2/2 - 5, yTop + roofH + 4, 10, 3);
+    ctx.fillRect(x + w2/2 - 8, yTop + roofH + 3, 3, 5);
+    ctx.fillRect(x + w2/2 + 5, yTop + roofH + 3, 3, 5);
+    // ciotola rossa
+    ctx.fillStyle = '#a03028';
+    ctx.fillRect(x + w2 + 8, Y + 92, 12, 5);
+    ctx.fillStyle = '#5a1a14';
+    ctx.fillRect(x + w2 + 10, Y + 92, 8, 2);
+    // Lv.2: staccionata del recinto
+    if (lvl >= 2) {
+      ctx.fillStyle = '#5a4028';
+      for (let i = -16; i <= w2 + 14; i += 8) ctx.fillRect(x + i, Y + 96 - 10, 3, 12);
+      ctx.fillRect(x - 16, Y + 96 - 6, w2 + 32, 2);
+    }
+  }
+  else if (key === 'sala_disco') {
+    // Piccola Sala Disco di DJ Lello: mattoni scuri, insegna, palla da disco, casse
+    const w2 = 80, wallH = 46, roofH = 14;
+    const x = X + 8, yTop = Y + 96 - wallH - roofH;
+    _sprShadow(ctx, x, yTop + roofH, w2, wallH);
+    _sprWall(ctx, p, x, yTop + roofH, w2, wallH, { bricks: true });
+    // tetto piatto
+    ctx.fillStyle = p[0]; ctx.fillRect(x - 5, yTop - 2, w2 + 10, roofH + 4);
+    ctx.fillStyle = p[5]; ctx.fillRect(x - 3, yTop, w2 + 6, roofH);
+    ctx.fillStyle = p[4]; ctx.fillRect(x - 3, yTop, w2 + 6, 3);
+    // palla da disco su palo sopra il tetto
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x + w2/2 - 1, yTop - 14, 2, 14);
+    ctx.fillStyle = '#d0d0de';
+    ctx.beginPath(); ctx.arc(x + w2/2, yTop - 18, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#9090a8';
+    for (let gy = -24; gy <= -14; gy += 3) {
+      for (let gx = -6; gx <= 4; gx += 3) {
+        if (((gx + gy) & 1) === 0) ctx.fillRect(x + w2/2 + gx, yTop + gy + 2, 2, 2);
+      }
+    }
+    // insegna DISCO
+    ctx.fillStyle = '#180a20';
+    ctx.fillRect(x + w2/2 - 24, yTop + roofH + 4, 48, 14);
+    ctx.strokeStyle = p[7]; ctx.lineWidth = 1;
+    ctx.strokeRect(x + w2/2 - 23.5, yTop + roofH + 4.5, 47, 13);
+    ctx.fillStyle = p[7];
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText('DISCO', x + w2/2 - 15, yTop + roofH + 14);
+    // porta doppia + casse audio ai lati
+    _sprDoor(ctx, p, x + w2/2 - 9, Y + 96 - 22, 18, 22);
+    ctx.fillStyle = '#101014';
+    ctx.fillRect(x + 6, Y + 96 - 18, 12, 18);
+    ctx.fillRect(x + w2 - 18, Y + 96 - 18, 12, 18);
+    ctx.fillStyle = '#2a2a30';
+    ctx.beginPath(); ctx.arc(x + 12, Y + 96 - 10, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + w2 - 12, Y + 96 - 10, 4, 0, Math.PI * 2); ctx.fill();
+    // Lv.2+: striscia neon lungo la gronda
+    if (lvl >= 2) {
+      ctx.fillStyle = p[7];
+      ctx.fillRect(x - 3, yTop + roofH, w2 + 6, 2);
+    }
+    // Lv.3: secondo faro sul tetto
+    if (lvl >= 3) {
+      ctx.fillStyle = '#1a1a1a'; ctx.fillRect(x + 10, yTop - 8, 3, 8);
+      ctx.fillStyle = p[7]; ctx.fillRect(x + 8, yTop - 12, 7, 5);
+    }
   }
   else if (key === 'zen_garden') {
     // giardino a terra: sabbia rastrellata + pietre + acero
@@ -9599,7 +10054,7 @@ function _renderBuildingSprite(ctx, key, lvl) {
 // posizione (slot 96×96) di ogni edificio — griglia 2× della v1
 const _BPOS = {
   sawmill:      [ 72, 144], zen_garden: [264, 144], altar_skulls: [600, 144], workshop: [792, 144],
-  watchtower:   [ 72, 312], hq: [432, 312], barracks: [792, 312],
+  watchtower:   [ 72, 312], cuccia: [264, 312], hq: [432, 312], sala_disco: [600, 312], barracks: [792, 312],
   lab:          [ 72, 480], mensa_comune: [264, 480], ambulatorio: [432, 480],
   arsenale:     [600, 480], market: [792, 480]
 };
@@ -9618,7 +10073,9 @@ const _BLIGHTS = {
   mensa_comune: [{ dx: 48, dy: 62, r: 44, c: '255,180,90' }],
   altar_skulls: [{ dx: 48, dy: 24, r: 40, c: '255,110,40' }],
   arsenale:     [{ dx: 48, dy: 62, r: 30, c: '200,220,160' }],
-  zen_garden:   [{ dx: 74, dy: 62, r: 24, c: '255,210,140' }]
+  zen_garden:   [{ dx: 74, dy: 62, r: 24, c: '255,210,140' }],
+  cuccia:       [{ dx: 48, dy: 82, r: 20, c: '255,190,110' }],
+  sala_disco:   [{ dx: 48, dy: 60, r: 46, c: '230,80,200' }]
 };
 
 // ============================================================
@@ -9916,6 +10373,140 @@ function drawCharLabel(cx, baseY, text, borderColor) {
   ctx.fillStyle = '#f6efd8';
   ctx.fillText(text, boxX + padX, boxY + boxH / 2 + 1);
   ctx.textBaseline = 'alphabetic';
+}
+
+// ============================================================
+// PENSIERI — fumetti occasionali coerenti con la bio dei personaggi
+// ============================================================
+const _THOUGHTS = {
+  papa:           ['Fai attenzione.', 'Quel muro non mi convince.', 'Ce l\'ho io il pezzo giusto.', 'Ai miei tempi, altro che zombie.'],
+  mamma:          ['Hai mangiato?', 'Copriti, che gira brutta aria.', 'Ti ho messo da parte una cosa.', 'Ti vedo stanco.'],
+  luoluo:         ['...', 'Perimetro: sicuro.', 'Pechino era peggio.', 'Calcolo le probabilità.'],
+  giulio_chrome:  ['Il socialismo o la barbarie.', 'Majakovskij lo aveva capito.', 'Convochiamo un\'assemblea.', 'L\'apocalisse è un\'occasione.'],
+  scalvo:         ['Rianimare i rianimati?', 'Stasera cucino io.', 'Parametri stabili. Per ora.', 'Chi ha toccato la morfina?'],
+  margareta:      ['Quella ferita va idratata.', 'SPF 50, anche d\'inverno.', 'Zombie, ma presentabili.', 'C\'è margine, qui.'],
+  giugno_denardo: ['E se aprissimo il cancello?', 'Fidati. Cosa può andare male?', 'Ho un\'idea pessima. Andiamo.'],
+  doggo:          ['Bau!', 'BAU BAU BAU!', '*annusa il vento*', 'Palla? Palla!', '*orecchie dritte*'],
+  sasy_troll:     ['Non è rotto: è modificato.', 'Chi ha preso il saldatore?', 'Lo sistemo domani. Forse.', 'Sento un motore che soffre.'],
+  roby_plettron:  ['Sento odore di affari.', 'Vroom.', 'Quello lo compro e lo rivendo.', 'Il mercato non dorme mai.'],
+  mary_c:         ['Manca il modulo B-7.', 'Protocollato.', 'Firma in tre copie, prego.', 'L\'ordine salva la vita.'],
+  the_prof:       ['Anche gli zombie imparano.', 'Lezione alle 15. Puntuali.', 'È discriminazione, questa.'],
+  notarium:       ['Serve un rogito.', 'Clausola 4, comma 2.', 'Gli zombie non firmano mai.', 'Lo stato di diritto tornerà.'],
+  dj_lello:       ['Senti che bassi.', 'Le orde ballano, stasera.', 'Un-tz. Un-tz. Un-tz.', 'La musica li calma. Sempre.']
+};
+const _CLASS_THOUGHTS = {
+  Boscaiolo:  ['Legna. Sempre legna.', 'Quell\'albero mi guarda.', 'La mia ascia ha fame.'],
+  Fabbro:     ['Il ferro non mente.', 'Battere finché è caldo.', 'Manca sempre un chiodo.'],
+  Scienziato: ['Interessante...', 'Serve più ricerca.', 'L\'ipotesi regge. Forse.'],
+  Mercante:   ['Tutto ha un prezzo.', 'Sconto? Mai sentito.', 'Compro basso, vendo alto.'],
+  Soldato:    ['Perimetro pulito.', 'Occhi aperti.', 'Troppo silenzio, non mi piace.'],
+  Medico:     ['Bevi più acqua.', 'Quella ferita va vista.', 'Dormire è una medicina.']
+};
+const _PLAYER_THOUGHTS = ['Un giorno alla volta.', 'Resisto.', 'Che giornata...', 'Il villaggio cresce.', 'Niente telefono. Respira.'];
+const _MOOD_FEAR  = ['Ho sentito dei lamenti...', 'Erano vicini, stanotte.', 'Meglio restare dentro.', 'Quel fumo non promette bene.'];
+const _MOOD_PARTY = ['Stasera si festeggia!', 'Sette giorni. Mica male.', 'Senti che musica.', 'Ce lo meritiamo.'];
+
+function _villageMood() {
+  const ts = (typeof todayStr === 'function') ? todayStr() : null;
+  if (G.lastAttack && ts && G.lastAttack.date === ts) return 'fear';
+  if (G.player && (G.player.streak || 0) >= 7) return 'party';
+  return '';
+}
+// Da fermo, ogni tanto, un personaggio pensa qualcosa (4-7 secondi)
+function _maybeThink(rs, pool, moving) {
+  const now = Date.now();
+  if (rs.bubble && rs.bubble.until < now) rs.bubble = null;
+  if (rs.bubble || moving || !pool || pool.length === 0) return;
+  if (Math.random() < 0.0012) {
+    const mood = _villageMood();
+    let p = pool;
+    if (mood === 'fear' && Math.random() < 0.5) p = _MOOD_FEAR;
+    else if (mood === 'party' && Math.random() < 0.4) p = _MOOD_PARTY;
+    rs.bubble = { text: p[Math.floor(Math.random() * p.length)], until: now + 4200 + Math.random() * 2800 };
+  }
+}
+// Fumetto-pensiero: nuvoletta chiara con codina a pallini
+function _drawThought(cx, baseY, text) {
+  const ctx = VCTX;
+  cx = Math.round(cx); baseY = Math.round(baseY);
+  ctx.font = '17px "VT323", "Courier New", monospace';
+  ctx.textBaseline = 'middle';
+  const tw = Math.ceil(ctx.measureText(text).width);
+  const padX = 8, boxH = 22, r = 8;
+  const boxW = tw + padX * 2;
+  const boxX = cx - Math.round(boxW / 2);
+  const boxY = baseY - boxH - 14;
+  // ombra
+  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX + 2, boxY + 2, boxW, boxH, r); else ctx.rect(boxX + 2, boxY + 2, boxW, boxH);
+  ctx.fill();
+  // nuvoletta
+  ctx.fillStyle = 'rgba(246, 240, 220, 0.96)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, r); else ctx.rect(boxX, boxY, boxW, boxH);
+  ctx.fill();
+  ctx.strokeStyle = '#5a4c34';
+  ctx.lineWidth = 1.25;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(boxX + 0.6, boxY + 0.6, boxW - 1.2, boxH - 1.2, r); else ctx.rect(boxX + 0.6, boxY + 0.6, boxW - 1.2, boxH - 1.2);
+  ctx.stroke();
+  // codina a pallini (stile pensiero)
+  ctx.fillStyle = 'rgba(246, 240, 220, 0.96)';
+  ctx.beginPath(); ctx.arc(cx - 5, boxY + boxH + 4, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx - 9, boxY + boxH + 9, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#5a4c34'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx - 5, boxY + boxH + 4, 3, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx - 9, boxY + boxH + 9, 2, 0, Math.PI * 2); ctx.stroke();
+  // testo
+  ctx.fillStyle = '#2c2418';
+  ctx.fillText(text, boxX + padX, boxY + boxH / 2 + 1);
+  ctx.textBaseline = 'alphabetic';
+}
+
+// === DOGGO === cane lupo pixel ~34×22, corsa 2-frame, coda scodinzolante
+function drawDog(cx, cy, frame, dir = 1, label = '') {
+  const ctx = VCTX;
+  const x = Math.round(cx) - 17, y = Math.round(cy) - 11;
+  const B = '#6a4a28', D = '#4a3218', L = '#8a6a40', OUT = '#14100a';
+  // px() specchia orizzontalmente quando dir < 0
+  const px = (dx, dy, w, h, c) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(dir >= 0 ? x + dx : x + 34 - dx - w, y + dy, w, h);
+  };
+  // ombra
+  ctx.fillStyle = 'rgba(0,0,0,0.40)';
+  ctx.beginPath();
+  ctx.ellipse(x + 17, y + 22, 13, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // coda che scodinzola
+  const wag = (Math.floor(Date.now() / 150) & 1) ? -2 : 1;
+  px(0, 6 + wag, 6, 3, D);
+  px(1, 5 + wag, 3, 2, B);
+  // corpo
+  px(5, 8, 18, 9, OUT);
+  px(6, 9, 16, 7, B);
+  px(6, 9, 16, 2, L);                 // schiena chiara
+  px(6, 14, 16, 2, D);                // pancia scura
+  // zampe animate 2-frame
+  const l1 = frame ? 2 : 0, l2 = frame ? 0 : 2;
+  px(7, 16 + l1, 3, 6, D); px(12, 16 + l2, 3, 6, D);
+  px(17, 16 + l2, 3, 6, D); px(21, 16 + l1, 3, 6, D);
+  // testa
+  px(20, 1, 11, 10, OUT);
+  px(21, 2, 9, 8, B);
+  px(21, 2, 9, 2, L);
+  // muso e naso
+  px(29, 5, 4, 4, D);
+  px(32, 6, 1, 2, OUT);
+  // orecchie a punta
+  px(21, -2, 3, 4, D); px(27, -2, 3, 4, D);
+  px(22, -1, 1, 2, B); px(28, -1, 1, 2, B);
+  // occhio
+  px(26, 4, 2, 2, OUT);
+  // lingua fuori quando corre
+  if (frame) px(30, 9, 2, 3, '#d06060');
+  if (label) drawCharLabel(x + 17, y - 4, label, '#c8a060');
 }
 
 // ============================================================
@@ -10220,6 +10811,20 @@ function drawVillage() {
       VCTX.fillRect(ax - fw / 2, ay - 6 - fl * 8 - i * 3, fw, 6);
     }
   }
+  // sala disco: palla che scintilla + luci colorate rotanti di notte
+  if (G.buildings.sala_disco && G.buildings.sala_disco.level > 0) {
+    const dscX = _BPOS.sala_disco[0] + 48;
+    const dscTop = _BPOS.sala_disco[1] - 96 + 18;   // altezza palla da disco
+    if (Math.sin(t * 9) > 0.55) {
+      VCTX.fillStyle = 'rgba(255,255,255,0.95)';
+      VCTX.fillRect(dscX - 2 + Math.sin(t * 4) * 5, dscTop, 2, 2);
+      VCTX.fillRect(dscX + 1 + Math.cos(t * 5) * 4, dscTop + 3, 2, 2);
+    }
+    if (tod.isNight || tod.phase === 'dusk') {
+      const hues = ['255,70,200', '70,200,255', '255,220,80'];
+      lights.push({ x: dscX, y: dscTop + 40, r: 60, c: hues[Math.floor(t * 1.5) % 3] });
+    }
+  }
 
   // --- zombie perimetrali (minaccia) --- shamble lento con stato persistente
   const threat = todayThreatPct();
@@ -10245,27 +10850,83 @@ function drawVillage() {
   const pp = villageRuntime.playerPos;
   if (pp) {
     const moving = Math.abs(pp.tx - pp.x) + Math.abs(pp.ty - pp.y) > 3;
+    _maybeThink(pp, _PLAYER_THOUGHTS, moving);
+    const thinking = pp.bubble && pp.bubble.until > Date.now();
     chars.push({
       y: pp.y,
-      draw: () => drawSurvivor(pp.x - 14, pp.y - 20, {
-        color: '#c84020', skin: '#e8c890', label: playerLabel,
-        accentBg: '#f0c040', isPlayer: true,
-        frame: moving ? (Math.floor(Date.now() / 260) & 1) : 0
-      })
+      draw: () => {
+        drawSurvivor(pp.x - 14, pp.y - 20, {
+          color: '#c84020', skin: '#e8c890', label: thinking ? '' : playerLabel,
+          accentBg: '#f0c040', isPlayer: true,
+          frame: moving ? (Math.floor(Date.now() / 260) & 1) : 0
+        });
+        if (thinking) _drawThought(pp.x, pp.y - 22, pp.bubble.text);
+      }
     });
   }
   G.survivors.forEach((s, i) => {
     const rs = villageRuntime.survivors[s.id];
     if (!rs) return;
     const moving = Math.abs(rs.tx - rs.x) + Math.abs(rs.ty - rs.y) > 3;
+    _maybeThink(rs, _CLASS_THOUGHTS[s.class] || [], moving);
+    const thinking = rs.bubble && rs.bubble.until > Date.now();
     chars.push({
       y: rs.y,
-      draw: () => drawSurvivor(rs.x - 14, rs.y - 20, {
-        color: s.color, skin: '#e8c890',
-        label: (s.name || '').toUpperCase().slice(0, 16),
-        accentBg: s.color, klass: s.class,
-        frame: moving ? (Math.floor(Date.now() / 260 + i * 3) & 1) : 0
-      })
+      draw: () => {
+        drawSurvivor(rs.x - 14, rs.y - 20, {
+          color: s.color, skin: '#e8c890',
+          label: thinking ? '' : (s.name || '').toUpperCase().slice(0, 16),
+          accentBg: s.color, klass: s.class,
+          frame: moving ? (Math.floor(Date.now() / 260 + i * 3) & 1) : 0
+        });
+        if (thinking) _drawThought(rs.x, rs.y - 22, rs.bubble.text);
+      }
+    });
+  });
+  // --- personaggi speciali acquistati ---
+  const _specialKlass = {
+    scalvo: 'Medico', margareta: 'Medico', mamma: 'Medico',
+    luoluo: 'Fabbro', sasy_troll: 'Fabbro',
+    giulio_chrome: 'Scienziato', the_prof: 'Scienziato',
+    roby_plettron: 'Mercante', notarium: 'Mercante', mary_c: 'Mercante',
+    giugno_denardo: 'Soldato'
+  };
+  (G.specialChars || []).forEach((sid, i) => {
+    const rs = villageRuntime.survivors['sp_' + sid];
+    if (!rs) return;
+    const def = (typeof getSpecial === 'function') ? getSpecial(sid) : null;
+    const nm = ((typeof getSpecialName === 'function') ? getSpecialName(sid) : sid) || sid;
+    const moving = Math.abs(rs.tx - rs.x) + Math.abs(rs.ty - rs.y) > 3;
+    const frame = moving ? (Math.floor(Date.now() / 240 + i * 5) & 1) : 0;
+    _maybeThink(rs, _THOUGHTS[sid] || [], moving);
+    const thinking = rs.bubble && rs.bubble.until > Date.now();
+    chars.push({
+      y: rs.y,
+      draw: () => {
+        if (sid === 'doggo') {
+          drawDog(rs.x, rs.y, moving ? frame : 0, rs.dir, thinking ? '' : nm.toUpperCase().slice(0, 16));
+          if (thinking) _drawThought(rs.x, rs.y - 14, rs.bubble.text);
+          return;
+        }
+        drawSurvivor(rs.x - 14, rs.y - 20, {
+          color: (def && def.color) || '#8a8a8a', skin: '#e2c396',
+          label: thinking ? '' : nm.toUpperCase().slice(0, 16),
+          accentBg: (def && def.color) || '#8a8a8a',
+          klass: _specialKlass[sid] || '', frame
+        });
+        if (thinking) _drawThought(rs.x, rs.y - 22, rs.bubble.text);
+        // DJ Lello: cuffie sempre in testa
+        if (sid === 'dj_lello') {
+          const hx = Math.round(rs.x) - 14, hy = Math.round(rs.y) - 20;
+          VCTX.fillStyle = '#181820';
+          VCTX.fillRect(hx + 6, hy, 16, 3);
+          VCTX.fillRect(hx + 4, hy + 3, 4, 7);
+          VCTX.fillRect(hx + 20, hy + 3, 4, 7);
+          VCTX.fillStyle = '#e850c8';
+          VCTX.fillRect(hx + 5, hy + 5, 2, 3);
+          VCTX.fillRect(hx + 21, hy + 5, 2, 3);
+        }
+      }
     });
   });
   chars.sort((a, b) => a.y - b.y).forEach(c => c.draw());
@@ -10619,6 +11280,8 @@ function difficultyScale() {
 function performAttack(prob) {
   // Calcola difesa villaggio
   let defense = G.buildings.wall.level * 8 + G.buildings.watchtower.level * 6;
+  // Cuccia del Cane: Doggo di guardia
+  if (G.buildings.cuccia && G.buildings.cuccia.level > 0) defense += G.buildings.cuccia.level * 4;
   G.survivors.forEach(s => { if (s.bonus.defense) defense += s.bonus.defense; });
   // Bonus speciale LuoLuo: leggero +5% difesa
   if (hasSpecial('luoluo')) defense += 5;
@@ -10748,8 +11411,9 @@ function endDay() {
     if (t > 0) G.stats.attacksSurvived = (G.stats.attacksSurvived || 0) + 1;
   }
 
-  // Genera passivi
-  const sawmillGain = G.buildings.sawmill.level * 2;
+  // Genera passivi (Capannina del Tuttofare: +1 legno bonus se evoluta)
+  const sawmillGain = G.buildings.sawmill.level * 2 +
+    ((charMissionDone('sasy_troll') && G.buildings.sawmill.level > 0) ? 1 : 0);
   const workshopGain = G.buildings.workshop.level * 2;
   const labGain = G.buildings.lab.level;
   G.resources.legno += sawmillGain;
@@ -10787,6 +11451,13 @@ function endDay() {
     const lvl = G.buildings.arsenale.level;
     G.resources.ferro = (G.resources.ferro || 0) + lvl;
     alignedReport.push(`Arsenale: +${lvl} ferro`);
+  }
+  // Piccola Sala Disco (DJ Lello): serate a pagamento + socialità
+  if (G.buildings.sala_disco && G.buildings.sala_disco.level > 0) {
+    const lvl = G.buildings.sala_disco.level;
+    G.resources.monete = (G.resources.monete || 0) + lvl;
+    gainSkillXp('Sociale', lvl);
+    alignedReport.push(`Sala Disco: +${lvl} monete · +${lvl} XP Sociale (serata di ${getSpecialName('dj_lello')})`);
   }
 
   // Bonus sopravvissuti
@@ -10846,7 +11517,7 @@ function endDay() {
 
   let msg = `Giorno ${G.day - 1} chiuso.\n`;
   if (inactionReport.length) msg += `\n⚠ ${inactionReport.join(' · ')}\n`;
-  msg += `\n+${sawmillGain}🪵 +${workshopGain}⚙ +${labGain}📜 da edifici`;
+  msg += `\n+${sawmillGain}☰ +${workshopGain}⚙ +${labGain}⚗︎ da edifici`;
   if (survivorReport.length) msg += '\n' + survivorReport.join(' · ');
   if (dailyReset) msg += `\n${dailyReset} missioni quotidiane resettate`;
   if (attackResult) msg += `\n\n☠ ATTACCO subito: ${attackResult.join(', ')}`;
@@ -10868,9 +11539,9 @@ function endDay() {
     <div class="recap">
       <p class="recap-sub">Il giorno ${G.day - 1} è passato. Ecco cosa ha portato la notte.</p>
       <div class="recap-chips">
-        ${sawmillGain ? `<span class="recap-chip">🪵 +${sawmillGain}</span>` : ''}
+        ${sawmillGain ? `<span class="recap-chip">☰ +${sawmillGain}</span>` : ''}
         ${workshopGain ? `<span class="recap-chip">⚙ +${workshopGain}</span>` : ''}
-        ${labGain ? `<span class="recap-chip">📜 +${labGain}</span>` : ''}
+        ${labGain ? `<span class="recap-chip">⚗︎ +${labGain}</span>` : ''}
         <span class="recap-chip">❤ ${G.player.hp}/${G.player.maxHp}</span>
         ${G.player.freezes ? `<span class="recap-chip">❄ ${G.player.freezes}</span>` : ''}
       </div>
@@ -10945,6 +11616,228 @@ document.getElementById('modalBg').addEventListener('click', e => {
   if (e.target.id === 'modalBg') document.getElementById('modalBg').classList.remove('active');
 });
 
+// -------------------- CHECK-IN INIZIALE --------------------
+// Mini questionario all'accesso: 4 domande dirette sulle difficoltà quotidiane.
+// Le risposte identificano i pattern (ansia mattutina, rimuginio, evitamento,
+// tempo non strutturato...) e generano le missioni starter su misura, basate
+// sui protocolli CBT: implementation intentions, stimulus control, attivazione
+// comportamentale, auto-monitoraggio (Rozental & Carlbring; Gollwitzer & Sheeran).
+const CHECKIN_QUESTIONS = [
+  { q: 'La mattina, come va alzarsi?', opts: [
+    { t: 'Mi alzo senza troppi problemi', flag: null },
+    { t: 'Rimando la sveglia finché posso (snooze a raffica)', flag: 'morning' },
+    { t: 'Anche da sveglio resto a letto e rimando l\'inizio', flag: 'morning' }
+  ]},
+  { q: 'E il sonno, come va?', opts: [
+    { t: 'Dormo bene, orari regolari', flag: null },
+    { t: 'Fatico ad addormentarmi: rimugino', flag: 'sleep_rumination' },
+    { t: 'Vado a letto tardi pur sapendo che pagherò il conto', flag: 'sleep_procr' }
+  ]},
+  { q: 'Davanti a un compito importante, cosa succede davvero?', opts: [
+    { t: 'Lo inizio e lo porto a termine', flag: null },
+    { t: 'Rimando finché la scadenza non brucia', flag: 'task_delay' },
+    { t: 'Inizio, ma mi disperdo (telefono, mille cose insieme)', flag: 'task_focus' }
+  ]},
+  { q: 'Nei giorni senza impegni, come stai?', opts: [
+    { t: 'Bene: mi riposo davvero', flag: null },
+    { t: 'In ansia: senza struttura mi sento perso o in colpa', flag: 'unstructured' },
+    { t: 'Li passo quasi tutti sullo schermo', flag: 'screen' }
+  ]}
+];
+const CHECKIN_PLANS = {
+  morning: {
+    label: 'Pattern ansioso mattutino',
+    note: 'Lo snooze non è riposo: è negoziazione. Si chiude togliendo la decisione al momento, non con la forza di volontà.',
+    science: 'Come si fa in pratica: la sera decidi UNA regola fissa — "quando la sveglia suona la prima volta, metto i piedi a terra". Tutto qui. Funziona perché la mattina non devi più decidere niente: la decisione è già presa, e senza decisione non c\'è negoziazione. È il metodo più studiato della psicologia del comportamento (Gollwitzer & Sheeran, 2006, analisi di 94 studi). La sveglia va messa lontana dal letto: per spegnerla devi alzarti, e contrattare da sdraiato diventa fisicamente impossibile (Bootzin, 1972). E sappi una cosa: rimandare la sveglia non ti fa riposare di più — l\'hanno misurato in laboratorio (Sundelin & Axelsson, 2023): quei minuti di snooze non sono vero sonno.',
+    missions: [
+      { name: 'Piedi a terra al primo squillo della sveglia', diff: 'Media', cat: 'Salute' },
+      { name: 'Sveglia fuori dal letto — preparala stasera', diff: 'Molto facile', cat: 'Salute' },
+      { name: 'Log del mattino: ora sveglia → ora piedi a terra', diff: 'Molto facile', cat: 'Spirito' }
+    ]
+  },
+  sleep_rumination: {
+    label: 'Rimuginio serale',
+    note: 'I pensieri vanno parcheggiati fuori dalla testa prima di dormire, non combattuti a letto.',
+    science: 'Come si fa in pratica: tieni carta e penna vicino al letto. Prima di spegnere la luce, scrivi l\'elenco delle cose in sospeso per domani — una lista secca, non un tema. Perché funziona: in uno studio con misurazione del sonno in laboratorio (Scullin et al., 2018), chi scriveva la lista delle cose DA FARE si addormentava più in fretta di chi scriveva quelle già fatte. Messi su carta, i pensieri smettono di girare in testa: il cervello li considera consegnati.',
+    missions: [
+      { name: 'Scarica i pensieri su carta 10 min prima di dormire', diff: 'Facile', cat: 'Spirito' },
+      { name: 'Schermi spenti 30 minuti prima di dormire', diff: 'Media', cat: 'Salute' }
+    ]
+  },
+  sleep_procr: {
+    label: 'Procrastinazione dell\'ora di dormire',
+    note: 'La sera "rubata" è tempo che ti ripaghi con gli interessi la mattina dopo.',
+    science: 'Ha un nome scientifico: "procrastinazione dell\'ora di dormire" — restare alzati senza nessun motivo, pur sapendo che domani si paga (Kroese et al., 2014). Come si gestisce: l\'orario per andare a letto lo decidi DI GIORNO, a mente lucida. La sera non decidi più niente: esegui e basta. Se la decisione la prendi alle 23:47 col telefono in mano, vince sempre il telefono.',
+    missions: [
+      { name: 'A letto entro l\'orario deciso — decidilo adesso', diff: 'Media', cat: 'Salute' },
+      { name: 'Ultima mezz\'ora senza telefono in mano', diff: 'Media', cat: 'Salute' }
+    ]
+  },
+  task_delay: {
+    label: 'Evitamento da scadenza',
+    note: 'Non serve finire: serve aprire. I 10 minuti tolgono al compito il suo peso immaginario.',
+    science: 'Come si fa in pratica: scegli il compito che stai evitando, metti un timer da 10 minuti e inizia — col patto che allo scadere puoi smettere, senza sensi di colpa. Quasi sempre continuerai: la parte difficile non è fare il compito, è iniziarlo. Se il compito è grosso, prima spezzalo in 3 pezzi piccoli e parti dal primo. La ricerca che ha confrontato tutti i metodi contro la procrastinazione (van Eerde & Klingsieck, 2018; Rozental & Carlbring, 2014) dice che i più efficaci sono esattamente questi due: pezzi piccoli e partenza facilissima.',
+    missions: [
+      { name: 'Apri il compito più importante per soli 10 minuti', diff: 'Facile', cat: 'Intelletto' },
+      { name: 'Scomponi il compito grosso in 3 pezzi piccoli', diff: 'Facile', cat: 'Intelletto' }
+    ]
+  },
+  task_focus: {
+    label: 'Dispersione dell\'attenzione',
+    note: 'Il problema non è la volontà: è l\'ambiente. Un blocco protetto vale più di tre ore disperse.',
+    science: 'Come si fa in pratica: prima del blocco di lavoro, porta il telefono in un\'altra stanza. Non in tasca, non a faccia in giù sulla scrivania: proprio in un\'altra stanza. Perché: uno studio famoso ("Brain Drain", Ward et al., 2017) ha mostrato che il telefono consuma attenzione anche da spento, se è a portata di mano — una parte del cervello resta occupata a ignorarlo. Poi 25 minuti di lavoro col timer Focus, e hai finito la missione.',
+    missions: [
+      { name: 'Un blocco da 25 min senza telefono (usa il timer Focus)', diff: 'Media', cat: 'Intelletto' }
+    ]
+  },
+  unstructured: {
+    label: 'Ansia da tempo non strutturato',
+    note: 'Non ti serve avere qualcosa da fare: ti serve un punto fisso nel tempo. Il contenuto non conta, conta l\'orario.',
+    science: 'Come si fa in pratica: la sera prima di un giorno libero, fissa un impegno con un orario preciso — anche banale: "alle 8:30 esco a prendere il caffè". Non serve che sia utile, serve che sia fissato. Perché funziona: il cervello ansioso non odia gli impegni, odia il vuoto imprevedibile — è l\'incertezza ad accendere l\'allarme, la prevedibilità lo spegne (Grupe & Nitschke, 2013, Nature Reviews Neuroscience). Un punto fermo dà una forma alla giornata, e il resto del tempo smette di essere un buco.',
+    missions: [
+      { name: 'Fissa un\'ancora per il prossimo giorno libero (orario preciso)', diff: 'Facile', cat: 'Spirito', cad: 'weekly' }
+    ]
+  },
+  screen: {
+    label: 'Fuga nello schermo',
+    note: 'Lo schermo riempie il silenzio che l\'ansia non tollera. Si inizia dai primi 30 minuti del giorno.',
+    science: 'Come si fa in pratica: la sera lasci il telefono fuori dalla camera, o comunque lontano dal letto. La prima mezz\'ora del giorno la fai senza: caffè, doccia, colazione — quello che vuoi, ma senza schermo. È la stessa logica della sveglia lontana: se una cosa non è a portata di mano, non devi resisterle — la tentazione sparisce da sola (controllo dello stimolo, Bootzin 1972; sul telefono che consuma attenzione anche da fermo: Ward et al., 2017).',
+    missions: [
+      { name: 'Prima mezz\'ora del giorno senza telefono', diff: 'Media', cat: 'Salute' },
+      { name: 'Registra lo screen time di ieri (tab SCHERMO)', diff: 'Molto facile', cat: 'Salute' }
+    ]
+  }
+};
+
+const Checkin = {
+  idx: -1, flags: [],
+  open() {
+    this.idx = -1; this.flags = [];
+    this.render();
+    document.getElementById('checkinBg').classList.add('active');
+  },
+  render() {
+    // Schermata introduttiva prima delle domande
+    if (this.idx === -1) {
+      document.getElementById('checkinProgress').textContent = 'DIAGNOSI DI SOPRAVVIVENZA';
+      document.getElementById('checkinQ').textContent =
+        'Queste 4 domande servono a capire a che punto è la tua trasformazione — dove i morti stanno già mangiando le tue giornate: il risveglio, il sonno, i compiti, il tempo vuoto. ' +
+        'Rispondi con sincerità: nessuno ti giudica, e nessuna risposta è sbagliata. ' +
+        'Le risposte impostano le tue piccole missioni quotidiane — il protocollo per restare umano.';
+      const wrap = document.getElementById('checkinOpts');
+      wrap.innerHTML = '';
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.style.cssText = 'width:100%;';
+      b.textContent = 'INIZIA IL CHECK-IN';
+      b.addEventListener('click', () => {
+        if (typeof sfxClick === 'function') sfxClick();
+        this.idx = 0;
+        this.render();
+      });
+      wrap.appendChild(b);
+      // "Più tardi": salta senza insistere — resta disponibile nella tab MISSIONI
+      const skip = document.createElement('button');
+      skip.className = 'btn small';
+      skip.style.cssText = 'width:100%; opacity:0.7;';
+      skip.textContent = 'PIÙ TARDI (lo trovi nella tab MISSIONI)';
+      skip.addEventListener('click', () => {
+        document.getElementById('checkinBg').classList.remove('active');
+        if (!G.checkin) {
+          G.checkin = { date: todayStr(), patterns: [], skipped: true };
+          saveState();
+        }
+        if (!G.tutorialDone) setTimeout(() => tutorOpen(), 260);
+      });
+      wrap.appendChild(skip);
+      return;
+    }
+    const cq = CHECKIN_QUESTIONS[this.idx];
+    if (!cq) { this.finish(); return; }
+    document.getElementById('checkinProgress').textContent = `${this.idx + 1} / ${CHECKIN_QUESTIONS.length}`;
+    document.getElementById('checkinQ').textContent = cq.q;
+    const wrap = document.getElementById('checkinOpts');
+    wrap.innerHTML = '';
+    cq.opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'btn small';
+      b.style.cssText = 'width:100%; text-align:left; text-transform:none; letter-spacing:0.5px; font-family:\'Special Elite\', monospace; font-size:15px;';
+      b.textContent = o.t;
+      b.addEventListener('click', () => {
+        if (typeof sfxClick === 'function') sfxClick();
+        if (o.flag) this.flags.push(o.flag);
+        this.idx++;
+        this.render();
+      });
+      wrap.appendChild(b);
+    });
+  },
+  finish() {
+    document.getElementById('checkinBg').classList.remove('active');
+    const patterns = [...new Set(this.flags)];
+    G.checkin = { date: todayStr(), patterns };
+    let created = 0;
+    let summaryHtml;
+    const disclaimer = '<p class="muted" style="font-size:12px; margin-top:14px">DEADLINE è un gioco, non uno strumento diagnostico. Le fonti citate descrivono meccanismi generali, non il tuo caso. Se l\'ansia pesa sulla tua vita, la mossa giusta è parlarne con un professionista.</p>';
+    if (patterns.length === 0) {
+      // nessun pattern critico: starter pack classico
+      if (G.missions.length === 0) {
+        addMission('Bere 2 litri d\'acqua', 'Molto facile', 'daily', 'Salute');
+        addMission('30 minuti di movimento', 'Facile', 'daily', 'Forza');
+        addMission('Sessione di studio profondo', 'Media', 'daily', 'Intelletto');
+        addMission('Chiamata a un familiare/amico', 'Facile', 'weekly', 'Sociale');
+        addMission('10 min di journaling', 'Molto facile', 'daily', 'Spirito');
+        created = 5;
+      }
+      summaryHtml = '<p>Nessun pattern critico identificato. Ti ho preparato le missioni base: si scala da lì.</p>' + disclaimer;
+    } else {
+      patterns.forEach(f => {
+        const plan = CHECKIN_PLANS[f];
+        if (!plan) return;
+        plan.missions.forEach(m => {
+          if (!G.missions.some(x => x.name === m.name)) {
+            addMission(m.name, m.diff, m.cad || 'daily', m.cat);
+            created++;
+          }
+        });
+      });
+      // Un blocco per pattern: nome, meccanismo, fonti dichiarate
+      const blocks = patterns.map(f => {
+        const plan = CHECKIN_PLANS[f];
+        return `<div style="text-align:left; margin:12px 0; padding:10px 12px; background:var(--bg-mid); border-left:3px solid var(--gb-glow); border-radius:6px">
+          <p style="font-size:16px; margin-bottom:6px"><strong>${escapeHtml(plan.label)}</strong></p>
+          <p style="font-size:14px; margin-bottom:8px">${escapeHtml(plan.note)}</p>
+          <p class="muted" style="font-size:12.5px; line-height:1.5"><strong>Cosa dice la letteratura:</strong> ${escapeHtml(plan.science)}</p>
+        </div>`;
+      }).join('');
+      summaryHtml = blocks +
+        `<p style="font-size:15px; margin-top:10px"><strong>${created}</strong> missioni quotidiane create su misura — le trovi nella tab MISSIONI. Protocollo minimo: meno regole, meno margine di negoziazione.</p>` +
+        disclaimer;
+    }
+    logEvent(`Check-in completato: ${patterns.length ? patterns.map(f => CHECKIN_PLANS[f].label).join(', ') : 'nessun pattern critico'}.`, 'evt-rest');
+    saveState();
+    renderAll();
+    showModalHTML(patterns.length ? 'PATTERN IDENTIFICATO' : 'CHECK-IN COMPLETATO', summaryHtml);
+    // dopo il riepilogo, tutorial nomi personaggi (solo primo avvio)
+    if (!G.tutorialDone) {
+      const onClose = () => {
+        document.getElementById('modalClose').removeEventListener('click', onClose);
+        setTimeout(() => tutorOpen(), 260);
+      };
+      document.getElementById('modalClose').addEventListener('click', onClose);
+    }
+  }
+};
+
+// Bottone CHECK-IN nella tab MISSIONI: rifai la diagnosi quando vuoi
+(function bindCheckinBtn() {
+  const btn = document.getElementById('checkinBtn');
+  if (btn) btn.addEventListener('click', () => {
+    if (typeof sfxClick === 'function') sfxClick();
+    Checkin.open();
+  });
+})();
+
 // -------------------- WELCOME --------------------
 function showWelcome() {
   document.getElementById('welcomeBg').classList.add('active');
@@ -10953,22 +11846,13 @@ document.getElementById('welcomeStart').addEventListener('click', () => {
   const n = document.getElementById('welcomeName').value.trim() || 'Sopravvissuto';
   G.player.name = n;
   G.initialized = true;
-  // Missioni di esempio
-  if (G.missions.length === 0) {
-    addMission('Bere 2 litri d\'acqua', 'Molto facile', 'daily', 'Salute');
-    addMission('30 minuti di movimento', 'Facile', 'daily', 'Forza');
-    addMission('Sessione di studio profondo', 'Media', 'daily', 'Intelletto');
-    addMission('Chiamata a un familiare/amico', 'Facile', 'weekly', 'Sociale');
-    addMission('10 min di journaling', 'Molto facile', 'daily', 'Spirito');
-  }
   document.getElementById('welcomeBg').classList.remove('active');
   logEvent(`${G.player.name} arriva nel rifugio. Inizia la resistenza.`, 'evt-success');
   saveState();
   renderAll();
-  // Tutorial nomi personaggi (solo al primo avvio)
-  if (!G.tutorialDone) {
-    setTimeout(() => tutorOpen(), 320);
-  }
+  // Check-in iniziale: le risposte generano le missioni starter su misura.
+  // Il tutorial nomi personaggi viene aperto dal check-in stesso, a fine flusso.
+  setTimeout(() => Checkin.open(), 320);
 });
 
 // === TUTORIAL NOMI PERSONAGGI ===
@@ -11169,6 +12053,8 @@ function renderAll() {
   document.getElementById('vBuildings').textContent = builtCount;
   document.getElementById('vSurvivors').textContent = G.survivors.length + 1;
   let defense = G.buildings.wall.level * 8 + G.buildings.watchtower.level * 6;
+  // Cuccia del Cane: Doggo di guardia
+  if (G.buildings.cuccia && G.buildings.cuccia.level > 0) defense += G.buildings.cuccia.level * 4;
   G.survivors.forEach(s => { if (s.bonus.defense) defense += s.bonus.defense; });
   if (hasSpecial('luoluo')) defense += 5;
   if (hasSpecial('dj_lello')) defense += 10;
@@ -11658,7 +12544,7 @@ const Rules = {
         _applyXpGain(s.player, xp);
         _applySkillXpGain(s, skill, skillXp);
         s.stats.totalFocusMinutes = (s.stats.totalFocusMinutes || 0) + minutes;
-        _pushLog(s, `Focus ${type}: ${minutes} min → +${legno}🪵 +${ferro}⚙ +${ricerca}📜`, 'evt-success');
+        _pushLog(s, `Focus ${type}: ${minutes} min → +${legno}☰ +${ferro}⚙ +${ricerca}⚗︎`, 'evt-success');
         // Drift morale per tipo di focus (silenzioso)
         const md = MORALE_DELTA_FOCUS[type] || 0;
         if (md !== 0) Morale.applyToState(s, md, `focus:${type}`);
@@ -11739,6 +12625,19 @@ const Game = {
     if (result.ok && result.mutator) {
       Store.setState(result.mutator);
       checkAchievements();
+      // Missione personale di un personaggio speciale: segna il legame e sblocca
+      if (m && m.charId && !charMissionDone(m.charId)) {
+        if (!G.charMissionsDone) G.charMissionsDone = {};
+        G.charMissionsDone[m.charId] = true;
+        const cname = getSpecialName(m.charId);
+        const unlockMsg = CHAR_MISSION_UNLOCKS[m.charId];
+        sfxLevelUp();
+        logEvent(`Legame rafforzato con ${cname}: missione personale completata.`, 'evt-success');
+        showModal('LEGAME RAFFORZATO',
+          `Hai completato la missione personale di ${cname}.` +
+          (unlockMsg ? `\n\n🔓 Sbloccato: ${unlockMsg}. Vai in COSTRUZIONI.` : `\n\n${cname} ti guarda con più rispetto di prima.`));
+        saveState();
+      }
       // Modal celebrativo se è stato sbloccato un personaggio speciale
       if (willUnlock) {
         const target = SPECIAL_CHARACTERS.find(c => c.lockedBy === willUnlock);
@@ -11914,6 +12813,10 @@ function boot() {
   if (G.player.freezes === undefined) G.player.freezes = 2;
   if (G.player.longestStreak === undefined) G.player.longestStreak = 0;
   if (!Array.isArray(G.missions)) G.missions = [];
+  // Check-in per i salvataggi esistenti che non l'hanno mai fatto (una volta sola)
+  if (G.initialized && !G.checkin) {
+    setTimeout(() => { try { Checkin.open(); } catch(_) {} }, 1200);
+  }
   // Reset counter mission "current" e "awarded" se la finestra di cadenza è scaduta
   try { if (typeof resetAllCountersIfNeeded === 'function') resetAllCountersIfNeeded(); } catch(_) {}
   if (!Array.isArray(G.focus)) G.focus = [];
