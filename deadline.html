@@ -8545,8 +8545,9 @@ function initVillageRuntime(w, h) {
       bob: i * 1.5
     });
   }
-  // Player parte vicino al centro
-  villageRuntime.playerPos = { x: w/2, y: h/2, tx: w/2, ty: h/2, nextMoveAt: Date.now() + 4000 };
+  // Il player parte sulla strada sotto la Capanna, non sopra: al centro
+  // coprirebbe l'edificio principale appena apri la tab.
+  villageRuntime.playerPos = { x: w/2, y: h/2 + 46, tx: w/2, ty: h/2 + 46, nextMoveAt: Date.now() + 4000 };
   villageRuntime.initialized = true;
 }
 
@@ -8575,7 +8576,8 @@ function updateVillageRuntime(dt, w, h) {
     let rs = villageRuntime.survivors[s.id];
     if (!rs) {
       const t = _randomTarget(b);
-      rs = { x: w/2, y: h/2, tx: t.tx, ty: t.ty, nextMoveAt: Date.now() + 1000, dir: 1 };
+      const start = _randomTarget(b);   // sparsi, non tutti ammucchiati al centro
+      rs = { x: start.tx, y: start.ty, tx: t.tx, ty: t.ty, nextMoveAt: Date.now() + 1000, dir: 1 };
       villageRuntime.survivors[s.id] = rs;
     }
     const dx = rs.tx - rs.x, dy = rs.ty - rs.y;
@@ -8720,6 +8722,36 @@ function drawWindowLight(ctx, x, y, w, h) {
   ctx.fillRect(x + Math.floor(w/2) - 4, y + h - 16, 8, 8);
 }
 
+/* === PALETTE E RUMORE DEL VILLAGGIO (stile 16 bit) ===
+   Un'unica palette per erba, terra, legno e tetti: prima ogni elemento aveva
+   i suoi colori scollegati e il risultato era fangoso. */
+const VP = {
+  g0:'#3f6b33', g1:'#487a39', g2:'#35592b', g3:'#5c9445', g4:'#6fa54a',
+  d0:'#8a6a45', d1:'#9c7a52', d2:'#6f5336', peb:'#b6a37d',
+  ink:'#1a2415', sh:'rgba(18,26,14,0.32)',
+  wood:'#6b4a2c', woodL:'#8a6238', woodD:'#4a3220',
+  glass:'#f2c85c'
+};
+function vHash(x, y, s) {
+  const n = Math.sin(x * 127.1 + y * 311.7 + (s || 0) * 74.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+function vNoise(x, y, s) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const sm = t => t * t * (3 - 2 * t);
+  const a = vHash(xi, yi, s), b = vHash(xi+1, yi, s), c = vHash(xi, yi+1, s), d = vHash(xi+1, yi+1, s);
+  const u = sm(xf), v = sm(yf);
+  return a*(1-u)*(1-v) + b*u*(1-v) + c*(1-u)*v + d*u*v;
+}
+// Cerchio pieno in pixel: la base di alberi e cespugli.
+function vBlob(cx, cy, r) {
+  for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) {
+    if (x*x + y*y <= r*r + r*0.4) VCTX.fillRect(cx + x, cy + y, 1, 1);
+  }
+}
+
+let _villageBg = null, _villageBgKey = '';
+
 function drawVillage() {
   const w = VC.width, h = VC.height;
   const t = Date.now() / 1000;
@@ -8734,45 +8766,56 @@ function drawVillage() {
   const tod = getTimeOfDay();
   _isNightCache = tod.isNight;
 
-  // === SFONDO: terra/erba uniforme (vista dall'alto) ===
-  VCTX.fillStyle = '#3e5226';
-  VCTX.fillRect(0, 0, w, h);
-  // Pattern erba: tile 8x8 con tonalità che variano
-  for (let y = 0; y < h; y += TILE) {
-    for (let x = 0; x < w; x += TILE) {
-      const n = (Math.sin(x*0.27 + y*0.34) + Math.cos(x*0.41 - y*0.21) + 2) * 0.25;
-      if (n > 0.78)      VCTX.fillStyle = '#506a2e';
-      else if (n > 0.6)  VCTX.fillStyle = '#48602a';
-      else if (n < 0.25) VCTX.fillStyle = '#2c3e1a';
-      else continue;
-      VCTX.fillRect(x, y, TILE, TILE);
+  // === SFONDO STATICO (erba, strade, alberi, palizzata) ===
+  // Erba e strade nascono da rumore procedurale: ricalcolarle 20 volte al
+  // secondo scaldava il telefono per niente, visto che non cambiano mai.
+  // Si disegnano una volta sola e poi si ricopiano da una canvas di appoggio.
+  const bgKey = w + 'x' + h + '|wall' + (G.buildings?.wall?.level || 0);
+  if (_villageBg && _villageBgKey === bgKey) {
+    VCTX.drawImage(_villageBg, 0, 0);
+  } else {
+    // === TERRENO: base + macchie a bassa frequenza + ciuffi radi ===
+    // La vecchia scacchiera 8x8 dava un effetto damiera; qui la variazione e'
+    // ampia e morbida, e il dettaglio fine sono pochi ciuffi sparsi.
+    VCTX.fillStyle = VP.g0;
+    VCTX.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 4) {
+      for (let x = 0; x < w; x += 4) {
+        const n = vNoise(x / 56, y / 56, 1);
+        if (n > 0.62)      { VCTX.fillStyle = VP.g1; VCTX.fillRect(x, y, 4, 4); }
+        else if (n < 0.36) { VCTX.fillStyle = VP.g2; VCTX.fillRect(x, y, 4, 4); }
+      }
     }
-  }
-  // Ciuffi d'erba (puntini più chiari)
-  for (let i = 0; i < 80; i++) {
-    const x = (i * 47 + 11) % w;
-    const y = (i * 73 + 17) % h;
-    VCTX.fillStyle = '#7a9445';
-    VCTX.fillRect(x, y, 2, 1);
-  }
+    for (let i = 0; i < 260; i++) {
+      const gx = Math.floor(vHash(i, 3, 7) * w), gy = Math.floor(vHash(i, 9, 11) * h);
+      VCTX.fillStyle = vHash(i, 5, 13) > 0.82 ? VP.g4 : VP.g3;
+      if (vHash(i, 1, 2) > 0.5) { VCTX.fillRect(gx, gy, 2, 1); VCTX.fillRect(gx + 1, gy - 1, 1, 1); }
+      else VCTX.fillRect(gx, gy, 1, 2);
+    }
 
-  // === STRADE LASTRICATE (croce a quattro vie dal centro) ===
-  drawCobblePath(w, h);
+    // === STRADE LASTRICATE (croce a quattro vie dal centro) ===
+    drawCobblePath(w, h);
 
-  // === ALBERI decorativi (cerchi visti dall'alto) sparsi negli spazi vuoti ===
-  drawTreeAt(20, 90, 0);
-  drawTreeAt(w - 40, 90, 1);
-  drawTreeAt(20, h - 100, 2);
-  drawTreeAt(w - 40, h - 100, 0);
-  drawTreeAt(w/2 - 28, 88, 1);
-  drawTreeAt(w/2 + 60, h - 100, 2);
-  drawTreeAt(220, 90, 0);
-  drawTreeAt(60, 248, 1);
-  drawTreeAt(w - 70, 248, 0);
+    // === ALBERI decorativi (cerchi visti dall'alto) sparsi negli spazi vuoti ===
+    drawTreeAt(20, 90, 0);
+    drawTreeAt(w - 40, 90, 1);
+    drawTreeAt(20, h - 100, 2);
+    drawTreeAt(w - 40, h - 100, 0);
+    drawTreeAt(w/2 - 28, 88, 1);
+    drawTreeAt(w/2 + 60, h - 100, 2);
+    drawTreeAt(220, 90, 0);
+    drawTreeAt(60, 248, 1);
+    drawTreeAt(w - 70, 248, 0);
 
-  // === PALIZZATA perimetrale (vista dall'alto = bordo spesso) ===
-  if (G.buildings.wall.level > 0) {
-    drawPalisade(w, h, G.buildings.wall.level);
+    // === PALIZZATA perimetrale (vista dall'alto = bordo spesso) ===
+    if (G.buildings.wall.level > 0) {
+      drawPalisade(w, h, G.buildings.wall.level);
+    }
+
+    _villageBg = document.createElement('canvas');
+    _villageBg.width = w; _villageBg.height = h;
+    _villageBg.getContext('2d').drawImage(VC, 0, 0);
+    _villageBgKey = bgKey;
   }
 
   // === EDIFICI — griglia 5×3 GTA-style ===
@@ -8881,85 +8924,78 @@ function drawVillage() {
 
 // === HELPERS ===
 function drawHudBox(x, y, w, h, text, textColor) {
-  VCTX.fillStyle = 'rgba(0,0,0,0.78)';
-  VCTX.fillRect(x, y, w, h);
-  VCTX.strokeStyle = textColor;
-  VCTX.lineWidth = 1;
-  VCTX.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-  VCTX.fillStyle = textColor;
+  // Il riquadro si adatta al testo: prima era largo fisso e restava mezzo vuoto.
   VCTX.font = 'bold 9px monospace';
-  VCTX.fillText(text, x + 5, y + 11);
+  const tw = Math.ceil(VCTX.measureText(text).width);
+  const bw = Math.min(w, tw + 12);
+  const bx = (x + w >= VC.width - 1) ? (x + w - bw) : x;   // ancorato a destra se il box tocca il bordo
+  VCTX.fillStyle = 'rgba(12,16,10,0.80)';
+  VCTX.fillRect(bx, y, bw, h);
+  VCTX.fillStyle = 'rgba(0,0,0,0.5)';
+  VCTX.fillRect(bx, y + h - 1, bw, 1);
+  VCTX.fillStyle = textColor;
+  VCTX.fillRect(bx, y, bw, 1);
+  VCTX.fillText(text, bx + 6, y + 11);
 }
 
 function drawCobblePath(w, h) {
-  // Vista dall'alto: croce di strade lastricate dal centro che passa tra gli edifici.
-  // Strada orizzontale a metà altezza + strada verticale al centro che collega le righe.
+  // Strada sterrata a croce. Il bordo non e' dritto: segue un rumore, cosi'
+  // non sembra una fascia incollata sopra il prato.
   const ctx = VCTX;
-  const cy = h/2;
-  const cx = w/2;
-  // bordo terra battuta sotto le strade (ombra del bordo strada)
-  ctx.fillStyle = '#4a3825';
-  ctx.fillRect(12, cy - 12, w - 24, 24);   // orizzontale
-  ctx.fillRect(cx - 12, 12, 24, h - 24);   // verticale
-
-  // pietre del lastricato (orizzontale)
-  for (let x = 12; x < w - 12; x += 6) {
-    for (let y = cy - 10; y < cy + 10; y += 6) {
-      const n = (Math.sin(x * 0.55 + y * 0.75) + Math.cos(x * 0.32) + 2) * 0.25;
-      if (n > 0.7)      ctx.fillStyle = '#a39477';
-      else if (n > 0.45) ctx.fillStyle = '#857658';
-      else if (n > 0.25) ctx.fillStyle = '#6a5a40';
-      else              ctx.fillStyle = '#52442e';
-      ctx.fillRect(x, y, 5, 5);
+  const cy = Math.round(h / 2), cx = Math.round(w / 2);
+  const HH = 13, HV = 12;
+  const dirtPx = (x, y) => {
+    const n = vNoise(x / 9, y / 9, 5);
+    ctx.fillStyle = n > 0.62 ? VP.d1 : (n < 0.38 ? VP.d2 : VP.d0);
+    ctx.fillRect(x, y, 1, 1);
+  };
+  for (let x = 0; x < w; x++) {
+    const j2 = Math.round((vNoise(x / 14, 0, 3) - 0.5) * 5);
+    const top = cy - HH + j2, bot = cy + HH + j2;
+    for (let y = top; y < bot; y++) dirtPx(x, y);
+    ctx.fillStyle = VP.ink;
+    ctx.fillRect(x, top - 1, 1, 1);
+    ctx.fillRect(x, bot, 1, 1);
+  }
+  for (let y = 0; y < h; y++) {
+    const j2 = Math.round((vNoise(0, y / 14, 4) - 0.5) * 5);
+    const l = cx - HV + j2, r = cx + HV + j2;
+    for (let x = l; x < r; x++) dirtPx(x, y);
+    if (y < cy - HH - 3 || y > cy + HH + 3) {
+      ctx.fillStyle = VP.ink;
+      ctx.fillRect(l - 1, y, 1, 1);
+      ctx.fillRect(r, y, 1, 1);
     }
   }
-  // pietre del lastricato (verticale)
-  for (let x = cx - 10; x < cx + 10; x += 6) {
-    for (let y = 12; y < h - 12; y += 6) {
-      const n = (Math.sin(x * 0.55 + y * 0.75) + Math.cos(y * 0.32) + 2) * 0.25;
-      if (n > 0.7)      ctx.fillStyle = '#a39477';
-      else if (n > 0.45) ctx.fillStyle = '#857658';
-      else if (n > 0.25) ctx.fillStyle = '#6a5a40';
-      else              ctx.fillStyle = '#52442e';
-      ctx.fillRect(x, y, 5, 5);
-    }
+  // sassolini e solchi
+  for (let i = 0; i < 110; i++) {
+    const onH = vHash(i, 5, 9) > 0.5;
+    const x = onH ? Math.floor(vHash(i, 1, 4) * w) : cx - 10 + Math.floor(vHash(i, 2, 6) * 20);
+    const y = onH ? cy - 9 + Math.floor(vHash(i, 3, 8) * 18) : Math.floor(vHash(i, 4, 2) * h);
+    ctx.fillStyle = vHash(i, 7, 1) > 0.5 ? VP.peb : VP.d2;
+    ctx.fillRect(x, y, 2, 1);
   }
-  // Crepe / linee scure tra le pietre
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  for (let x = 12; x < w - 12; x += 6) ctx.fillRect(x + 5, cy - 11, 1, 22);
-  for (let y = 12; y < h - 12; y += 6) ctx.fillRect(cx - 11, y + 5, 22, 1);
 }
 
 // Albero visto dall'alto: cerchio di chioma con tronco al centro e ombra
 function drawTreeAt(x, y, type=0) {
+  // Chioma tonda con contorno scuro e ombra a terra: e' il contorno che la fa
+  // leggere come oggetto invece che come macchia di colore.
   const ctx = VCTX;
-  const palettes = [
-    ['#1a3010', '#2a4818', '#3a6020', '#5a8030'],     // verde sano
-    ['#221a08', '#3a3018', '#5a4828', '#7a6638'],     // secco/giallo
-    ['#15280c', '#244218', '#3c5a24', '#5a7a30']      // verde scuro foresta
-  ];
-  const p = palettes[type % palettes.length];
-  // Ombra (offset SE per stile GTA top-down)
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.fillRect(x + 2, y + 2, 14, 14);
-  // Cerchio chioma esterno (più scuro)
-  ctx.fillStyle = p[0];
-  ctx.fillRect(x + 2, y, 12, 16);
-  ctx.fillRect(x, y + 2, 16, 12);
-  // Strato medio
-  ctx.fillStyle = p[1];
-  ctx.fillRect(x + 3, y + 1, 10, 14);
-  ctx.fillRect(x + 1, y + 3, 14, 10);
-  // Strato chiaro
-  ctx.fillStyle = p[2];
-  ctx.fillRect(x + 4, y + 3, 8, 10);
-  ctx.fillRect(x + 3, y + 4, 10, 8);
-  // Highlight in alto-sx (luce dall'alto-NW)
-  ctx.fillStyle = p[3];
-  ctx.fillRect(x + 4, y + 4, 4, 3);
-  // Tronco al centro (visto da sopra = piccolo cerchio scuro)
-  ctx.fillStyle = '#2a1a0c';
-  ctx.fillRect(x + 7, y + 7, 2, 2);
+  const cx = x + 8, cy = y + 8;
+  const seed = (x * 7 + y * 13);
+  const r = (type === 1) ? 6 : (vHash(seed, 2, 3) > 0.5 ? 9 : 7);
+  const tones = [
+    ['#2c5222', '#3d6b2c', '#548a3a', '#6fa54a'],   // sano
+    ['#3a3a1c', '#4e4a24', '#6a6430', '#867d3e'],   // secco
+    ['#22421a', '#325626', '#467030', '#5d8c3c']    // scuro
+  ][type % 3];
+  ctx.fillStyle = VP.sh;  ctx.fillRect(cx - r + 3, cy + r - 2, r * 2 - 2, 4);
+  ctx.fillStyle = VP.ink; vBlob(cx, cy, r + 1);
+  ctx.fillStyle = tones[0]; vBlob(cx, cy, r);
+  ctx.fillStyle = tones[1]; vBlob(cx - 1, cy - 1, r - 2);
+  ctx.fillStyle = tones[2]; vBlob(cx - 2, cy - 2, Math.max(1, r - 4));
+  ctx.fillStyle = tones[3]; ctx.fillRect(cx - r + 3, cy - r + 3, 2, 2);
 }
 
 function drawSmoke(x, y, t) {
@@ -8976,58 +9012,44 @@ function drawSmoke(x, y, t) {
 }
 
 function drawPalisade(w, h, lvl) {
-  // Vista dall'alto: la palizzata è un bordo spesso di legno marrone tutto intorno
-  // al perimetro, con piccoli picchetti come "denti" del bordo.
+  // Steccato di pali piantati, non un bordo pieno: si legge subito come
+  // recinto e lascia respirare il prato. Varchi dove passano le strade.
   const ctx = VCTX;
-  const T = 8;  // spessore del muro
-  // Bordo principale (marrone medio)
-  ctx.fillStyle = '#5a4028';
-  ctx.fillRect(0, 0, w, T);          // top
-  ctx.fillRect(0, h - T, w, T);      // bottom
-  ctx.fillRect(0, 0, T, h);          // left
-  ctx.fillRect(w - T, 0, T, h);      // right
-  // Pattern picchetti scuri (i listelli)
-  ctx.fillStyle = '#3a2818';
-  for (let x = 2; x < w; x += 5) {
-    ctx.fillRect(x, 0, 1, T);          // top
-    ctx.fillRect(x, h - T, 1, T);      // bottom
+  const cx = Math.round(w / 2), cy = Math.round(h / 2);
+  const GATE = 15;
+  const post = (px, py) => {
+    ctx.fillStyle = VP.sh;    ctx.fillRect(px + 1, py + 7, 6, 2);
+    ctx.fillStyle = VP.ink;   ctx.fillRect(px, py, 6, 8);
+    ctx.fillStyle = VP.wood;  ctx.fillRect(px + 1, py + 1, 4, 6);
+    ctx.fillStyle = VP.woodL; ctx.fillRect(px + 1, py + 1, 4, 1);
+  };
+  const m = 5;
+  for (let x = m; x < w - m; x += 8) {
+    if (Math.abs(x + 3 - cx) > GATE) { post(x, m); post(x, h - m - 8); }
   }
-  for (let y = 2; y < h; y += 5) {
-    ctx.fillRect(0, y, T, 1);          // left
-    ctx.fillRect(w - T, y, T, 1);      // right
+  for (let y = m; y < h - m; y += 8) {
+    if (Math.abs(y + 4 - cy) > GATE) { post(m, y); post(w - m - 6, y); }
   }
-  // Highlight chiaro sui bordi interni (luce)
-  ctx.fillStyle = '#7a5a3a';
-  ctx.fillRect(0, T - 1, w, 1);
-  ctx.fillRect(0, h - T, w, 1);
-  ctx.fillRect(T - 1, 0, 1, h);
-  ctx.fillRect(w - T, 0, 1, h);
-  // Cancello centrale (apertura sulla strada lastricata)
-  ctx.fillStyle = '#3e5226';
-  const gateOpen = 18;
-  ctx.fillRect(0, h/2 - gateOpen/2, T, gateOpen);
-  ctx.fillRect(w - T, h/2 - gateOpen/2, T, gateOpen);
-  ctx.fillRect(w/2 - gateOpen/2, 0, gateOpen, T);
-  ctx.fillRect(w/2 - gateOpen/2, h - T, gateOpen, T);
-  // Rinforzi se livello > 1 (doppia parete)
+  // Livello 2+: seconda fila interna
   if (lvl > 1) {
-    ctx.fillStyle = '#3a2818';
-    ctx.fillRect(T, T, w - T*2, 1);
-    ctx.fillRect(T, h - T - 1, w - T*2, 1);
-    ctx.fillRect(T, T, 1, h - T*2);
-    ctx.fillRect(w - T - 1, T, 1, h - T*2);
+    for (let x = m + 4; x < w - m; x += 12) {
+      if (Math.abs(x + 3 - cx) > GATE + 4) { post(x, m + 9); post(x, h - m - 17); }
+    }
+    for (let y = m + 6; y < h - m; y += 12) {
+      if (Math.abs(y + 4 - cy) > GATE + 4) { post(m + 8, y); post(w - m - 14, y); }
+    }
   }
-  // Torrette agli angoli se livello >= 3
+  // Livello 3+: piazzole d'angolo con lanterna
   if (lvl >= 3) {
-    [ [0,0], [w-12,0], [0,h-12], [w-12,h-12] ].forEach(([cx, cy]) => {
-      ctx.fillStyle = '#3a2818';
-      ctx.fillRect(cx, cy, 12, 12);
-      ctx.fillStyle = '#7a5a3a';
-      ctx.fillRect(cx + 1, cy + 1, 10, 10);
-      ctx.fillStyle = '#5a4028';
-      ctx.fillRect(cx + 3, cy + 3, 6, 6);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(cx + 5, cy + 5, 2, 2);
+    [[m, m], [w - m - 14, m], [m, h - m - 14], [w - m - 14, h - m - 14]].forEach(([bx, by]) => {
+      ctx.fillStyle = VP.sh;    ctx.fillRect(bx + 2, by + 12, 14, 4);
+      ctx.fillStyle = VP.ink;   ctx.fillRect(bx - 1, by - 1, 16, 16);
+      ctx.fillStyle = VP.woodD; ctx.fillRect(bx, by, 14, 14);
+      ctx.fillStyle = VP.wood;  ctx.fillRect(bx + 1, by + 1, 12, 12);
+      ctx.fillStyle = VP.woodL; ctx.fillRect(bx + 1, by + 1, 12, 1);
+      ctx.fillStyle = VP.ink;   ctx.fillRect(bx + 5, by + 5, 4, 4);
+      ctx.fillStyle = _isNightCache ? VP.glass : '#3a2a18';
+      ctx.fillRect(bx + 6, by + 6, 2, 2);
     });
   }
 }
@@ -9094,378 +9116,236 @@ function drawMoraleDecor(w, h) {
 }
 
 function drawBuilding(key, x, y, lvl) {
+  // Tutti gli edifici passano dallo stesso trattamento — ombra a terra,
+  // contorno scuro, muro con assi, tetto con colmo chiaro e gronda scura —
+  // e si distinguono per palette e per i pezzi caratteristici in fondo.
   const ctx = VCTX;
-  // Palette: [bordo/scuro, corpo-mid, corpo-light, dettaglio, accent]
-  const palettes = {
-    hq:           ['#3a2010','#806548','#a8866a','#5a3a20','#d4a02f'],
-    sawmill:      ['#3a1a08','#8a5828','#b07840','#6a3a18','#a06028'],
-    workshop:     ['#1a1a1a','#5a5a5a','#909090','#3a3a3a','#c8c8c8'],
-    lab:          ['#102030','#5080a0','#80a8c0','#2a4a60','#a0d0e8'],
-    market:       ['#402810','#a07028','#c89438','#7a5018','#f0c050'],
-    barracks:     ['#1a1a10','#48542a','#6a7838','#2a3018','#a8a08a'],
-    watchtower:   ['#201810','#806040','#a08858','#5a4028','#ffe080'],
-    ambulatorio:  ['#3a1010','#e8e8e8','#ffffff','#a05050','#d02020'],
-    zen_garden:   ['#5a7a40','#d8e0b8','#e8f0c8','#80a060','#406018'],
-    mensa_comune: ['#3a1810','#a06848','#c89068','#7a4828','#f0d098'],
-    altar_skulls: ['#000000','#3a2828','#604040','#1a1a1a','#c02020'],
-    arsenale:     ['#0a0a10','#3a3a40','#5a5a60','#1a1a20','#c0c0a0']
+  const CFG = {
+    hq:           { w:44, h:42, ax:2,  ay:4,  roof:['#6b3327','#8f4a38','#ab5f46'], wall:['#a07a4c','#c39a66'], accent:'#e8c04a', extra:'flag'   },
+    sawmill:      { w:48, h:34, ax:0,  ay:8,  roof:['#5a3a1c','#7a5228','#96683a'], wall:['#7a5730','#9c7346'], accent:'#c8a060', extra:'logs'   },
+    workshop:     { w:40, h:42, ax:4,  ay:4,  roof:['#3c4046','#565c64','#6e757e'], wall:['#6a6a6a','#8a8a8a'], accent:'#c8c8c8', extra:'anvil'  },
+    lab:          { w:30, h:48, ax:9,  ay:0,  roof:['#24455c','#356781','#4a86a3'], wall:['#5b7c92','#7ea4bb'], accent:'#a0d0e8', extra:'aerial' },
+    market:       { w:48, h:32, ax:0,  ay:12, roof:['#7a4a14','#a06f24','#c89438'], wall:['#8a6a3a','#b08a4e'], accent:'#f0c050', extra:'crates' },
+    barracks:     { w:48, h:38, ax:0,  ay:6,  roof:['#2f3a1c','#485726','#5f7434'], wall:['#5c6a3c','#7d8b54'], accent:'#a8a08a', extra:'sacks'  },
+    watchtower:   { w:22, h:48, ax:13, ay:0,  roof:['#4a3520','#6b4a2c','#8a6238'], wall:['#7a5c3c','#9c7a52'], accent:'#ffe080', extra:'crenel' },
+    ambulatorio:  { w:40, h:40, ax:4,  ay:6,  roof:['#8c2418','#b4462a','#c85f42'], wall:['#c4c4bc','#e6e6dc'], accent:'#d02020', extra:'cross'  },
+    mensa_comune: { w:48, h:36, ax:0,  ay:8,  roof:['#6b4a24','#8f6a34','#ab8448'], wall:['#a06848','#c89068'], accent:'#f0d098', extra:'table'  },
+    arsenale:     { w:48, h:32, ax:0,  ay:12, roof:['#22232a','#35363f','#4a4c56'], wall:['#3a3a40','#55555e'], accent:'#c0c0a0', extra:'rack'   }
   };
-  const p = palettes[key] || ['#1a1a1a','#605040','#807060','#3a2a18','#ffffff'];
-  // Forme: w, h, offset dall'angolo dello slot 48x48
-  const SHAPES = {
-    hq:           { w:44, h:42, ax:2,  ay:4 },
-    sawmill:      { w:48, h:34, ax:0,  ay:8 },
-    workshop:     { w:40, h:42, ax:4,  ay:4 },
-    lab:          { w:30, h:48, ax:9,  ay:0 },
-    market:       { w:48, h:32, ax:0,  ay:12 },
-    barracks:     { w:48, h:38, ax:0,  ay:6 },
-    watchtower:   { w:22, h:48, ax:13, ay:0 },
-    ambulatorio:  { w:40, h:40, ax:4,  ay:6 },
-    zen_garden:   { w:46, h:46, ax:1,  ay:1 },
-    mensa_comune: { w:48, h:36, ax:0,  ay:8 },
-    altar_skulls: { w:36, h:36, ax:6,  ay:8 },
-    arsenale:     { w:48, h:32, ax:0,  ay:12 }
-  };
-  const sh = SHAPES[key] || { w:44, h:44, ax:2, ay:2 };
-  const bx = x + sh.ax, by = y + sh.ay, bw = sh.w, bh = sh.h;
-  // Ombra a terra
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(bx + 3, by + 3, bw, bh);
-  // === SILHOUETTE SPECIFICA PER OGNI EDIFICIO ===
-  if (key === 'hq') {
-    // Quadrata con tetto a punta + bandiera dorata
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 6, bw, bh - 6);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 8, bw - 4, bh - 10);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 8, bw - 4, 1);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 8, 1, bh - 10);
-    // Tetto a punta (triangolo)
-    ctx.fillStyle = p[3];
-    for (let i = 0; i < 8; i++) ctx.fillRect(bx + i, by + 6 - i, bw - i*2, 1);
-    ctx.fillStyle = p[0];
-    for (let i = 0; i < 8; i++) ctx.fillRect(bx + bw - i - 1, by + 6 - i, 1, 1);
-    // Bandiera dorata
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 8, 1, 12);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2, by - 7, 8, 5);
-    // Porta scura + finestre
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 8, 6, 8);
-    ctx.fillStyle = '#ffe080';
-    ctx.fillRect(bx + 6, by + 14, 4, 4);
-    ctx.fillRect(bx + bw - 10, by + 14, 4, 4);
+
+  // --- Due strutture non sono case: hanno un disegno tutto loro ---
+  if (key === 'zen_garden')   { drawZenGarden(x, y, lvl); return; }
+  if (key === 'altar_skulls') { drawAltar(x, y, lvl); return; }
+
+  const c = CFG[key] || { w:44, h:42, ax:2, ay:4, roof:['#5a3a2a','#7a5240','#96684f'], wall:['#8a7050','#ac9068'], accent:'#e0d0a0', extra:'' };
+  const bx = x + c.ax, by = y + c.ay, bw = c.w, bh = c.h;
+  const roofH = Math.max(10, Math.round(bh * 0.46));
+
+  // ombra a terra
+  ctx.fillStyle = VP.sh; ctx.fillRect(bx + 3, by + bh - 3, bw, 6);
+  // contorno
+  ctx.fillStyle = VP.ink; ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+  // muro
+  ctx.fillStyle = c.wall[1]; ctx.fillRect(bx, by + roofH, bw, bh - roofH);
+  ctx.fillStyle = c.wall[0]; ctx.fillRect(bx, by + bh - 4, bw, 4);
+  ctx.fillStyle = 'rgba(0,0,0,0.10)';
+  for (let i = 0; i < bw; i += 6) ctx.fillRect(bx + i, by + roofH, 1, bh - roofH);
+  // tetto
+  ctx.fillStyle = c.roof[1]; ctx.fillRect(bx, by, bw, roofH);
+  ctx.fillStyle = c.roof[2]; ctx.fillRect(bx, by, bw, 3);
+  ctx.fillStyle = c.roof[0]; ctx.fillRect(bx, by + roofH - 3, bw, 3);
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  for (let i = 2; i < bw; i += 5) ctx.fillRect(bx + i, by + 1, 1, roofH - 2);
+
+  // porta
+  const dw = bw < 26 ? 8 : 10, dx = bx + Math.round((bw - dw) / 2);
+  ctx.fillStyle = VP.ink;   ctx.fillRect(dx - 1, by + bh - 13, dw + 2, 13);
+  ctx.fillStyle = VP.wood;  ctx.fillRect(dx, by + bh - 12, dw, 12);
+  ctx.fillStyle = VP.woodL; ctx.fillRect(dx + 1, by + bh - 11, dw - 2, 1);
+  ctx.fillStyle = c.accent; ctx.fillRect(dx + dw - 3, by + bh - 7, 1, 1);
+
+  // finestre: due se c'e' spazio, una sola sulle strutture strette
+  const wy = by + roofH + 4;
+  const spots = bw < 26 ? [bx + Math.round(bw/2) - 3] : [bx + 4, bx + bw - 10];
+  spots.forEach(wx => {
+    ctx.fillStyle = VP.ink;   ctx.fillRect(wx - 1, wy - 1, 8, 7);
+    ctx.fillStyle = _isNightCache ? VP.glass : '#93a6b0';
+    ctx.fillRect(wx, wy, 6, 5);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(wx + 3, wy, 1, 5);
+    ctx.fillStyle = 'rgba(255,255,255,0.20)'; ctx.fillRect(wx, wy, 6, 1);
+  });
+
+  // comignolo (chi non ha un pezzo caratteristico in cima)
+  if (c.extra !== 'crenel' && c.extra !== 'aerial' && c.extra !== 'flag') {
+    ctx.fillStyle = VP.ink;   ctx.fillRect(bx + bw - 15, by - 7, 8, 9);
+    ctx.fillStyle = c.roof[0]; ctx.fillRect(bx + bw - 14, by - 6, 6, 8);
+    ctx.fillStyle = c.roof[2]; ctx.fillRect(bx + bw - 14, by - 6, 6, 1);
   }
-  else if (key === 'sawmill') {
-    // Capannone allungato con tetto a doppio spiovente
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 8, bw - 4, bh - 10);
-    ctx.fillStyle = p[3];
-    // Doppio spiovente (visto dall'alto = due triangoli)
-    for (let i = 0; i < 8; i++) {
-      ctx.fillRect(bx + 2, by + i, bw - 4, 1);
-    }
-    // Spina centrale
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 3, bw - 4, 1);
-    // Pile di tronchi laterali
-    ctx.fillStyle = '#6a4218';
-    ctx.fillRect(bx + bw - 12, by + bh + 2, 10, 3);
-    ctx.fillRect(bx + bw - 12, by + bh + 6, 10, 3);
-    ctx.fillStyle = '#3a2010';
+
+  // === PEZZI CARATTERISTICI ===
+  if (c.extra === 'flag') {
+    ctx.fillStyle = VP.ink;   ctx.fillRect(bx + bw - 12, by - 14, 2, 16);
+    ctx.fillStyle = c.accent; ctx.fillRect(bx + bw - 10, by - 13, 8, 5);
+    ctx.fillStyle = '#a87c1c'; ctx.fillRect(bx + bw - 10, by - 9, 8, 1);
+  }
+  if (c.extra === 'logs') {
     for (let i = 0; i < 3; i++) {
-      ctx.fillRect(bx + bw - 11 + i*4, by + bh + 2, 1, 3);
-      ctx.fillRect(bx + bw - 11 + i*4, by + bh + 6, 1, 3);
+      const lx = bx - 12, ly = by + 6 + i * 6;
+      ctx.fillStyle = VP.ink;   ctx.fillRect(lx - 1, ly - 1, 12, 6);
+      ctx.fillStyle = VP.wood;  ctx.fillRect(lx, ly, 10, 4);
+      ctx.fillStyle = VP.woodL; ctx.fillRect(lx, ly, 10, 1);
+      ctx.fillStyle = '#c9a26a'; ctx.fillRect(lx + 9, ly + 1, 1, 2);
     }
-    // Sega circolare visibile
-    ctx.fillStyle = '#c0c0c0';
-    ctx.fillRect(bx + 8, by + bh/2 + 4, 8, 8);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + 11, by + bh/2 + 7, 2, 2);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
   }
-  else if (key === 'workshop') {
-    // Quadrato con tetto metallico + ciminiera grossa
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto metallico a strisce (alluminio corrugato)
-    ctx.fillStyle = p[2];
-    for (let i = 4; i < bw - 4; i += 3) {
-      ctx.fillRect(bx + i, by + 4, 1, bh - 12);
+  if (c.extra === 'anvil') {
+    // barile di ferraglia accanto all'officina
+    const ax2 = bx + bw + 2, ay2 = by + bh - 13;
+    ctx.fillStyle = VP.sh;    ctx.fillRect(ax2, ay2 + 12, 10, 3);
+    ctx.fillStyle = VP.ink;   ctx.fillRect(ax2 - 1, ay2 - 1, 11, 14);
+    ctx.fillStyle = '#6b5a3c'; ctx.fillRect(ax2, ay2, 9, 12);
+    ctx.fillStyle = '#8a7550'; ctx.fillRect(ax2, ay2, 9, 2);
+    ctx.fillStyle = '#3a3a40'; ctx.fillRect(ax2, ay2 + 4, 9, 1); ctx.fillRect(ax2, ay2 + 8, 9, 1);
+  }
+  if (c.extra === 'aerial') {
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx + Math.round(bw/2) - 1, by - 15, 2, 17);
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx + Math.round(bw/2) - 5, by - 13, 10, 1);
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx + Math.round(bw/2) - 4, by - 9, 8, 1);
+    ctx.fillStyle = c.accent; ctx.fillRect(bx + Math.round(bw/2) - 1, by - 17, 2, 2);
+  }
+  if (c.extra === 'crates') {
+    // tenda a righe sopra il muro + casse davanti
+    for (let i = 0; i < bw; i += 8) {
+      ctx.fillStyle = (i / 8) % 2 === 0 ? '#c8c0a8' : '#b44a2c';
+      ctx.fillRect(bx + i, by + roofH, 8, 4);
     }
-    // Ciminiera grossa
-    ctx.fillStyle = p[0]; ctx.fillRect(bx + bw - 12, by - 6, 8, 12);
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw - 11, by - 7, 6, 1);
-    // Forgia (cerchio rosso al centro)
-    ctx.fillStyle = '#ff6020';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 6);
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(bx + bw/2 - 2, by + bh/2 - 1, 4, 2);
-    // Incudine fuori
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw + 2, by + bh - 8, 6, 3);
-    ctx.fillRect(bx + bw + 3, by + bh - 5, 4, 4);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 6, by + bh - 6, 6, 6);
-  }
-  else if (key === 'lab') {
-    // Torre stretta con cupola circolare blu in cima
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 10, bw, bh - 10);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 12, bw - 4, bh - 14);
-    // Cupola (semicerchio approssimato)
-    ctx.fillStyle = p[0]; ctx.fillRect(bx - 2, by + 6, bw + 4, 6);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx - 1, by + 4, bw + 2, 8);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 1, by + 2, bw - 2, 8);
-    ctx.fillStyle = p[4]; ctx.fillRect(bx + 3, by, bw - 6, 6);
-    // Antenna in cima
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(bx + bw/2 - 0.5, by - 6, 1, 6);
-    ctx.fillStyle = p[4]; ctx.fillRect(bx + bw/2 - 2, by - 7, 4, 1);
-    // Provette in vetrate
-    ctx.fillStyle = '#80ffa0';
-    ctx.fillRect(bx + 3, by + 24, 2, 6);
-    ctx.fillRect(bx + 6, by + 24, 2, 6);
-    ctx.fillStyle = '#ff80c0';
-    ctx.fillRect(bx + bw - 8, by + 24, 2, 6);
-    // Porta
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
-  }
-  else if (key === 'market') {
-    // Bancarella aperta: pali e tendoni a strisce, niente muri pieni
-    // Pali agli angoli
-    ctx.fillStyle = p[3];
-    [0, bw - 2, 0, bw - 2].forEach((dx, i) => {
-      const dy = i < 2 ? 0 : bh - 4;
-      ctx.fillRect(bx + dx, by + dy, 2, 4);
-    });
-    // Tendone (tetto a strisce rosso/bianco)
-    for (let i = 0; i < bh - 8; i += 3) {
-      ctx.fillStyle = (Math.floor(i / 3) % 2 === 0) ? '#b04040' : '#f0e8d0';
-      ctx.fillRect(bx + 1, by + 4 + i, bw - 2, 3);
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx, by + roofH + 4, bw, 1);
+    for (let i = 0; i < 2; i++) {
+      const kx = bx + bw + 2, ky = by + bh - 14 + i * 8;
+      ctx.fillStyle = VP.ink;   ctx.fillRect(kx, ky, 9, 8);
+      ctx.fillStyle = VP.wood;  ctx.fillRect(kx + 1, ky + 1, 7, 6);
+      ctx.fillStyle = VP.woodL; ctx.fillRect(kx + 1, ky + 3, 7, 1);
     }
-    // Bordo nero del tendone
-    ctx.fillStyle = p[0];
-    ctx.fillRect(bx + 1, by + 4, bw - 2, 1);
-    ctx.fillRect(bx + 1, by + bh - 5, bw - 2, 1);
-    // Banco centrale con merci colorate
-    ctx.fillStyle = '#7a5018';
-    ctx.fillRect(bx + 6, by + bh + 2, bw - 12, 4);
-    // Frutta/oggetti
-    ctx.fillStyle = '#f0c050'; ctx.fillRect(bx + 8, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#80c060'; ctx.fillRect(bx + 14, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#d04060'; ctx.fillRect(bx + 20, by + bh + 3, 2, 2);
-    ctx.fillStyle = '#a070d0'; ctx.fillRect(bx + 26, by + bh + 3, 2, 2);
-    // Bandiera dorata sopra
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 4, 1, 8);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2, by - 3, 5, 3);
   }
-  else if (key === 'barracks') {
-    // Caserma lunga col tetto verde militare
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 2, bw - 4, 1);
-    // Tetto piatto militare
-    ctx.fillStyle = p[3];
-    for (let i = 6; i < bh - 4; i += 4) {
-      ctx.fillRect(bx + 4, by + i, bw - 8, 1);
+  if (c.extra === 'sacks') {
+    for (let i = 0; i < 4; i++) {
+      const sx = bx + 2 + i * 11, sy = by + bh + 1;
+      ctx.fillStyle = VP.ink;   ctx.fillRect(sx, sy, 10, 5);
+      ctx.fillStyle = '#8a7c56'; ctx.fillRect(sx + 1, sy + 1, 8, 3);
+      ctx.fillStyle = '#a89a6e'; ctx.fillRect(sx + 1, sy + 1, 8, 1);
     }
-    // Bandiera nera
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 8, 1, 10);
-    ctx.fillRect(bx + bw/2, by - 7, 6, 4);
-    // Sacchi di sabbia davanti
-    ctx.fillStyle = '#8a7050';
-    for (let sx = 4; sx < bw - 4; sx += 8) {
-      ctx.fillRect(bx + sx, by + bh, 6, 4);
+  }
+  if (c.extra === 'crenel') {
+    for (let i = 0; i < bw; i += 7) {
+      ctx.fillStyle = VP.ink;    ctx.fillRect(bx + i, by - 5, 5, 6);
+      ctx.fillStyle = c.roof[1]; ctx.fillRect(bx + i + 1, by - 4, 3, 5);
     }
-    ctx.fillStyle = '#a08868';
-    for (let sx = 4; sx < bw - 4; sx += 8) ctx.fillRect(bx + sx, by + bh, 6, 1);
-    // Porta centrale
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 4, by + bh - 8, 8, 8);
-  }
-  else if (key === 'watchtower') {
-    // Torre alta stretta con merlatura + faretto in cima
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by + 8, bw, bh - 8);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 10, bw - 4, bh - 12);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 10, bw - 4, 1);
-    // Merlatura quadrata in cima (corona)
-    ctx.fillStyle = p[3];
-    for (let i = 0; i < bw; i += 3) {
-      ctx.fillRect(bx + i, by + 4, 2, 4);
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx + Math.round(bw/2) - 3, by + 4, 6, 6);
+    ctx.fillStyle = _isNightCache ? c.accent : '#7a6a48';
+    ctx.fillRect(bx + Math.round(bw/2) - 2, by + 5, 4, 4);
+    if (_isNightCache) {
+      ctx.fillStyle = 'rgba(255,224,128,0.18)';
+      ctx.fillRect(bx + Math.round(bw/2) - 7, by, 14, 14);
     }
-    ctx.fillStyle = p[1];
-    ctx.fillRect(bx, by + 6, bw, 2);
-    // Faretto giallo in cima
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 - 2, by, 4, 4);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(bx + bw/2 - 1, by + 1, 2, 2);
-    // Cono di luce sceso
-    ctx.fillStyle = 'rgba(255,224,128,0.15)';
-    for (let i = 0; i < 12; i++) {
-      ctx.fillRect(bx + bw/2 - 2 - i, by + 4 + i, 4 + i*2, 2);
+  }
+  if (c.extra === 'cross') {
+    const mx = bx + Math.round(bw/2), my = by + Math.round(roofH/2);
+    ctx.fillStyle = '#f4f4ee'; ctx.fillRect(mx - 6, my - 2, 12, 4); ctx.fillRect(mx - 2, my - 6, 4, 12);
+    ctx.fillStyle = c.accent;  ctx.fillRect(mx - 5, my - 1, 10, 2); ctx.fillRect(mx - 1, my - 5, 2, 10);
+  }
+  if (c.extra === 'table') {
+    const tx = bx + bw + 2, ty = by + bh - 16;
+    ctx.fillStyle = VP.sh;    ctx.fillRect(tx, ty + 12, 14, 3);
+    ctx.fillStyle = VP.ink;   ctx.fillRect(tx - 1, ty - 1, 14, 12);
+    ctx.fillStyle = VP.wood;  ctx.fillRect(tx, ty, 12, 10);
+    ctx.fillStyle = VP.woodL; ctx.fillRect(tx, ty, 12, 2);
+    ctx.fillStyle = c.accent; ctx.fillRect(tx + 3, ty + 4, 3, 3);
+  }
+  if (c.extra === 'rack') {
+    for (let i = 0; i < 3; i++) {
+      const rx = bx + 6 + i * 14, ry = by + bh + 1;
+      ctx.fillStyle = VP.ink;   ctx.fillRect(rx, ry, 2, 7);
+      ctx.fillStyle = '#8a8a94'; ctx.fillRect(rx, ry, 2, 2);
     }
-    // Strisce verticali sui muri (tipo travi)
-    ctx.fillStyle = p[3];
-    ctx.fillRect(bx + 4, by + 14, 1, bh - 18);
-    ctx.fillRect(bx + bw - 5, by + 14, 1, bh - 18);
-    // Piccola finestra (feritoia)
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 1, by + bh/2, 2, 4);
+    ctx.fillStyle = VP.ink; ctx.fillRect(bx + 4, by + bh + 1, 40, 1);
   }
-  else if (key === 'ambulatorio') {
-    // Bianco con croce rossa enorme
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Bordo tetto
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 2, by + 2, bw - 4, 2);
-    // Croce rossa enorme
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 - 2, by + 8, 4, bh - 14);
-    ctx.fillRect(bx + 8, by + bh/2 - 2, bw - 16, 4);
-    // Vetrate verdi (vetri ospedale)
-    ctx.fillStyle = '#80c0a0';
-    ctx.fillRect(bx + 4, by + 6, 3, 4);
-    ctx.fillRect(bx + bw - 7, by + 6, 3, 4);
-    // Porta
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
+
+  // Livello: piccole tacche sulla gronda, una per livello
+  ctx.globalAlpha = 0.75;
+  for (let i = 0; i < Math.min(lvl, 5); i++) {
+    ctx.fillStyle = c.accent;
+    ctx.fillRect(bx + 3 + i * 4, by + roofH - 2, 2, 1);
   }
-  else if (key === 'zen_garden') {
-    // Sabbia bianca con cerchi concentrici + pietra al centro
-    ctx.fillStyle = p[3]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
-    // Cerchi concentrici (linee leggere)
-    ctx.fillStyle = p[1];
-    for (let r = 4; r < bw/2 - 1; r += 5) {
-      ctx.fillRect(bx + r, by + r, bw - r*2, 1);
-      ctx.fillRect(bx + r, by + bh - r - 1, bw - r*2, 1);
-      ctx.fillRect(bx + r, by + r, 1, bh - r*2);
-      ctx.fillRect(bx + bw - r - 1, by + r, 1, bh - r*2);
-    }
-    // Pietra zen al centro
-    ctx.fillStyle = '#3a3a30';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 6);
-    ctx.fillStyle = '#6a6a5a';
-    ctx.fillRect(bx + bw/2 - 4, by + bh/2 - 3, 8, 1);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh/2 + 2, 6, 1);
-    // Bambù negli angoli (puntini verdi)
-    ctx.fillStyle = p[4];
-    [[3, 3], [bw - 5, 3], [3, bh - 5], [bw - 5, bh - 5]].forEach(([dx, dy]) => {
-      ctx.fillRect(bx + dx, by + dy, 2, 2);
-    });
-  }
-  else if (key === 'mensa_comune') {
-    // Capannone caldo con camino + cuore sopra
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto a tegole rosse calde
-    ctx.fillStyle = p[3];
-    for (let i = 5; i < bh - 4; i += 3) ctx.fillRect(bx + 3, by + i, bw - 6, 1);
-    // Camino con cucina visibile
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 4, by - 6, 5, 10);
-    ctx.fillStyle = '#ff6020'; ctx.fillRect(bx + 5, by - 4, 3, 1);
-    // Tavolone con piatti
-    ctx.fillStyle = '#5a3818';
-    ctx.fillRect(bx + 8, by + 14, bw - 16, bh - 24);
-    ctx.fillStyle = '#f0e8d0';
-    for (let py = 16; py < bh - 14; py += 6) {
-      for (let px = 11; px < bw - 11; px += 7) {
-        ctx.fillRect(bx + px, by + py, 4, 4);
-      }
-    }
-    // Cuore sopra il tetto
-    ctx.fillStyle = '#d04060';
-    ctx.fillRect(bx + bw/2 - 1, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 + 1, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 - 2, by - 7, 4, 1);
-    ctx.fillRect(bx + bw/2 - 1, by - 6, 2, 1);
-    // Porta
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 5, 6, 5);
-  }
-  else if (key === 'altar_skulls') {
-    // Piramide visto dall'alto = quadrato nero con teschi in cerchio + fiamma centrale
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 4, by + 4, bw - 8, bh - 8);
-    ctx.fillStyle = p[3]; ctx.fillRect(bx + 8, by + 8, bw - 16, bh - 16);
-    // Teschi in cerchio (8 teschi)
-    const cx = bx + bw/2, cy = by + bh/2;
-    for (let i = 0; i < 8; i++) {
-      const ang = (i / 8) * Math.PI * 2;
-      const sx = cx + Math.cos(ang) * 10;
-      const sy = cy + Math.sin(ang) * 10;
-      ctx.fillStyle = '#e8d8a0';
-      ctx.fillRect(sx - 2, sy - 2, 4, 4);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(sx - 1, sy - 1, 1, 1);
-      ctx.fillRect(sx + 1, sy - 1, 1, 1);
-    }
-    // Fiamma centrale viva
-    const tF = Date.now() / 200;
-    ctx.fillStyle = (Math.floor(tF) % 2 === 0) ? '#ff6020' : '#ffa040';
-    ctx.fillRect(cx - 2, cy - 3, 4, 5);
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(cx - 1, cy - 1, 2, 2);
-  }
-  else if (key === 'arsenale') {
-    // Bunker basso e largo, tetto cemento, filo spinato e bandiera
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-    // Tetto cemento liscio
-    ctx.fillStyle = p[2]; ctx.fillRect(bx + 4, by + 4, bw - 8, bh - 12);
-    // Filo spinato (dentelli scuri)
-    ctx.fillStyle = '#1a1a1a';
-    for (let i = 0; i < bw; i += 3) {
-      ctx.fillRect(bx + i, by + 2, 1, 2);
-    }
-    // Bandiera nera col teschio
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 0.5, by - 10, 1, 12);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2, by - 9, 7, 4);
-    ctx.fillStyle = p[4];
-    ctx.fillRect(bx + bw/2 + 2, by - 8, 1, 1);
-    ctx.fillRect(bx + bw/2 + 4, by - 8, 1, 1);
-    // Casse di munizioni
-    ctx.fillStyle = '#3a3028';
-    ctx.fillRect(bx + 4, by + bh + 1, 8, 5);
-    ctx.fillRect(bx + 14, by + bh + 1, 8, 5);
-    ctx.fillStyle = '#c02020';
-    ctx.fillRect(bx + 6, by + bh + 4, 4, 1);
-    ctx.fillRect(bx + 16, by + bh + 4, 4, 1);
-    // Porta blindata
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(bx + bw/2 - 3, by + bh - 6, 6, 6);
-  }
-  else {
-    // Default rect
-    ctx.fillStyle = p[0]; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = p[1]; ctx.fillRect(bx + 2, by + 2, bw - 4, bh - 4);
-  }
-  // === ELEMENTI COMUNI: targhetta icona + pip livello ===
-  ctx.fillStyle = 'rgba(0,0,0,0.75)';
-  ctx.fillRect(x + 1, y + 48 - 11, 12, 9);
-  ctx.fillStyle = p[4];
-  ctx.font = 'bold 9px monospace';
-  ctx.fillText(BUILDINGS[key].icon, x + 3, y + 48 - 4);
-  for (let i = 0; i < lvl; i++) {
-    ctx.fillStyle = p[4];
-    ctx.fillRect(x + 14 + i*4, y + 48 - 9, 2, 2);
-  }
-  // === FINESTRA ACCESA DI NOTTE === piccolo bagliore caldo
-  if (typeof drawWindowLight === 'function') drawWindowLight(ctx, x, y, 48, 48);
+  ctx.globalAlpha = 1;
+
+  drawWindowLight(ctx, bx, by, bw, bh);
 }
-// === SOPRAVVISSUTO === sprite 14×22 pixel-perfect (v3.24), bigger & class-aware.
-// Caratteristiche per classe: ascia per Boscaiolo, croce rossa per Medico,
-// elmetto per Soldato, camice per Scienziato, sacchetto monete per Mercante,
-// camicia a quadri per Boscaiolo. Player ha bandana rossa.
-// Animazione walk a 2 frame: braccia + gambe oscillano.
-//
-// SIGNATURE NUOVA (con backward-compat per chiamate legacy):
-//   drawSurvivor(x, y, opts) — opts: { klass, color, skin, label, accentBg, frame, isPlayer }
-//   drawSurvivor(x, y, color, skin, label, accentBg) — vecchio formato (deprecated)
+
+// Giardino Zen: sabbia rastrellata, pietre, un ciliegio. Nessun tetto.
+function drawZenGarden(x, y, lvl) {
+  const ctx = VCTX;
+  const bx = x + 1, by = y + 1, bw = 46, bh = 46;
+  ctx.fillStyle = VP.sh;  ctx.fillRect(bx + 3, by + bh - 2, bw, 5);
+  ctx.fillStyle = VP.ink; ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+  ctx.fillStyle = '#d9d3b4'; ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = '#c4bd9a';
+  for (let i = 2; i < bh; i += 4) ctx.fillRect(bx + 2, by + i, bw - 4, 1);
+  // bordo di legno
+  ctx.fillStyle = VP.woodD; ctx.fillRect(bx, by, bw, 2); ctx.fillRect(bx, by + bh - 2, bw, 2);
+  ctx.fillStyle = VP.wood;  ctx.fillRect(bx, by, 2, bh); ctx.fillRect(bx + bw - 2, by, 2, bh);
+  // pietre
+  [[10, 12, 7], [30, 26, 5], [18, 34, 4]].forEach(([sx, sy, r]) => {
+    ctx.fillStyle = VP.ink;   vBlob(bx + sx, by + sy, r);
+    ctx.fillStyle = '#8f8d84'; vBlob(bx + sx, by + sy, r - 1);
+    ctx.fillStyle = '#b0aea4'; vBlob(bx + sx - 1, by + sy - 1, Math.max(1, r - 3));
+  });
+  // ciliegio
+  ctx.fillStyle = VP.ink;   ctx.fillRect(bx + 33, by + 6, 2, 10);
+  ctx.fillStyle = VP.ink;   vBlob(bx + 34, by + 8, 7);
+  ctx.fillStyle = '#c86f96'; vBlob(bx + 34, by + 8, 6);
+  ctx.fillStyle = '#e394b4'; vBlob(bx + 33, by + 7, 4);
+  if (lvl >= 2) { ctx.fillStyle = '#f0b7ce'; ctx.fillRect(bx + 31, by + 5, 2, 2); }
+  if (lvl >= 3) { // lanterna di pietra
+    ctx.fillStyle = VP.ink;   ctx.fillRect(bx + 6, by + 32, 8, 10);
+    ctx.fillStyle = '#9a988e'; ctx.fillRect(bx + 7, by + 33, 6, 8);
+    ctx.fillStyle = _isNightCache ? VP.glass : '#6e6c62';
+    ctx.fillRect(bx + 9, by + 36, 2, 3);
+  }
+}
+
+// Altare di teschi: piramide scura, torce ai lati. Nessuna finestra.
+function drawAltar(x, y, lvl) {
+  const ctx = VCTX;
+  const bx = x + 6, by = y + 8, bw = 36, bh = 36;
+  ctx.fillStyle = VP.sh;  ctx.fillRect(bx + 3, by + bh - 2, bw, 5);
+  ctx.fillStyle = VP.ink; ctx.fillRect(bx - 1, by + 10, bw + 2, bh - 9);
+  // basamento a gradoni
+  ctx.fillStyle = '#3a3230'; ctx.fillRect(bx, by + 24, bw, 12);
+  ctx.fillStyle = '#4a403c'; ctx.fillRect(bx + 4, by + 16, bw - 8, 9);
+  ctx.fillStyle = '#584c46'; ctx.fillRect(bx + 8, by + 11, bw - 16, 6);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(bx, by + 24, bw, 1); ctx.fillRect(bx + 4, by + 16, bw - 8, 1);
+  // teschi
+  const skull = (sx, sy) => {
+    ctx.fillStyle = VP.ink;   ctx.fillRect(sx - 1, sy - 1, 7, 7);
+    ctx.fillStyle = '#d8d2c0'; ctx.fillRect(sx, sy, 5, 5);
+    ctx.fillStyle = '#1a1614'; ctx.fillRect(sx + 1, sy + 1, 1, 2); ctx.fillRect(sx + 3, sy + 1, 1, 2);
+    ctx.fillStyle = '#1a1614'; ctx.fillRect(sx + 2, sy + 4, 1, 1);
+  };
+  skull(bx + 14, by + 4);
+  skull(bx + 6, by + 19); skull(bx + 25, by + 19);
+  skull(bx + 3, by + 28); skull(bx + 15, by + 28); skull(bx + 27, by + 28);
+  // torce
+  [[bx - 4, by + 18], [bx + bw - 2, by + 18]].forEach(([tx, ty]) => {
+    ctx.fillStyle = VP.ink;  ctx.fillRect(tx, ty, 3, 16);
+    ctx.fillStyle = VP.wood; ctx.fillRect(tx, ty + 4, 3, 12);
+    ctx.fillStyle = '#c02020'; ctx.fillRect(tx, ty, 3, 4);
+    ctx.fillStyle = '#f0a020'; ctx.fillRect(tx + 1, ty + 1, 1, 2);
+    if (_isNightCache) { ctx.fillStyle = 'rgba(200,60,30,0.18)'; ctx.fillRect(tx - 4, ty - 4, 11, 12); }
+  });
+  if (lvl >= 2) { skull(bx + 9, by + 11); skull(bx + 21, by + 11); }
+  if (lvl >= 3) { ctx.fillStyle = '#c02020'; ctx.fillRect(bx + 2, by + 33, bw - 4, 1); }
+}
+
 function drawSurvivor(x, y, optsOrColor, skinLegacy, labelLegacy, accentLegacy) {
   // Adatta vecchia firma
   let opts;
