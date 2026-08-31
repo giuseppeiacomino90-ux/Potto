@@ -1802,6 +1802,129 @@
   }
   .mission-item > .btn.danger-btn:hover { color: var(--rust); background: color-mix(in srgb, var(--rust) 12%, transparent); }
   .counter-bonus-badge { margin-right: 2px; }
+
+  /* ===== FIX ALLINEAMENTO STRISCIA RISORSE (mobile) ===== */
+  @media (max-width: 699px) {
+    .res-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      overflow: visible;
+      margin-left: 0;
+      margin-right: 0;
+      padding: 0;
+      scroll-snap-type: none;
+    }
+    .res-strip .res-chip {
+      flex: none;
+      min-width: 0;
+      width: auto;
+      padding: 9px 10px;
+      overflow: hidden;
+      justify-content: flex-start;
+      gap: 3px;
+    }
+    .res-strip .res-chip .res-label {
+      gap: 5px;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .res-strip .res-chip.threat-chip {
+      grid-column: span 2;
+      min-width: 0;
+    }
+  }
+
+  /* Diario su desktop: le colonne della griglia non possono scendere sotto la
+     larghezza minima del loro contenuto, cosi' la lista delle pagine (ricerca +
+     filtri) si prendeva 508px su 732 e l'editor restava a 208. Con min-width:0
+     le frazioni 1.35fr/1fr valgono davvero, e i filtri vanno a capo invece di
+     imporre la loro riga. */
+  .diary-layout > * { min-width: 0; }
+  #tab-diary .filter-group { flex-wrap: wrap; overflow-x: visible; }
+  .village-layout > *, .focus-grid > * { min-width: 0; }
+
+  /* Valori delle risorse allineati su tutte le larghezze: senza questo, nelle
+     tessere piu' alte (Minaccia, che ha la barra sotto) il numero resta a meta'
+     mentre negli altri viene spinto in fondo da justify-content: space-between. */
+  .res-strip .res-chip { justify-content: flex-start; gap: 3px; }
+
+  /* valore Minaccia allineato agli altri (non e' :last-child per via della barra) */
+  .res-chip.threat-chip > span:nth-of-type(2) {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--gb-light);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============================== SCRITTURA: REGISTRO, RETRO, PREVISIONI ============================== */
+  .writ-card { margin-bottom: var(--sp-4); }
+  .writ-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--sp-2); margin-bottom: var(--sp-2); flex-wrap: wrap;
+  }
+  .writ-head .sub-title { min-width: 0; }
+  .writ-badge {
+    flex: 0 1 auto; min-width: 0;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .3px;
+    color: var(--gb-mid); background: var(--bg-tile);
+    border-radius: var(--r-pill); padding: 3px 9px;
+  }
+  .writ-prompt {
+    font-family: var(--font-display);
+    font-size: 17px; line-height: 1.35; font-weight: 600;
+    color: var(--gb-light);
+    margin-bottom: var(--sp-3);
+  }
+  .writ-sub {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .6px; color: var(--gb-dark);
+    margin: var(--sp-3) 0 var(--sp-2);
+  }
+  .writ-input {
+    min-height: 96px;
+    margin-bottom: var(--sp-2);
+  }
+  .writ-actions {
+    display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap;
+  }
+  .writ-actions .note-counter { margin-left: auto; }
+  .writ-done { font-style: italic; }
+
+  .retro-entries {
+    max-height: 210px; overflow-y: auto;
+    background: var(--bg-tile); border-radius: var(--r-sm);
+    padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-3);
+  }
+  .retro-entry { padding: var(--sp-2) 0; border-bottom: 1px solid var(--gb-darkest); }
+  .retro-entry:last-child { border-bottom: 0; }
+  .retro-entry b { font-size: 13px; color: var(--gb-light); }
+  .retro-entry span { display: block; font-size: 12.5px; color: var(--gb-mid); line-height: 1.4; }
+  .retro-entry em { font-family: var(--font-mono); font-size: 10.5px; color: var(--gb-dark); font-style: normal; }
+
+  .pred-form input[type="text"] { width: 100%; margin-bottom: var(--sp-2); font-size: 14px; padding: 8px 10px; }
+  .pred-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(92px, auto);
+    gap: var(--sp-2); align-items: center;
+  }
+  .pred-row input[type="date"] { min-width: 0; width: 100%; font-size: 13px; padding: 6px 8px; }
+  .pred-row select { min-width: 0; width: 100%; font-size: 13px; padding: 6px 22px 6px 8px; }
+  .pred-row .btn { grid-column: 1 / -1; justify-self: start; }
+
+  .pred-item {
+    background: var(--bg-tile); border-radius: var(--r-sm);
+    padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2);
+  }
+  .pred-item .pred-txt { font-size: 14px; color: var(--gb-light); line-height: 1.35; }
+  .pred-item .pred-meta { font-family: var(--font-mono); font-size: 11px; color: var(--gb-dark); margin-top: 3px; }
+  .pred-item .pred-btns { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); }
+  .pred-item.due { box-shadow: inset 3px 0 0 var(--rust); }
+  .pred-hit { color: var(--ok); }
+  .pred-miss { color: var(--rust); }
 </style>
 </head>
 <body>
@@ -2177,6 +2300,71 @@
     <div class="tab-pane" id="tab-diary">
       <h2 class="section-title">Diario</h2>
       <p class="muted mb8">Uno spazio tuo. Annota pensieri, riflessioni, idee, rancori contro gli zombie. Solo testo, salvato sul tuo dispositivo.</p>
+
+      <!-- REGISTRO DI BORDO — domanda del giorno -->
+      <div class="info-card writ-card" id="logbookCard">
+        <div class="writ-head">
+          <h3 class="sub-title" style="margin:0">REGISTRO DI BORDO</h3>
+          <span class="writ-badge" id="logbookBadge">+4 ricerca</span>
+        </div>
+        <p class="writ-prompt" id="logbookPrompt">—</p>
+        <div id="logbookForm">
+          <div id="logbookText" class="note-textarea writ-input" contenteditable="true" data-placeholder="Rispondi qui. Poche righe bastano, purché siano tue."></div>
+          <div class="writ-actions">
+            <button id="logbookSaveBtn" class="btn">REGISTRA</button>
+            <span class="note-counter" id="logbookCounter">0 / 120 caratteri</span>
+          </div>
+        </div>
+        <p class="muted writ-done" id="logbookDone" style="display:none">Registrato per oggi. La voce è finita tra le pagine, qui sotto.</p>
+      </div>
+
+      <!-- RETROSPETTIVA SETTIMANALE -->
+      <div class="info-card writ-card" id="retroCard" style="display:none">
+        <div class="writ-head">
+          <h3 class="sub-title" style="margin:0">CHIUDI LA SETTIMANA</h3>
+          <span class="writ-badge">+12 ricerca</span>
+        </div>
+        <p class="muted mb8">Rileggi cosa hai scritto negli ultimi sette giorni, poi tira le somme. È qui che il diario smette di essere sfogo.</p>
+        <div class="retro-entries" id="retroEntries"></div>
+        <div id="retroText" class="note-textarea writ-input" contenteditable="true" data-placeholder="Cosa torna sempre, cosa è cambiato, cosa vuoi smettere di fare."></div>
+        <div class="writ-actions">
+          <button id="retroSaveBtn" class="btn">CHIUDI LA SETTIMANA</button>
+          <span class="note-counter" id="retroCounter">0 / 200 caratteri</span>
+        </div>
+      </div>
+
+      <!-- PREVISIONI DATATE -->
+      <div class="info-card writ-card" id="predCard">
+        <div class="writ-head">
+          <h3 class="sub-title" style="margin:0">PREVISIONI</h3>
+          <span class="writ-badge" id="predCalib">nessuna chiusa</span>
+        </div>
+        <p class="muted mb8">Scrivi cosa pensi che succederà ed entro quando. Alla scadenza il registro te la ripropone e dichiari com'è andata. Conta più rispondere che indovinare.</p>
+        <div class="pred-form">
+          <input type="text" id="predText" placeholder="Es. Chiudo la revisione entro venerdì" maxlength="160">
+          <div class="pred-row">
+            <input type="date" id="predDate" title="Entro quando">
+            <select id="predConf" title="Quanto ci credi">
+              <option value="50">50%</option>
+              <option value="60">60%</option>
+              <option value="70" selected>70%</option>
+              <option value="80">80%</option>
+              <option value="90">90%</option>
+              <option value="95">95%</option>
+            </select>
+            <button id="predAddBtn" class="btn small">ANNOTA</button>
+          </div>
+        </div>
+        <div id="predDueWrap" style="display:none">
+          <h4 class="writ-sub">SCADUTE — com'è andata?</h4>
+          <div id="predDueList"></div>
+        </div>
+        <div id="predOpenWrap" style="display:none">
+          <h4 class="writ-sub">IN CORSO</h4>
+          <div id="predOpenList"></div>
+        </div>
+      </div>
+
       <div class="diary-layout">
         <div class="note-editor">
           <input type="text" id="noteTitle" class="note-title-input" placeholder="Titolo (opzionale)">
@@ -2193,6 +2381,8 @@
               <option value="Studio">Studio</option>
               <option value="Lavoro">Lavoro</option>
               <option value="Creativita">Creatività</option>
+              <option value="Registro">Registro</option>
+              <option value="Retrospettiva">Retrospettiva</option>
             </select>
             <button id="noteSaveBtn" class="btn">SALVA NOTA</button>
             <button id="noteNewBtn" class="btn small">+ NUOVA</button>
@@ -2210,6 +2400,8 @@
             <button class="filter-btn" data-note-cat="Studio">STUDIO</button>
             <button class="filter-btn" data-note-cat="Lavoro">LAVORO</button>
             <button class="filter-btn" data-note-cat="Creativita">CREATIVITÀ</button>
+            <button class="filter-btn" data-note-cat="Registro">REGISTRO</button>
+            <button class="filter-btn" data-note-cat="Retrospettiva">RETRO</button>
           </div>
           <ul id="noteList" class="note-list"></ul>
           <p id="noNotes" class="muted mt8" style="display:none">Nessuna pagina ancora. La prima è quella sopra.</p>
@@ -2684,7 +2876,7 @@
     //    (gioco single-file: basta cachare la URL corrente per andare offline).
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE = 'deadline-v1';
+        const CACHE = 'deadline-v3';
         const ASSETS = [location.href.replace(/sw\\.js.*$/, '')];
         self.addEventListener('install', (e) => {
           e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./']).catch(() => {})));
@@ -3048,6 +3240,16 @@ const BUILDINGS = {
     effect: lvl => `Cura attiva: ${15 + lvl*10} HP per ${Math.max(1, 6 - lvl)} ricerca + ${Math.max(1, 4 - lvl)} monete.`,
     unlock: g => g.buildings.lab.level >= 1,
     unlockReason: () => 'Serve il Laboratorio costruito.'
+  },
+
+  archivio: {
+    name: 'Archivio', icon: '≡',
+    desc: 'Scaffali di quaderni recuperati. Produce ricerca solo finché continui a scriverci dentro.',
+    maxLevel: 4,
+    cost: lvl => ({ legno: 20+lvl*10, ricerca: 8+lvl*6 }),
+    effect: lvl => `+${lvl*2} ricerca / giorno se hai scritto negli ultimi 2 giorni. +${lvl} XP Intelletto.`,
+    unlock: g => g.buildings.hq.level >= 2,
+    unlockReason: () => 'Migliora la Capanna al Lv.2.'
   },
 
   // === STRUTTURE IDEALISTE — richiedono morale alto ===
@@ -7631,11 +7833,9 @@ function saveCurrentNote(silent=false) {
     G.currentNoteId = n.id;
     document.getElementById('noteDeleteBtn').style.display = 'inline-block';
   }
-  // bonus piccolo Spirito XP per scrittura sostanziale (≥80 caratteri di testo PURO)
-  if (plain.trim().length >= 80) {
-    gainSkillXp('Spirito', 4);
-    Morale.apply(MORALE.LIGHT, 'diary');
-  }
+  // Bonus scrittura: SOLO su salvataggio esplicito (mai sugli autosave), sul testo
+  // effettivamente nuovo rispetto all'ultimo premio, con tetto giornaliero.
+  if (!silent) rewardFreeWriting(G.currentNoteId, plain);
   if (!silent) {
     sfxComplete();
     logEvent(`Pagina di diario salvata${title ? `: "${title}"` : ''}${category ? ` [${category}]` : ''}.`, 'evt-rest');
@@ -7959,7 +8159,8 @@ document.querySelectorAll('.format-btn').forEach(b => {
 // Auto-salvataggio leggero ogni 20s nella tab Diario se c'è una nota corrente
 setInterval(() => {
   if (document.getElementById('tab-diary').classList.contains('active')) {
-    const txt = document.getElementById('noteText').value;
+    const el = document.getElementById('noteText');
+    const txt = el ? htmlToPlain(el.innerHTML) : '';
     if (txt.trim() && G.currentNoteId) saveCurrentNote(true);
   }
 }, 20000);
@@ -9833,6 +10034,24 @@ function endDay() {
     alignedReport.push(`Arsenale: +${lvl} ferro`);
   }
 
+  // Archivio: produce solo se alimentato di recente dalla scrittura
+  try {
+    W_ensure();
+    if (G.buildings.archivio && G.buildings.archivio.level > 0) {
+      const alvl = G.buildings.archivio.level;
+      const since = wDaysSinceLastEntry();
+      if (since !== null && since <= 2) {
+        G.resources.ricerca += alvl * 2;
+        gainSkillXp('Intelletto', alvl);
+        alignedReport.push(`Archivio: +${alvl*2} ricerca · ${G.writing.archive.pages} pagine`);
+      } else {
+        alignedReport.push(`Archivio fermo: nessuna pagina nuova${since === null ? '' : ` da ${since} giorni`}`);
+      }
+    }
+    const due = wDuePredictions().length;
+    if (due > 0) alignedReport.push(`${due} ${due === 1 ? 'previsione scaduta' : 'previsioni scadute'}: vai nel Diario e dichiara com'è andata`);
+  } catch (e) {}
+
   // Bonus sopravvissuti
   let survivorReport = [];
   G.survivors.forEach(s => {
@@ -11248,6 +11467,431 @@ boot();
   }
 })();
 
+
+/* ==========================================================================
+   SCRITTURA E PENSIERO — Registro di bordo, Retrospettiva, Archivio, Previsioni
+   Aggiunta v4: la scrittura diventa una fonte di risorse e un pezzo di economia,
+   non un premio farmabile. Tutti i testi delle domande stanno in W_PROMPTS:
+   si sostituiscono senza toccare la logica.
+   ========================================================================== */
+
+const W_PROMPTS = [
+  'Cosa hai evitato oggi che sapevi di dover fare?',
+  'Qual è la decisione che stai rimandando da più tempo?',
+  'Cosa ti ha fatto arrabbiare oggi, e cosa c\'era sotto?',
+  'Che cosa hai imparato oggi che ieri non sapevi?',
+  'Chi ti ha aiutato, ultimamente, senza che glielo chiedessi?',
+  'Qual è la cosa più inutile a cui hai dedicato tempo oggi?',
+  'Se domani potessi fare una cosa sola, quale sarebbe?',
+  'Cosa stai facendo per abitudine e non perché serva ancora?',
+  'Di cosa hai avuto paura oggi, anche in piccolo?',
+  'Che cosa hai detto oggi che non pensavi davvero?',
+  'Qual è il problema che continui a risolvere invece di eliminarlo?',
+  'Cosa ti riesce facile che agli altri sembra difficile?',
+  'Che cosa cambieresti della giornata di oggi, potendo?',
+  'A chi devi una risposta che non hai ancora dato?',
+  'Qual è la bugia più comoda che ti racconti in questo periodo?',
+  'Cosa ti ha stancato oggi più di quanto valesse?',
+  'Che cosa hai fatto oggi che rifaresti identico?',
+  'Qual è la cosa che rimandi perché non sai da dove cominciare?',
+  'Cosa ti manca per chiudere quello che hai lasciato a metà?',
+  'Che cosa ti ha sorpreso oggi?',
+  'Quand\'è l\'ultima volta che hai cambiato idea su qualcosa di importante?',
+  'Cosa stai difendendo solo perché ci hai già investito troppo?',
+  'Che cosa faresti se non ti importasse di sbagliare?',
+  'Qual è la cosa piccola che ti raddrizza la giornata ogni volta?',
+  'Cosa hai promesso a te stesso e non hai mantenuto?',
+  'Chi vorresti sentire e non chiami?',
+  'Che cosa ti sta costando più di quanto ammetti?',
+  'Qual è la parte del tuo lavoro che rifaresti anche gratis?',
+  'Cosa hai smesso di fare senza mai deciderlo?',
+  'Che cosa sai fare oggi che un anno fa non sapevi fare?',
+  'Qual è il consiglio che dai spesso e non segui?',
+  'Cosa ti tiene sveglio, quando ti tiene sveglio?',
+  'Che cosa succederebbe davvero se smettessi domani?',
+  'Qual è la cosa che continui a fare per non deludere qualcuno?',
+  'Cosa hai guardato oggi senza vederlo?',
+  'Che cosa ti farebbe dire che oggi è stata una buona giornata?',
+  'Qual è la conversazione che stai evitando?',
+  'Cosa faresti con due ore in più, davvero?',
+  'Che cosa hai buttato via oggi: tempo, energia, occasioni?',
+  'Di cosa vai fiero questa settimana senza averlo detto a nessuno?'
+];
+
+const W_CFG = {
+  LOGBOOK_MIN: 120,        // caratteri minimi per il registro di bordo
+  LOGBOOK_RICERCA: 4,
+  RETRO_MIN: 200,          // caratteri minimi per la retrospettiva
+  RETRO_RICERCA: 12,
+  FREE_MIN: 80,            // caratteri NUOVI minimi per il bonus scrittura libera
+  FREE_XP: 4,
+  FREE_MAX_DAY: 3,         // quante volte al giorno la scrittura libera paga
+  PRED_MIN: 12,
+  PRED_MAX_DAY: 3,         // quante previsioni al giorno pagano
+  ARCHIVE_FEED_DAYS: 2     // giorni entro cui l'Archivio va alimentato
+};
+
+function W_ensure() {
+  if (!G.writing) G.writing = {};
+  const w = G.writing;
+  if (!w.logbook)  w.logbook  = { lastDate: null, count: 0 };
+  if (!w.retro)    w.retro    = { lastWeek: null, count: 0 };
+  if (!w.archive)  w.archive  = { pages: 0, lastEntryDate: null };
+  if (!w.free)     w.free     = { date: null, count: 0, perNote: {} };
+  if (!w.pred)     w.pred     = { date: null, count: 0 };
+  if (!Array.isArray(G.predictions)) G.predictions = [];
+  if (!G.buildings) G.buildings = {};
+  if (!G.buildings.archivio) G.buildings.archivio = { level: 0 };
+  return w;
+}
+
+/* -------------------- utilità date -------------------- */
+function wDayNumber(dateStr) {
+  return Math.floor(Date.parse((dateStr || todayStr()) + 'T00:00:00Z') / 86400000);
+}
+function wWeekKey(dateStr) {
+  // chiave della settimana: data del lunedì
+  const d = new Date((dateStr || todayStr()) + 'T00:00:00Z');
+  const dow = (d.getUTCDay() + 6) % 7; // 0 = lunedì
+  d.setUTCDate(d.getUTCDate() - dow);
+  return d.toISOString().slice(0, 10);
+}
+function wDaysSinceLastEntry() {
+  W_ensure();
+  const last = G.writing.archive.lastEntryDate;
+  if (!last) return null;
+  return wDayNumber(todayStr()) - wDayNumber(last);
+}
+function wNoteDate(n) { return (n.createdAt || '').slice(0, 10); }
+function wFmtDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}`;
+}
+
+/* -------------------- economia della scrittura -------------------- */
+function wAddArchivePage(n) {
+  W_ensure();
+  G.writing.archive.pages += (n || 1);
+  G.writing.archive.lastEntryDate = todayStr();
+}
+
+// Premio per la scrittura libera: solo su salvataggio esplicito, solo sul testo
+// nuovo rispetto all'ultimo premio della stessa nota, con tetto giornaliero.
+function rewardFreeWriting(noteId, plain) {
+  W_ensure();
+  const f = G.writing.free;
+  const today = todayStr();
+  if (f.date !== today) { f.date = today; f.count = 0; f.perNote = {}; }
+  if (!noteId) return;
+  const len = (plain || '').trim().length;
+  const already = f.perNote[noteId] || 0;
+  if (len - already < W_CFG.FREE_MIN) return;
+  f.perNote[noteId] = len;
+  if (f.count >= W_CFG.FREE_MAX_DAY) return;   // scritto registrato, ma non pagato
+  f.count += 1;
+  gainSkillXp('Spirito', W_CFG.FREE_XP);
+  Morale.apply(2, 'diary');
+  wAddArchivePage(1);
+}
+
+/* -------------------- REGISTRO DI BORDO -------------------- */
+// Ordine delle domande: permutazione fissa, uguale per tutti, senza ripetizioni
+// finché la lista non è esaurita.
+const W_ORDER = (() => {
+  const idx = W_PROMPTS.map((_, i) => i);
+  let seed = 20260831;
+  for (let i = idx.length - 1; i > 0; i--) {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    const j = seed % (i + 1);
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return idx;
+})();
+
+function wPromptForDate(dateStr) {
+  const n = wDayNumber(dateStr);
+  const i = ((n % W_ORDER.length) + W_ORDER.length) % W_ORDER.length;
+  return W_PROMPTS[W_ORDER[i]];
+}
+
+function renderLogbook() {
+  W_ensure();
+  const promptEl = document.getElementById('logbookPrompt');
+  if (!promptEl) return;
+  const today = todayStr();
+  const done = G.writing.logbook.lastDate === today;
+  promptEl.textContent = wPromptForDate(today);
+  document.getElementById('logbookForm').style.display = done ? 'none' : '';
+  document.getElementById('logbookDone').style.display = done ? '' : 'none';
+  const badge = document.getElementById('logbookBadge');
+  if (badge) badge.textContent = done ? 'fatto oggi' : `+${W_CFG.LOGBOOK_RICERCA} ricerca`;
+}
+
+function wLogbookCounter() {
+  const el = document.getElementById('logbookText');
+  const c = document.getElementById('logbookCounter');
+  if (!el || !c) return;
+  const len = htmlToPlain(el.innerHTML).trim().length;
+  c.textContent = `${len} / ${W_CFG.LOGBOOK_MIN} caratteri`;
+}
+
+function saveLogbook() {
+  W_ensure();
+  const el = document.getElementById('logbookText');
+  const plain = htmlToPlain(el.innerHTML).trim();
+  const today = todayStr();
+  if (G.writing.logbook.lastDate === today) {
+    showModal('GIÀ REGISTRATO', 'Il registro di bordo si compila una volta al giorno. Se hai altro da scrivere, la pagina libera qui sotto è sempre aperta.');
+    return;
+  }
+  if (plain.length < W_CFG.LOGBOOK_MIN) {
+    showModal('TROPPO CORTO', `Servono almeno ${W_CFG.LOGBOOK_MIN} caratteri: ne hai scritti ${plain.length}. Non è per fare volume, è perché sotto quella soglia non stai rispondendo, stai liquidando.`);
+    return;
+  }
+  const prompt = wPromptForDate(today);
+  G.notes.unshift({
+    id: 'n' + Date.now() + Math.floor(Math.random() * 1000),
+    title: prompt,
+    text: el.innerHTML,
+    category: 'Registro',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  G.writing.logbook.lastDate = today;
+  G.writing.logbook.count = (G.writing.logbook.count || 0) + 1;
+  G.resources.ricerca += W_CFG.LOGBOOK_RICERCA;
+  gainSkillXp('Spirito', 8);
+  gainSkillXp('Intelletto', 4);
+  Morale.apply(2, 'logbook');
+  wAddArchivePage(1);
+  el.innerHTML = '';
+  sfxComplete();
+  logEvent(`Registro di bordo compilato: "${prompt}" (+${W_CFG.LOGBOOK_RICERCA} ricerca)`, 'evt-rest');
+  saveState();
+  renderAll();
+  showModal('REGISTRATO', `+${W_CFG.LOGBOOK_RICERCA} ricerca · +8 XP Spirito · +4 XP Intelletto\n\nUna pagina in più nell'Archivio: ${G.writing.archive.pages} in tutto.`);
+}
+
+/* -------------------- RETROSPETTIVA SETTIMANALE -------------------- */
+function wWeekEntries() {
+  W_ensure();
+  const from = wDayNumber(todayStr()) - 7;
+  return (G.notes || []).filter(n => {
+    const d = wNoteDate(n);
+    return d && wDayNumber(d) >= from && n.category !== 'Retrospettiva';
+  });
+}
+function retroAvailable() {
+  W_ensure();
+  return G.writing.retro.lastWeek !== wWeekKey(todayStr()) && wWeekEntries().length >= 2;
+}
+
+function renderRetro() {
+  W_ensure();
+  const card = document.getElementById('retroCard');
+  if (!card) return;
+  const avail = retroAvailable();
+  card.style.display = avail ? '' : 'none';
+  if (!avail) return;
+  const list = document.getElementById('retroEntries');
+  const entries = wWeekEntries();
+  list.innerHTML = entries.map(n => {
+    const plain = htmlToPlain(n.text || '').trim().replace(/\s+/g, ' ');
+    return `<div class="retro-entry"><em>${escapeHtml(wFmtDate(wNoteDate(n)))}</em> <b>${escapeHtml(n.title || 'Senza titolo')}</b><span>${escapeHtml(plain.slice(0, 180))}${plain.length > 180 ? '…' : ''}</span></div>`;
+  }).join('');
+}
+
+function wRetroCounter() {
+  const el = document.getElementById('retroText');
+  const c = document.getElementById('retroCounter');
+  if (!el || !c) return;
+  const len = htmlToPlain(el.innerHTML).trim().length;
+  c.textContent = `${len} / ${W_CFG.RETRO_MIN} caratteri`;
+}
+
+function saveRetro() {
+  W_ensure();
+  if (!retroAvailable()) { renderRetro(); return; }
+  const el = document.getElementById('retroText');
+  const plain = htmlToPlain(el.innerHTML).trim();
+  if (plain.length < W_CFG.RETRO_MIN) {
+    showModal('ANCORA POCO', `La retrospettiva chiede almeno ${W_CFG.RETRO_MIN} caratteri: ne hai ${plain.length}. Una settimana merita più di due righe.`);
+    return;
+  }
+  const week = wWeekKey(todayStr());
+  G.notes.unshift({
+    id: 'n' + Date.now() + Math.floor(Math.random() * 1000),
+    title: `Settimana del ${wFmtDate(week)}`,
+    text: el.innerHTML,
+    category: 'Retrospettiva',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  G.writing.retro.lastWeek = week;
+  G.writing.retro.count = (G.writing.retro.count || 0) + 1;
+  G.resources.ricerca += W_CFG.RETRO_RICERCA;
+  gainSkillXp('Intelletto', 20);
+  gainSkillXp('Spirito', 10);
+  gainXp(30);
+  Morale.apply(4, 'retro');
+  wAddArchivePage(3);
+  el.innerHTML = '';
+  sfxComplete();
+  logEvent(`Settimana chiusa: retrospettiva scritta (+${W_CFG.RETRO_RICERCA} ricerca)`, 'evt-success');
+  saveState();
+  renderAll();
+  showModal('SETTIMANA CHIUSA', `+${W_CFG.RETRO_RICERCA} ricerca · +20 XP Intelletto · +10 XP Spirito · +30 XP\n\nArchivio: ${G.writing.archive.pages} pagine.`);
+}
+
+/* -------------------- PREVISIONI DATATE -------------------- */
+function wDuePredictions() {
+  W_ensure();
+  const today = todayStr();
+  return G.predictions.filter(p => !p.resolved && p.dueDate <= today);
+}
+function wOpenPredictions() {
+  W_ensure();
+  const today = todayStr();
+  return G.predictions.filter(p => !p.resolved && p.dueDate > today);
+}
+function wCalibration() {
+  W_ensure();
+  const done = G.predictions.filter(p => p.resolved);
+  if (!done.length) return null;
+  const hit = done.filter(p => p.outcome === 'hit').length;
+  const declared = done.reduce((a, p) => a + (p.confidence || 0), 0) / done.length;
+  return { n: done.length, real: Math.round(hit / done.length * 100), declared: Math.round(declared) };
+}
+
+function addPrediction() {
+  W_ensure();
+  const txtEl = document.getElementById('predText');
+  const dateEl = document.getElementById('predDate');
+  const confEl = document.getElementById('predConf');
+  const text = (txtEl.value || '').trim();
+  const due = dateEl.value;
+  if (text.length < W_CFG.PRED_MIN) {
+    showModal('PREVISIONE TROPPO VAGA', 'Scrivi una frase che tra un mese potrai giudicare vera o falsa senza discutere con te stesso.');
+    return;
+  }
+  if (!due || due <= todayStr()) {
+    showModal('SERVE UNA DATA FUTURA', 'Una previsione senza scadenza non si può sbagliare, e quindi non insegna niente. Metti una data.');
+    return;
+  }
+  G.predictions.unshift({
+    id: 'p' + Date.now() + Math.floor(Math.random() * 1000),
+    text, dueDate: due,
+    confidence: parseInt(confEl.value, 10) || 70,
+    createdAt: new Date().toISOString(),
+    resolved: false, outcome: null, resolvedAt: null
+  });
+  const pd = G.writing.pred;
+  const today = todayStr();
+  if (pd.date !== today) { pd.date = today; pd.count = 0; }
+  if (pd.count < W_CFG.PRED_MAX_DAY) {
+    pd.count += 1;
+    G.resources.ricerca += 1;
+  }
+  txtEl.value = ''; dateEl.value = '';
+  sfxComplete();
+  logEvent(`Previsione annotata: "${text}" entro il ${due}`, 'evt-rest');
+  saveState();
+  renderAll();
+}
+
+function resolvePrediction(id, outcome) {
+  W_ensure();
+  const p = G.predictions.find(x => x.id === id);
+  if (!p || p.resolved) return;
+  p.resolved = true;
+  p.outcome = outcome;
+  p.resolvedAt = new Date().toISOString();
+  let ric = 5;
+  if (outcome === 'hit' && p.confidence >= 70) ric += 2;
+  G.resources.ricerca += ric;
+  gainSkillXp('Intelletto', 8);
+  sfxComplete();
+  logEvent(`Previsione ${outcome === 'hit' ? 'azzeccata' : 'sbagliata'}: "${p.text}" (+${ric} ricerca)`, outcome === 'hit' ? 'evt-success' : 'evt-rest');
+  saveState();
+  renderAll();
+}
+
+function renderPredictions() {
+  W_ensure();
+  const dueWrap = document.getElementById('predDueWrap');
+  if (!dueWrap) return;
+  const due = wDuePredictions();
+  const open = wOpenPredictions();
+  const dueList = document.getElementById('predDueList');
+  const openList = document.getElementById('predOpenList');
+  const openWrap = document.getElementById('predOpenWrap');
+
+  dueWrap.style.display = due.length ? '' : 'none';
+  dueList.innerHTML = due.map(p => `
+    <div class="pred-item due">
+      <div class="pred-txt">${escapeHtml(p.text)}</div>
+      <div class="pred-meta">scadeva il ${escapeHtml(wFmtDate(p.dueDate))} · dichiarato ${p.confidence}%</div>
+      <div class="pred-btns">
+        <button class="btn small" data-pred-hit="${p.id}">AZZECCATA</button>
+        <button class="btn small" data-pred-miss="${p.id}">SBAGLIATA</button>
+      </div>
+    </div>`).join('');
+
+  openWrap.style.display = open.length ? '' : 'none';
+  openList.innerHTML = open.map(p => `
+    <div class="pred-item">
+      <div class="pred-txt">${escapeHtml(p.text)}</div>
+      <div class="pred-meta">entro il ${escapeHtml(wFmtDate(p.dueDate))} · ${p.confidence}%</div>
+    </div>`).join('');
+
+  const cal = wCalibration();
+  const badge = document.getElementById('predCalib');
+  if (badge) {
+    badge.textContent = cal
+      ? `${cal.n} ${cal.n === 1 ? 'chiusa' : 'chiuse'} · ${cal.declared}% → ${cal.real}%`
+      : 'nessuna chiusa';
+  }
+}
+
+/* -------------------- render unico + aggancio -------------------- */
+function renderWriting() {
+  try { renderLogbook(); renderRetro(); renderPredictions(); } catch (e) {}
+}
+
+(function bindWriting() {
+  W_ensure();
+
+  const lbSave = document.getElementById('logbookSaveBtn');
+  const lbText = document.getElementById('logbookText');
+  if (lbSave) lbSave.addEventListener('click', saveLogbook);
+  if (lbText) lbText.addEventListener('input', wLogbookCounter);
+
+  const rSave = document.getElementById('retroSaveBtn');
+  const rText = document.getElementById('retroText');
+  if (rSave) rSave.addEventListener('click', saveRetro);
+  if (rText) rText.addEventListener('input', wRetroCounter);
+
+  const pAdd = document.getElementById('predAddBtn');
+  if (pAdd) pAdd.addEventListener('click', addPrediction);
+  const pList = document.getElementById('predCard');
+  if (pList) {
+    pList.addEventListener('click', (e) => {
+      const hit = e.target.closest('[data-pred-hit]');
+      const miss = e.target.closest('[data-pred-miss]');
+      if (hit) resolvePrediction(hit.getAttribute('data-pred-hit'), 'hit');
+      else if (miss) resolvePrediction(miss.getAttribute('data-pred-miss'), 'miss');
+    });
+  }
+
+  // Aggancio a renderAll senza toccarne il corpo
+  if (typeof renderAll === 'function') {
+    const prev = renderAll;
+    renderAll = function () { prev.apply(this, arguments); renderWriting(); };
+  }
+
+  renderWriting();
+})();
 </script>
 
 
